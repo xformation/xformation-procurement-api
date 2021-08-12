@@ -1,0 +1,97 @@
+{
+  "name": "Invoice",
+  "fields": [
+    {
+      "fieldName": "invoiceNo",
+      "fieldType": "String"
+    },
+    {
+      "fieldName": "amount",
+      "fieldType": "Integer"
+    },
+    {
+      "fieldName": "modeOfPayment",
+      "fieldType": "String"
+    },
+    {
+      "fieldName": "txnRefNo",
+      "fieldType": "String"
+    },
+    {
+      "fieldName": "chequeOrDdNo",
+      "fieldType": "String"
+    },
+    {
+      "fieldName": "issuerBank",
+      "fieldType": "String"
+    },
+    {
+      "fieldName": "status",
+      "fieldType": "String"
+    },
+    {
+      "fieldName": "createdOn",
+      "fieldType": "Instant"
+    },
+    {
+      "fieldName": "createdBy",
+      "fieldType": "String"
+    },
+    {
+      "fieldName": "updatedOn",
+      "fieldType": "Instant"
+    },
+    {
+      "fieldName": "updatedBy",
+      "fieldType": "String"
+    },
+    {
+      "fieldName": "dueDate",
+      "fieldType": "LocalDate"
+    },
+    {
+      "fieldName": "notes",
+      "fieldType": "String",
+      "fieldValidateRules": [
+        "maxlength"
+      ],
+      "fieldValidateRulesMaxlength": "5000"
+    }
+  ],
+  "relationships": [
+    {
+      "relationshipType": "one-to-one",
+      "otherEntityName": "quotation",
+      "otherEntityRelationshipName": "invoice",
+      "relationshipName": "quotation",
+      "otherEntityField": "id",
+      "ownerSide": true
+    },
+    {
+      "relationshipType": "one-to-one",
+      "otherEntityName": "document",
+      "otherEntityRelationshipName": "invoice",
+      "relationshipName": "document",
+      "otherEntityField": "id",
+      "ownerSide": true
+    },
+    {
+      "relationshipType": "one-to-many",
+      "otherEntityName": "invoiceActivity",
+      "otherEntityRelationshipName": "invoice",
+      "relationshipName": "invoiceActivityList"
+    }
+  ],
+  "changelogDate": "20210722053455",
+  "entityTableName": "invoice",
+  "dto": "no",
+  "pagination": "infinite-scroll",
+  "service": "no",
+  "jpaMetamodelFiltering": false,
+  "fluentMethods": true,
+  "readOnly": false,
+  "embedded": false,
+  "clientRootFolder": "procurement",
+  "applications": "*",
+  "microserviceName": "procurement"
+}

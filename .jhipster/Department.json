@@ -1,0 +1,22 @@
+{
+  "name": "Department",
+  "fields": [
+    {
+      "fieldName": "name",
+      "fieldType": "String"
+    }
+  ],
+  "relationships": [],
+  "changelogDate": "20210722052555",
+  "entityTableName": "department",
+  "dto": "no",
+  "pagination": "infinite-scroll",
+  "service": "no",
+  "jpaMetamodelFiltering": false,
+  "fluentMethods": true,
+  "readOnly": false,
+  "embedded": false,
+  "clientRootFolder": "procurement",
+  "applications": "*",
+  "microserviceName": "procurement"
+}
