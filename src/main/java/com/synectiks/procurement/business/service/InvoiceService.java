@@ -43,7 +43,6 @@ public class InvoiceService {
 	@Autowired
 	private DocumentRepository documentRepository;
 	
-	@Autowired
 	public Invoice addInvoice(ObjectNode obj) throws JSONException {
 		Invoice invoice = new Invoice();
 		
