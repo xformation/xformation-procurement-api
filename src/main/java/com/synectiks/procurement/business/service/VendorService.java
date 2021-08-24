@@ -1,0 +1,170 @@
+package com.synectiks.procurement.business.service;
+
+import java.net.URISyntaxException;
+import java.time.Instant;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.configurationprocessor.json.JSONException;
+import org.springframework.data.domain.Example;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
+import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.synectiks.procurement.config.Constants;
+import com.synectiks.procurement.domain.Vendor;
+import com.synectiks.procurement.repository.VendorRepository;
+
+@Service
+public class VendorService {
+
+	private static final Logger logger = LoggerFactory.getLogger(VendorService.class);
+	
+	@Autowired
+	private VendorRepository vendorRepository;
+	
+	public Vendor getVendor(Long id) {
+		logger.info("Getting vendor by id: "+id);
+		Optional<Vendor> ovn = vendorRepository.findById(id);
+		if(ovn.isPresent()) {
+			logger.info("Vendor: "+ovn.get().toString());
+			return ovn.get();
+		}
+		logger.warn("Vendor not found");
+		return null;
+	}
+	
+	public Vendor addVendor(ObjectNode obj) throws JSONException {
+		Vendor vendor = new Vendor();
+
+		if (obj.get("firstName") != null) {
+			vendor.setFirstName(obj.get("firstName").asText());
+		}
+		if (obj.get("middleName") != null) {
+			vendor.setMiddleName(obj.get("middleName").asText());
+		}
+		if (obj.get("lastName") != null) {
+			vendor.setLastName(obj.get("lastName").asText());
+		}
+		if (obj.get("phoneNumber") != null) {
+			vendor.setPhoneNumber(obj.get("phoneNumber").asText());
+		}
+		if (obj.get("email") != null) {
+			vendor.setEmail(obj.get("email").asText());
+		}
+		if (obj.get("address") != null) {
+			vendor.setAddress(obj.get("address").asText());
+		}
+		if (obj.get("zipCode") != null) {
+			vendor.setZipCode(obj.get("zipCode").asText());
+		}
+		
+		vendor.setCreatedBy(Constants.SYSTEM_ACCOUNT);
+		vendor.setUpdatedBy(Constants.SYSTEM_ACCOUNT);
+		Instant now = Instant.now();
+		vendor.setCreatedOn(now);
+		vendor.setUpdatedOn(now);
+		vendor = vendorRepository.save(vendor);
+		logger.info("Vendor added successfully: "+vendor.toString());
+		return vendor;
+	}
+	
+	public Vendor updateVendor(ObjectNode obj) throws JSONException, URISyntaxException {
+		Optional<Vendor> ur = vendorRepository.findById(Long.parseLong(obj.get("id").asText()));
+		if(!ur.isPresent()) {
+			logger.error("Vendor not found");
+			return null;
+		}
+		Vendor vendor = new Vendor();
+
+		if (obj.get("firstName") != null) {
+			vendor.setFirstName(obj.get("firstName").asText());
+		}
+		if (obj.get("middleName") != null) {
+			vendor.setMiddleName(obj.get("middleName").asText());
+		}
+		if (obj.get("lastName") != null) {
+			vendor.setLastName(obj.get("lastName").asText());
+		}
+		if (obj.get("phoneNumber") != null) {
+			vendor.setPhoneNumber(obj.get("phoneNumber").asText());
+		}
+		if (obj.get("email") != null) {
+			vendor.setEmail(obj.get("email").asText());
+		}
+		if (obj.get("address") != null) {
+			vendor.setAddress(obj.get("address").asText());
+		}
+		if (obj.get("zipCode") != null) {
+			vendor.setZipCode(obj.get("zipCode").asText());
+		}
+		
+		if (obj.get("user") != null) {
+			 vendor.setUpdatedBy(obj.get("user").asText());
+		} else {
+			 vendor.setUpdatedBy(Constants.SYSTEM_ACCOUNT);
+		}
+		 
+		Instant now = Instant.now();
+		vendor.setUpdatedOn(now);
+		vendor = vendorRepository.save(vendor);
+		logger.info("Updating requisition completed"+vendor.toString());
+		return vendor;
+	}
+	
+	public List<Vendor> searchVendor(@RequestParam Map<String, String> requestObj) {
+		Vendor vendor = new Vendor();
+		boolean isFilter = false;
+		if (requestObj.get("id") != null) {
+			vendor.setId(Long.parseLong(requestObj.get("id")));
+			isFilter = true;
+		}
+		
+		if (requestObj.get("firstName") != null) {
+			vendor.setFirstName(requestObj.get("firstName"));
+			isFilter = true;
+		}
+		if (requestObj.get("lastName") != null) {
+			vendor.setLastName(requestObj.get("lastName"));
+			isFilter = true;
+		}
+		if (requestObj.get("phoneNumber") != null) {
+			vendor.setPhoneNumber(requestObj.get("phoneNumber"));
+			isFilter = true;
+		}
+		if (requestObj.get("email") != null) {
+			vendor.setEmail(requestObj.get("email"));
+			isFilter = true;
+		}
+		if (requestObj.get("address") != null) {
+			vendor.setAddress(requestObj.get("address"));
+			isFilter = true;
+		}
+		if (requestObj.get("zipCode") != null) {
+			vendor.setZipCode(requestObj.get("zipCode"));
+			isFilter = true;
+		}
+		List<Vendor> list = null;
+		if (isFilter) {
+			list = this.vendorRepository.findAll(Example.of(vendor), Sort.by(Direction.DESC, "id"));
+		} else {
+			list = this.vendorRepository.findAll(Sort.by(Direction.DESC, "id"));
+		}
+		
+        logger.info("search data "+ list);
+
+		return list;
+	}
+	
+	public void deleteVender(Long id) {
+	     vendorRepository.deleteById(id);
+	     logger.info("Vendor deleted successfully");
+	}
+}

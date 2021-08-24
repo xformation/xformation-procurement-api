@@ -1,8 +1,6 @@
 package com.synectiks.procurement.controllers;
 
-import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,76 +16,49 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.synectiks.procurement.business.service.DepartmentService;
 import com.synectiks.procurement.domain.Department;
 import com.synectiks.procurement.domain.Status;
-import com.synectiks.procurement.repository.DepartmentRepository;
-
-import io.github.jhipster.web.util.HeaderUtil;
 
 @RestController
 @RequestMapping("/api")
 public class DepartmentController {
 	private static final Logger logger = LoggerFactory.getLogger(DepartmentController.class);
-	private static final String ENTITY_NAME = "department";
 	
-	@Value("${jhipster.clientApp.name}")
-	private String applicationName;
 	@Autowired
-	private DepartmentRepository departmentRepository;
+	private DepartmentService departmentService;
 	
 	@PostMapping("/addDepartment")
-	public  ResponseEntity<Object> addDepartment(@RequestBody ObjectNode obj) throws JSONException {
-		
-		try {
-			Department department = new Department();
-		if (obj.get("name") != null) {
-		department.setName(obj.get("name").asText());
-		}
-		department = departmentRepository.save(department);
-		logger.info("Add New Requisition SUCCESS");
-		
+	public  ResponseEntity<Status> addDepartment(@RequestBody ObjectNode obj) throws JSONException {
+		logger.info("Request to add Department");
 		Status st = new Status();
-		st.setCode(HttpStatus.OK.value());
-		st.setType("SUCCESS");
-		st.setMessage("Add New department SUCCESS : "+department);
-		st.setObject(department);
-		return ResponseEntity.status(HttpStatus.OK).body(st);
-		
+		try {
+		    Department department = departmentService.addDepartment(obj);
+			st.setCode(HttpStatus.OK.value());
+			st.setType("SUCCESS");
+			st.setMessage("Department add successful");
+			st.setObject(department);
+			return ResponseEntity.status(HttpStatus.OK).body(st);
 		}catch (Exception e) {
-			logger.error("Add New department failed. Exception: ", e);
-			Status st = new Status();
+			logger.error("Department add failed. Exception: ", e);
 			st.setCode(HttpStatus.EXPECTATION_FAILED.value());
 			st.setType("ERROR");
-			st.setMessage("Add New department failed");
+			st.setMessage("Department add failed");
 			return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(st);
 		}
-		
 	}
 	
-	@PutMapping("/updateDepartment")
-	public  ResponseEntity<Object> updateDepartment(@RequestBody ObjectNode obj) throws JSONException, URISyntaxException {
-//		 String id =(obj.get("id")).asText();
+	@PostMapping("/updateDepartment")
+	public ResponseEntity<Status> updateDepartment(@RequestBody ObjectNode obj) throws JSONException, URISyntaxException {
+		logger.info("Request to update Department");
 		Status st = new Status();
-		Optional<Department> ur = departmentRepository.findById(Long.parseLong(obj.get("id").asText()));
-		 if(!ur.isPresent()) {
-				return ResponseEntity.created(new URI("/api/updateDepartment/")).headers(HeaderUtil
-						.createEntityCreationAlert(applicationName, false, ENTITY_NAME, ""))
-						.body(null);
-			 }
 		try {
-			Department department = new Department();
-		
-			department.setName(obj.get("name").asText());
-		
-			department = departmentRepository.save(department);
-		logger.info("Updating department completed");
-	
-		st.setCode(HttpStatus.OK.value());
-		st.setType("SUCCESS");
-		st.setMessage("Updating department SUCCESS : "+department);
-		st.setObject(department);
-		return ResponseEntity.status(HttpStatus.OK).body(st);
-		
+			Department department = departmentService.updateDepartment(obj);
+			st.setCode(HttpStatus.OK.value());
+			st.setType("SUCCESS");
+			st.setMessage("Updating department successful");
+			st.setObject(department);
+			return ResponseEntity.status(HttpStatus.OK).body(st);
 		}catch (Exception e) {
 			logger.error("Updating department failed. Exception: ", e);
 			st.setCode(HttpStatus.EXPECTATION_FAILED.value());

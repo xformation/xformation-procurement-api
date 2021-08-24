@@ -1,0 +1,188 @@
+package com.synectiks.procurement.business.service;
+
+import java.net.URISyntaxException;
+import java.time.Instant;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.configurationprocessor.json.JSONException;
+import org.springframework.data.domain.Example;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
+import org.springframework.stereotype.Service;
+
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.synectiks.procurement.config.Constants;
+import com.synectiks.procurement.domain.Contact;
+import com.synectiks.procurement.repository.ContactRepository;
+
+@Service
+public class ContactService {
+	private static final Logger logger = LoggerFactory.getLogger(ContactService.class);
+	
+	@Autowired
+	private ContactRepository contactRepository;
+	
+	public Contact addContact(ObjectNode obj) throws JSONException {
+		Contact contact = new Contact();
+
+		if (obj.get("firstName") != null) {
+			contact.setFirstName(obj.get("firstName").asText());
+		}
+		if (obj.get("middleName") != null) {
+			contact.setMiddleName(obj.get("middleName").asText());
+		}
+		if (obj.get("lastName") != null) {
+			contact.setLastName(obj.get("lastName").asText());
+		}
+		if (obj.get("phoneNumber") != null) {
+			contact.setPhoneNumber(obj.get("phoneNumber").asText());
+		}
+		if (obj.get("email") != null) {
+			contact.setEmail(obj.get("email").asText());
+		}
+		
+		if (obj.get("isActive") != null) {
+			contact.setIsActive(obj.get("isActive").asText());
+		}
+		if (obj.get("inviteStatus") != null) {
+			contact.setInviteStatus(obj.get("inviteStatus").asText());
+		}
+		if (obj.get("invitationLink") != null) {
+			contact.setInvitationLink(obj.get("invitationLink").asText());
+		}
+//			if (obj.get("inviteSentOn") != null) {
+//				contact.setInviteSentOn(obj.get("inviteSentOn"));
+//			}
+		if (obj.get("jobType") != null) {
+			contact.setJobType(obj.get("jobType").asText());
+		}
+		if (obj.get("notes") != null) {
+			contact.setNotes(obj.get("notes").asText());
+		}
+		contact.setCreatedBy(Constants.SYSTEM_ACCOUNT);
+		contact.setUpdatedBy(Constants.SYSTEM_ACCOUNT);
+		Instant now = Instant.now();
+		contact.setCreatedOn(now);
+		contact.setUpdatedOn(now);
+		contact = contactRepository.save(contact);
+		logger.info("Contact added successfully:"+contact.toString());
+		return contact;
+	}
+	
+	public Contact updateContact(ObjectNode obj) throws JSONException, URISyntaxException {
+		Optional<Contact> ur = contactRepository.findById(Long.parseLong(obj.get("id").asText()));
+		if(!ur.isPresent()) {
+				return null;
+		}
+		Contact contact = new Contact();
+		if (obj.get("firstName") != null) {
+			contact.setFirstName(obj.get("firstName").asText());
+		}
+		if (obj.get("middleName") != null) {
+			contact.setMiddleName(obj.get("middleName").asText());
+		}
+		if (obj.get("lastName") != null) {
+			contact.setLastName(obj.get("lastName").asText());
+		}
+		if (obj.get("phoneNumber") != null) {
+			contact.setPhoneNumber(obj.get("phoneNumber").asText());
+		}
+		if (obj.get("email") != null) {
+			contact.setEmail(obj.get("email").asText());
+		}
+		
+		if (obj.get("isActive") != null) {
+			contact.setIsActive(obj.get("isActive").asText());
+		}
+		if (obj.get("inviteStatus") != null) {
+			contact.setInviteStatus(obj.get("inviteStatus").asText());
+		}
+		if (obj.get("invitationLink") != null) {
+			contact.setInvitationLink(obj.get("invitationLink").asText());
+		}
+//			if (obj.get("inviteSentOn") != null) {
+//				contact.setInviteSentOn(obj.get("inviteSentOn"));
+//			}
+		if (obj.get("jobType") != null) {
+			contact.setJobType(obj.get("jobType").asText());
+		}
+		if (obj.get("notes") != null) {
+			contact.setNotes(obj.get("notes").asText());
+		}
+	 
+		Instant now = Instant.now();
+		contact.setUpdatedOn(now);
+		contact = contactRepository.save(contact);
+		logger.info("Updating Committee successfully: "+contact.toString());
+		return contact;
+	}
+	
+	public List<Contact> searchContact(Map<String, String> requestObj) {
+		Contact contact = new Contact();
+		boolean isFilter = false;
+		if (requestObj.get("id") != null) {
+			contact.setId(Long.parseLong(requestObj.get("id")));
+			isFilter = true;
+		}
+		if (requestObj.get("firstName") != null) {
+			contact.setFirstName(requestObj.get("firstName"));
+			isFilter = true;
+		}
+		if (requestObj.get("lastName") != null) {
+			contact.setLastName(requestObj.get("lastName"));
+			isFilter = true;
+		}
+		if (requestObj.get("phoneNumber") != null) {
+			contact.setPhoneNumber(requestObj.get("phoneNumber"));
+			isFilter = true;
+		}
+		if (requestObj.get("email") != null) {
+			contact.setEmail(requestObj.get("email"));
+			isFilter = true;
+		}
+		if (requestObj.get("isActive") != null) {
+			contact.setIsActive(requestObj.get("isActive"));
+			isFilter = true;
+		}
+		if (requestObj.get("inviteStatus") != null) {
+			contact.setInviteStatus(requestObj.get("inviteStatus"));
+			isFilter = true;
+		}
+		if (requestObj.get("invitationLink") != null) {
+			contact.setInvitationLink(requestObj.get("invitationLink"));
+			isFilter = true;
+		}
+//		if (requestObj.get("inviteSentOn") != null) {
+//			contact.setInviteSentOn(requestObj.get("inviteSentOn"));
+//			isFilter = true;
+//		}
+		if (requestObj.get("jobType") != null) {
+			contact.setJobType(requestObj.get("jobType"));
+			isFilter = true;
+		}
+		if (requestObj.get("notes") != null) {
+			contact.setNotes(requestObj.get("notes"));
+			isFilter = true;
+		}
+		List<Contact> list = null;
+		if (isFilter) {
+			list = this.contactRepository.findAll(Example.of(contact), Sort.by(Direction.DESC, "id"));
+		} else {
+			list = this.contactRepository.findAll(Sort.by(Direction.DESC, "id"));
+		}
+		
+        logger.info("search data "+list);
+		return list;
+		
+	}
+	
+	public void deleteContact(Long id) {
+		 contactRepository.deleteById(id);
+	}	
+	
+}

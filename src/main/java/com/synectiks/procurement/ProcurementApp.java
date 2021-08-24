@@ -25,7 +25,7 @@ import io.github.jhipster.config.JHipsterConstants;
 
 @EnableConfigurationProperties({LiquibaseProperties.class, ApplicationProperties.class})
 public class ProcurementApp {
-
+	
     private static final Logger log = LoggerFactory.getLogger(ProcurementApp.class);
 
     private final Environment env;
