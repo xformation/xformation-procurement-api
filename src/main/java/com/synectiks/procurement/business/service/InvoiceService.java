@@ -2,6 +2,8 @@ package com.synectiks.procurement.business.service;
 
 import java.net.URISyntaxException;
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -30,36 +32,36 @@ import com.synectiks.procurement.repository.QuotationRepository;
 @Service
 public class InvoiceService {
 	private static final Logger logger = LoggerFactory.getLogger(InvoiceService.class);
-	
+
 	@Autowired
 	private InvoiceActivityRepository invoiceActivityRepository;
-	
+
 	@Autowired
 	private InvoiceRepository invoiceRepository;
-	
+
 	@Autowired
 	private QuotationRepository quotationRepository;
-	
+
 	@Autowired
 	private DocumentRepository documentRepository;
-	
+
 	public Invoice addInvoice(ObjectNode obj) throws JSONException {
 		Invoice invoice = new Invoice();
-		
+
 		Optional<Document> odc = documentRepository.findById(Long.parseLong(obj.get("documentId").asText()));
 		if (odc.isPresent()) {
 			invoice.setDocument(odc.get());
 		}
-		
+
 		Optional<Quotation> oqot = quotationRepository.findById(Long.parseLong(obj.get("quotationId").asText()));
 		if (oqot.isPresent()) {
 			invoice.setQuotation(oqot.get());
 		}
-		
+
 		if (obj.get("invoiceNo") != null) {
 			invoice.setInvoiceNo(obj.get("invoiceNo").asText());
 		}
-		
+
 		if (obj.get("amount") != null) {
 			invoice.setAmount(obj.get("amount").asInt());
 		}
@@ -81,7 +83,19 @@ public class InvoiceService {
 		if (obj.get("notes") != null) {
 			invoice.setNotes(obj.get("notes").asText());
 		}
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern(Constants.DEFAULT_DATE_FORMAT);
+		if (obj.get("dueDate") != null) {
+			LocalDate localDate = LocalDate.parse(obj.get("dueDate").asText(), formatter);
+			invoice.setDueDate(localDate);
+		} else {
+			long millis = System.currentTimeMillis();
+			java.sql.Date date = new java.sql.Date(millis);
 
+			LocalDate datew = LocalDate.parse(date.toString());
+			LocalDate localDate = datew.plusDays(Constants.DEFAULT_DUE_DAYS);
+			invoice.setDueDate(localDate);
+		}
+		invoice.setStatus(Constants.Status);
 		invoice.setCreatedBy(Constants.SYSTEM_ACCOUNT);
 		invoice.setUpdatedBy(Constants.SYSTEM_ACCOUNT);
 		Instant now = Instant.now();
@@ -90,7 +104,7 @@ public class InvoiceService {
 		invoice = invoiceRepository.save(invoice);
 		logger.info("Invoice added successfully");
 
-		if (invoice.getId() != null) {
+		if (invoice != null) {
 			InvoiceActivity invoiceActivity = new InvoiceActivity();
 			BeanUtils.copyProperties(invoice, invoiceActivity);
 			invoiceActivity.setInvoice(invoice);
@@ -99,46 +113,56 @@ public class InvoiceService {
 		}
 		return invoice;
 	}
-	
+
 	public Invoice updateinvoice(ObjectNode obj) throws JSONException, URISyntaxException {
-		Invoice invoice = new Invoice();
-		
 		Optional<Invoice> ur = invoiceRepository.findById(Long.parseLong(obj.get("id").asText()));
 		if (!ur.isPresent()) {
 			logger.error("Invoice not found");
 			return null;
 		}
-
+		Invoice invoice = ur.get();
 		if (obj.get("invoiceNo") != null) {
 			invoice.setInvoiceNo(obj.get("invoiceNo").asText());
 		}
-		
+
 		if (obj.get("amount") != null) {
 			invoice.setAmount(obj.get("amount").asInt());
 		}
-		
+
 		if (obj.get("modeOfPayment") != null) {
 			invoice.setModeOfPayment(obj.get("modeOfPayment").asText());
 		}
-		
+
 		if (obj.get("txnRefNo") != null) {
 			invoice.setTxnRefNo(obj.get("txnRefNo").asText());
 		}
-		
+
 		if (obj.get("chequeOrDdNo") != null) {
 			invoice.setChequeOrDdNo(obj.get("chequeOrDdNo").asText());
 		}
-		
+
 		if (obj.get("issuerBank") != null) {
 			invoice.setIssuerBank(obj.get("issuerBank").asText());
 		}
-		
+
 		if (obj.get("chequeOrDdNo") != null) {
 			invoice.setChequeOrDdNo(obj.get("chequeOrDdNo").asText());
 		}
-		
+
 		if (obj.get("notes") != null) {
 			invoice.setNotes(obj.get("notes").asText());
+		}
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern(Constants.DEFAULT_DATE_FORMAT);
+		if (obj.get("dueDate") != null) {
+			LocalDate localDate = LocalDate.parse(obj.get("dueDate").asText(), formatter);
+			invoice.setDueDate(localDate);
+		} else {
+			long millis = System.currentTimeMillis();
+			java.sql.Date date = new java.sql.Date(millis);
+
+			LocalDate datew = LocalDate.parse(date.toString());
+			LocalDate localDate = datew.plusDays(Constants.DEFAULT_DUE_DAYS);
+			invoice.setDueDate(localDate);
 		}
 
 		if (obj.get("user") != null) {
@@ -146,15 +170,14 @@ public class InvoiceService {
 		} else {
 			invoice.setUpdatedBy(Constants.SYSTEM_ACCOUNT);
 		}
-
 		Instant now = Instant.now();
 		invoice.setUpdatedOn(now);
 		invoice = invoiceRepository.save(invoice);
-		logger.info("Updating invoice completed"+invoice.toString());
+		logger.info("Updating invoice completed" + invoice.toString());
 		return invoice;
 
 	}
-	
+
 	public List<Invoice> searchinvoice(Map<String, String> requestObj) {
 		logger.info("Request to get invoice on given filter criteria");
 		Invoice invoice = new Invoice();
@@ -198,12 +221,25 @@ public class InvoiceService {
 		} else {
 			list = this.invoiceRepository.findAll(Sort.by(Direction.DESC, "id"));
 		}
-		
-		logger.info("Invoice list: "+invoice);
+
+		logger.info("Invoice search completed. Total records: " + list.size());
 		return list;
-		
+
 	}
-		
+
+	public void deleteInvoice(Long id) {
+		documentRepository.deleteById(id);
+	}
+
+	public Invoice getInvoice(Long id) {
+		logger.info("Getting invoice by id: " + id);
+		Optional<Invoice> oin = invoiceRepository.findById(id);
+		if (oin.isPresent()) {
+			logger.info("Invoice: " + oin.get().toString());
+			return oin.get();
+		}
+		logger.warn("Invoice not found");
+		return null;
+	}
+
 }
-
-

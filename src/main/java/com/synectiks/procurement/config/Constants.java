@@ -16,7 +16,12 @@ public final class Constants {
     public static final String DATE_FORMAT_MM_DD_YYYY = "MM-DD-YYYY";
     public static final String DATE_FORMAT_DD_MM_YYYY = "DD-MM-YYYY";
     public static final String DEFAULT_DATE_FORMAT =  DATE_FORMAT_YYYY_MM_DD;
+    public static final int DEFAULT_DUE_DAYS = 5;
     
+    public static final String Status_Active = "Active";
+    public static final String Status_Inactive = "Inactive";
+    public static final String Status_Draft = "Draft";
+    public static final String Status =  Status_Inactive;
     public static final String LOCAL_REQUISITION_FILE_STORAGE_DIRECTORY = "requisition_files"; 
     private Constants() {
     }

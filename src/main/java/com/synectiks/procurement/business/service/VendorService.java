@@ -82,7 +82,7 @@ public class VendorService {
 			logger.error("Vendor not found");
 			return null;
 		}
-		Vendor vendor = new Vendor();
+		Vendor vendor =ur.get();
 
 		if (obj.get("firstName") != null) {
 			vendor.setFirstName(obj.get("firstName").asText());
@@ -115,7 +115,7 @@ public class VendorService {
 		Instant now = Instant.now();
 		vendor.setUpdatedOn(now);
 		vendor = vendorRepository.save(vendor);
-		logger.info("Updating requisition completed"+vendor.toString());
+		logger.info("Updating vendor completed"+vendor.toString());
 		return vendor;
 	}
 	
@@ -158,7 +158,7 @@ public class VendorService {
 			list = this.vendorRepository.findAll(Sort.by(Direction.DESC, "id"));
 		}
 		
-        logger.info("search data "+ list);
+		logger.info("Vendor search completed. Total records: " + list.size());
 
 		return list;
 	}

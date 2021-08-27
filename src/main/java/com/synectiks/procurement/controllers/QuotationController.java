@@ -28,17 +28,17 @@ import com.synectiks.procurement.domain.Status;
 @RequestMapping("/api")
 public class QuotationController {
 	private static final Logger logger = LoggerFactory.getLogger(QuotationController.class);
-	
+
 	@Autowired
 	private QuotationService quotationService;
-	
+
 	@GetMapping("/getQuotation/{id}")
 	public ResponseEntity<Status> getQuotation(@PathVariable Long id) {
-		logger.info("Getting quotation by id: "+id);
+		logger.info("Getting quotation by id: " + id);
 		Status st = new Status();
 		try {
 			Quotation quotation = quotationService.getQuotation(id);
-			if(quotation == null) {
+			if (quotation == null) {
 				logger.warn("Quotation not found.");
 				st.setCode(HttpStatus.EXPECTATION_FAILED.value());
 				st.setType("ERROR");
@@ -50,7 +50,7 @@ public class QuotationController {
 			st.setMessage("Quotation found");
 			st.setObject(quotation);
 			return ResponseEntity.status(HttpStatus.OK).body(st);
-		}catch (Exception e) {
+		} catch (Exception e) {
 			logger.error("Quotation not found. Exception: ", e);
 			st.setCode(HttpStatus.EXPECTATION_FAILED.value());
 			st.setType("ERROR");
@@ -58,13 +58,13 @@ public class QuotationController {
 			return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(st);
 		}
 	}
-	
+
 	@PostMapping("/addQuotation")
 	public ResponseEntity<Status> addQuotation(@RequestBody ObjectNode obj) throws JSONException {
 		Status st = new Status();
 		try {
 			Quotation quotation = quotationService.addQuotation(obj);
-			if(quotation == null) {
+			if (quotation == null) {
 				logger.error("Quotation could not be added.");
 				st.setCode(HttpStatus.EXPECTATION_FAILED.value());
 				st.setType("ERROR");
@@ -76,21 +76,22 @@ public class QuotationController {
 			st.setMessage("Quotation created");
 			st.setObject(quotation);
 			return ResponseEntity.status(HttpStatus.OK).body(st);
-		}catch (Exception e) {
+		} catch (Exception e) {
 			logger.error("Add quotation failed. Exception: ", e);
 			st.setCode(HttpStatus.EXPECTATION_FAILED.value());
 			st.setType("ERROR");
 			st.setMessage("Add quotation failed");
 			return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(st);
 		}
-	} 
-			 
+	}
+
 	@PostMapping("/updateQuotation")
-	public ResponseEntity<Status> updateQuotation(@RequestBody ObjectNode obj) throws JSONException, URISyntaxException {
+	public ResponseEntity<Status> updateQuotation(@RequestBody ObjectNode obj)
+			throws JSONException, URISyntaxException {
 		Status st = new Status();
 		try {
 			Quotation quotation = quotationService.addQuotation(obj);
-			if(quotation == null) {
+			if (quotation == null) {
 				logger.error("Quotation could not be updated.");
 				st.setCode(HttpStatus.EXPECTATION_FAILED.value());
 				st.setType("ERROR");
@@ -102,7 +103,7 @@ public class QuotationController {
 			st.setMessage("Quotation updated");
 			st.setObject(quotation);
 			return ResponseEntity.status(HttpStatus.OK).body(st);
-		}catch (Exception e) {
+		} catch (Exception e) {
 			logger.error("Update quotation failed. Exception: ", e);
 			st.setCode(HttpStatus.EXPECTATION_FAILED.value());
 			st.setType("ERROR");
@@ -110,7 +111,7 @@ public class QuotationController {
 			return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(st);
 		}
 	}
-	
+
 	@GetMapping("/searchQuotation")
 	public ResponseEntity<Status> searchQuotation(@RequestParam Map<String, String> requestObj) {
 		logger.info("Request to search quotation on given filter criteria");
@@ -122,7 +123,7 @@ public class QuotationController {
 			st.setMessage("Search quotation successful");
 			st.setObject(list);
 			return ResponseEntity.status(HttpStatus.OK).body(st);
-		}catch (Exception e) {
+		} catch (Exception e) {
 			logger.error("Search quotation failed. Exception: ", e);
 			st.setCode(HttpStatus.EXPECTATION_FAILED.value());
 			st.setType("ERROR");
@@ -130,9 +131,9 @@ public class QuotationController {
 			return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(st);
 		}
 	}
-	
+
 	@DeleteMapping("/deleteQuotation/{id}")
-    public ResponseEntity<Status> deleteQuotation(@PathVariable Long id) {
+	public ResponseEntity<Status> deleteQuotation(@PathVariable Long id) {
 		Status st = new Status();
 		try {
 			quotationService.deleteQuotation(id);
@@ -146,6 +147,6 @@ public class QuotationController {
 			st.setMessage("Delete quotation failed");
 			return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(st);
 		}
-		
+
 	}
 }

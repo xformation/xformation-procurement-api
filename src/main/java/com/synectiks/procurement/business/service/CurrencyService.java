@@ -60,9 +60,10 @@ public class CurrencyService {
 	public Currency updateCurrency(ObjectNode obj) throws JSONException, URISyntaxException {
 		Optional<Currency> ur = currencyRepository.findById(Long.parseLong(obj.get("id").asText()));
 		if(!ur.isPresent()) {
+			logger.warn("Currency id not found");
 			return null;
 		}
-		Currency currency = new Currency();
+		Currency currency = ur.get();
 
 		if (obj.get("code") != null) {
 			currency.setCode(obj.get("code").asText());
@@ -117,7 +118,7 @@ public class CurrencyService {
 			list = this.currencyRepository.findAll(Sort.by(Direction.DESC, "id"));
 		}
 		
-        logger.info("search data "+list);
+		logger.info("Currency search completed. Total records: " + list.size());
 		return list;
 		
 	}

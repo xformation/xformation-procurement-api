@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.synectiks.procurement.business.service.VendorService;
+import com.synectiks.procurement.domain.Quotation;
 import com.synectiks.procurement.domain.Status;
 import com.synectiks.procurement.domain.Vendor;
 
@@ -109,4 +110,30 @@ public class VendorController {
 			return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(st); 
 		}
 	}
+		@GetMapping("/getVendor/{id}")
+		public ResponseEntity<Status> getVendor(@PathVariable Long id) {
+			logger.info("Getting vendor by id: " + id);
+			Status st = new Status();
+			try {
+				Vendor vendor = vendorService.getVendor(id);
+				if (vendor == null) {
+					logger.warn("Vendor not found.");
+					st.setCode(HttpStatus.EXPECTATION_FAILED.value());
+					st.setType("ERROR");
+					st.setMessage("Vendor not found");
+					return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(st);
+				}
+				st.setCode(HttpStatus.OK.value());
+				st.setType("SUCCESS");
+				st.setMessage("Vendor found");
+				st.setObject(vendor);
+				return ResponseEntity.status(HttpStatus.OK).body(st);
+			} catch (Exception e) {
+				logger.error("Vendor not found. Exception: ", e);
+				st.setCode(HttpStatus.EXPECTATION_FAILED.value());
+				st.setType("ERROR");
+				st.setMessage("Vendor not found");
+				return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(st);
+			}
+		}
 }

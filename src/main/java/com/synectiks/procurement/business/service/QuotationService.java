@@ -31,137 +31,146 @@ import com.synectiks.procurement.repository.QuotationRepository;
 public class QuotationService {
 
 	private static final Logger logger = LoggerFactory.getLogger(QuotationService.class);
-	
+
 	@Autowired
 	private QuotationRepository quotationRepository;
-	
+
 	@Autowired
 	private QuotationActivityRepository quotationActivityRepository;
-	
+
 	@Autowired
 	DocumentService documentService;
-	
+
 	@Autowired
 	VendorService vendorService;
-	
+
 	@Autowired
 	PurchaseOrderService purchaseOrderService;
-	
+
 	public Quotation getQuotation(Long id) {
-		logger.info("Getting quotation by id: "+id);
+		logger.info("Getting quotation by id: " + id);
 		Optional<Quotation> ovn = quotationRepository.findById(id);
-		if(ovn.isPresent()) {
-			logger.info("Quotation: "+ovn.get().toString());
+		if (ovn.isPresent()) {
+			logger.info("Quotation: " + ovn.get().toString());
 			return ovn.get();
 		}
 		logger.warn("Quotation not found");
 		return null;
 	}
-	
+
 	public Quotation addQuotation(ObjectNode obj) {
 		Quotation quotation = new Quotation();
-		if(obj.get("documentId") != null) {
+		if (obj.get("documentId") != null) {
 			Document doc = documentService.getDocument(Long.parseLong(obj.get("documentId").asText()));
 			if (doc == null) {
 				logger.error("Document not found. Quotation cannot be added");
 				return null;
 			}
 			quotation.setDocument(doc);
-		}else {
+		} else {
 			logger.error("Document not provided. Quotation cannot be added");
 		}
-		
-		if(obj.get("vendorId") != null) {
+
+		if (obj.get("vendorId") != null) {
 			Vendor vendor = vendorService.getVendor(Long.parseLong(obj.get("vendorId").asText()));
 			if (vendor == null) {
 				logger.error("Vendor not found. Quotation cannot be added");
 				return null;
 			}
 			quotation.setVendor(vendor);
-		}else {
+		} else {
 			logger.error("Vendor not provided. Quotation cannot be added");
 			return null;
 		}
-		 
+
 		if (obj.get("quotationNo") != null) {
 			quotation.setQuotationNo(obj.get("quotationNo").asText());
 		}
-	
+
 		if (obj.get("notes") != null) {
 			quotation.setNotes(obj.get("notes").asText());
 		}
-		
-		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("d/MM/yyyy");
-		LocalDate localDate = LocalDate.parse(obj.get("dueDate").asText(), formatter);
-		quotation.setDueDate(localDate);
-					
+
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern(Constants.DEFAULT_DATE_FORMAT);
+		if (obj.get("dueDate") != null) {
+			LocalDate localDate = LocalDate.parse(obj.get("dueDate").asText(), formatter);
+			quotation.setDueDate(localDate);
+		} else {
+			long millis = System.currentTimeMillis();
+			java.sql.Date date = new java.sql.Date(millis);
+
+			LocalDate datew = LocalDate.parse(date.toString());
+			LocalDate localDate = datew.plusDays(Constants.DEFAULT_DUE_DAYS);
+			quotation.setDueDate(localDate);
+		}
+		quotation.setStatus(Constants.Status);
 		if (obj.get("user") != null) {
 			quotation.setCreatedBy(obj.get("user").asText());
 			quotation.setUpdatedBy(obj.get("user").asText());
-		}else {
+		} else {
 			quotation.setCreatedBy(Constants.SYSTEM_ACCOUNT);
 			quotation.setUpdatedBy(Constants.SYSTEM_ACCOUNT);
 		}
-			
+
 		Instant now = Instant.now();
 		quotation.setCreatedOn(now);
 		quotation.setUpdatedOn(now);
-					
+
 		quotation = quotationRepository.save(quotation);
-			
+
 		logger.info("New quotation added successfully");
-		if(quotation.getId() != null) {
+		if (quotation.getId() != null) {
 			QuotationActivity quotationActivity = new QuotationActivity();
-			BeanUtils.copyProperties(quotation, quotationActivity);	
+			BeanUtils.copyProperties(quotation, quotationActivity);
 			quotationActivity.setQuotation(quotation);
 			quotationActivity = quotationActivityRepository.save(quotationActivity);
 			logger.info("Quotation activity added");
 		}
 		return quotation;
 	}
-	
+
 	public Quotation updateQuotation(ObjectNode obj) {
 		logger.info("Updating quotation");
 		Optional<Quotation> ur = quotationRepository.findById(Long.parseLong(obj.get("id").asText()));
-		if(!ur.isPresent()) {
+		if (!ur.isPresent()) {
 			logger.error("Quotation not found. Cannot update quotation");
 			return null;
 		}
-		
+
 		Quotation quotation = ur.get();
-			
+
 		if (obj.get("notes") != null) {
 			quotation.setNotes(obj.get("notes").asText());
 		}
-		
+
 		if (obj.get("status") != null) {
 			quotation.setStatus(obj.get("status").asText());
 		}
-		
-		if(obj.get("dueDate") != null) {
+
+		if (obj.get("dueDate") != null) {
 			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("d/MM/yyyy");
 			LocalDate localDate = LocalDate.parse(obj.get("dueDate").asText(), formatter);
 			quotation.setDueDate(localDate);
-		}	
-		
+		}
+
 		if (obj.get("user") != null) {
 			quotation.setUpdatedBy(obj.get("user").asText());
 		} else {
 			quotation.setUpdatedBy(Constants.SYSTEM_ACCOUNT);
 		}
-		 
+
 		Instant now = Instant.now();
 		quotation.setUpdatedOn(now);
 		quotation = quotationRepository.save(quotation);
 		logger.info("Quotation updated");
-		
+
 		return quotation;
 	}
-	
+
 	public List<Quotation> searchQuotation(Map<String, String> requestObj) {
 		logger.info("Searching quotations");
 		Quotation quotation = new Quotation();
-		
+
 		boolean isFilter = false;
 		if (requestObj.get("id") != null) {
 			quotation.setId(Long.parseLong(requestObj.get("id")));
@@ -175,56 +184,57 @@ public class QuotationService {
 			quotation.setStatus(requestObj.get("status"));
 			isFilter = true;
 		}
-		
-		if(!StringUtils.isBlank(requestObj.get("documentId"))) {
+
+		if (!StringUtils.isBlank(requestObj.get("documentId"))) {
 			Document doc = documentService.getDocument(Long.parseLong(requestObj.get("documentId")));
 			if (doc != null) {
 				quotation.setDocument(doc);
 			}
 			isFilter = true;
 		}
-		
-		if(!StringUtils.isBlank(requestObj.get("vendorId"))) {
+
+		if (!StringUtils.isBlank(requestObj.get("vendorId"))) {
 			Vendor vendor = vendorService.getVendor(Long.parseLong(requestObj.get("vendorId")));
 			if (vendor != null) {
 				quotation.setVendor(vendor);
 			}
 			isFilter = true;
 		}
-		
-		if(!StringUtils.isBlank(requestObj.get("purchaseOrderId"))) {
-			PurchaseOrder purchaseOrder = purchaseOrderService.getPurchaseOrder(Long.parseLong(requestObj.get("purchaseOrderId")));
+
+		if (!StringUtils.isBlank(requestObj.get("purchaseOrderId"))) {
+			PurchaseOrder purchaseOrder = purchaseOrderService
+					.getPurchaseOrder(Long.parseLong(requestObj.get("purchaseOrderId")));
 			if (purchaseOrder != null) {
 				quotation.setPurchaseOrder(purchaseOrder);
 			}
 			isFilter = true;
 		}
-		
+
 		if (requestObj.get("notes") != null) {
 			quotation.setNotes(requestObj.get("notes"));
 			isFilter = true;
 		}
-		
+
 		if (requestObj.get("updatedBy") != null) {
 			quotation.setUpdatedBy(requestObj.get("updatedBy"));
 			isFilter = true;
 		}
-		
+
 		List<Quotation> list = null;
 		if (isFilter) {
 			list = this.quotationRepository.findAll(Example.of(quotation), Sort.by(Direction.DESC, "id"));
 		} else {
 			list = this.quotationRepository.findAll(Sort.by(Direction.DESC, "id"));
 		}
-		
-        logger.info("Quotation search completed. Total records: "+list.size());
-		
+
+		logger.info("Quotation search completed. Total records: " + list.size());
+
 		return list;
-		
+
 	}
-	
-    public void deleteQuotation(Long id) {
-		 quotationRepository.deleteById(id);
-		 logger.info("Quotation deleted successfully");
+
+	public void deleteQuotation(Long id) {
+		quotationRepository.deleteById(id);
+		logger.info("Quotation deleted successfully");
 	}
 }

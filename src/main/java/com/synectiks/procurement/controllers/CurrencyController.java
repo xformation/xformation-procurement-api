@@ -7,7 +7,6 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.configurationprocessor.json.JSONException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,7 +14,6 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -40,6 +38,13 @@ public class CurrencyController {
 		Status st = new Status();
 		try {
 			Currency currency = currencyService.addCurrency(obj);
+			if(currency == null) {
+				logger.error("Add currency failed");
+				st.setCode(HttpStatus.EXPECTATION_FAILED.value());
+				st.setType("ERROR");
+				st.setMessage("Add currency failed");
+				return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(st);
+			}
 			st.setCode(HttpStatus.OK.value());
 			st.setType("SUCCESS");
 			st.setMessage("Currency addes successfully");
@@ -61,6 +66,13 @@ public class CurrencyController {
 		Status st = new Status(); 
 		try {
 			Currency currency = currencyService.updateCurrency(obj);
+			if (currency == null) {
+				logger.error("Currency could not be updated.");
+				st.setCode(HttpStatus.EXPECTATION_FAILED.value());
+				st.setType("ERROR");
+				st.setMessage("Update currency failed");
+				return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(st);
+			}
 			st.setCode(HttpStatus.OK.value());
 			st.setType("SUCCESS");
 			st.setMessage("Updating currency successful");
@@ -82,6 +94,13 @@ public class CurrencyController {
 		Status st = new Status();
 		try {
 			List<Currency> list = currencyService.searchCurrency(requestObj);
+			if(list == null) {
+				logger.error("Search currency failed");
+				st.setCode(HttpStatus.EXPECTATION_FAILED.value());
+				st.setType("ERROR");
+				st.setMessage("Search currency failed");
+				return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(st);
+			}
 			st.setCode(HttpStatus.OK.value());
 			st.setType("SUCCESS");
 			st.setMessage("Search currency successful");
@@ -110,6 +129,33 @@ public class CurrencyController {
 			st.setType("ERROR");
 			st.setMessage("Delete currency failed");
 			return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(st); 
+		}
+	}
+	
+	@GetMapping("/getCurrency/{id}")
+	public ResponseEntity<Status> getCurrency(@PathVariable Long id) {
+		logger.info("Getting currency by id: " + id);
+		Status st = new Status();
+		try {
+			Currency currency = currencyService.getCurrency(id);
+			if (currency == null) {
+				logger.warn("Currency not found.");
+				st.setCode(HttpStatus.EXPECTATION_FAILED.value());
+				st.setType("ERROR");
+				st.setMessage("Currency not found");
+				return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(st);
+			}
+			st.setCode(HttpStatus.OK.value());
+			st.setType("SUCCESS");
+			st.setMessage("Currency found");
+			st.setObject(currency);
+			return ResponseEntity.status(HttpStatus.OK).body(st);
+		} catch (Exception e) {
+			logger.error("Currency not found. Exception: ", e);
+			st.setCode(HttpStatus.EXPECTATION_FAILED.value());
+			st.setType("ERROR");
+			st.setMessage("Currency not found");
+			return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(st);
 		}
 	}
 }

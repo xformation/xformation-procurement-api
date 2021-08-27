@@ -8,6 +8,7 @@ import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.configurationprocessor.json.JSONException;
 import org.springframework.data.domain.Example;
@@ -18,15 +19,19 @@ import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.synectiks.procurement.config.Constants;
 import com.synectiks.procurement.domain.Contact;
+import com.synectiks.procurement.domain.ContactActivity;
+import com.synectiks.procurement.repository.ContactActivityRepository;
 import com.synectiks.procurement.repository.ContactRepository;
 
 @Service
 public class ContactService {
 	private static final Logger logger = LoggerFactory.getLogger(ContactService.class);
-	
+
 	@Autowired
 	private ContactRepository contactRepository;
-	
+	@Autowired
+	ContactActivityRepository contactActivityRepository;
+
 	public Contact addContact(ObjectNode obj) throws JSONException {
 		Contact contact = new Contact();
 
@@ -45,7 +50,7 @@ public class ContactService {
 		if (obj.get("email") != null) {
 			contact.setEmail(obj.get("email").asText());
 		}
-		
+
 		if (obj.get("isActive") != null) {
 			contact.setIsActive(obj.get("isActive").asText());
 		}
@@ -55,9 +60,7 @@ public class ContactService {
 		if (obj.get("invitationLink") != null) {
 			contact.setInvitationLink(obj.get("invitationLink").asText());
 		}
-//			if (obj.get("inviteSentOn") != null) {
-//				contact.setInviteSentOn(obj.get("inviteSentOn"));
-//			}
+
 		if (obj.get("jobType") != null) {
 			contact.setJobType(obj.get("jobType").asText());
 		}
@@ -67,19 +70,27 @@ public class ContactService {
 		contact.setCreatedBy(Constants.SYSTEM_ACCOUNT);
 		contact.setUpdatedBy(Constants.SYSTEM_ACCOUNT);
 		Instant now = Instant.now();
+		contact.setInviteSentOn(now);
 		contact.setCreatedOn(now);
 		contact.setUpdatedOn(now);
 		contact = contactRepository.save(contact);
-		logger.info("Contact added successfully:"+contact.toString());
+		if (contact != null) {
+			ContactActivity contactActivity = new ContactActivity();
+			BeanUtils.copyProperties(contact, contactActivity);
+			contactActivity.setContact(contact);
+			contactActivity = contactActivityRepository.save(contactActivity);
+			logger.info("Contact activity add successfully");
+		}
 		return contact;
 	}
-	
+
 	public Contact updateContact(ObjectNode obj) throws JSONException, URISyntaxException {
 		Optional<Contact> ur = contactRepository.findById(Long.parseLong(obj.get("id").asText()));
-		if(!ur.isPresent()) {
-				return null;
+		if (!ur.isPresent()) {
+			logger.info("Contact id not found");
+			return null;
 		}
-		Contact contact = new Contact();
+		Contact contact = ur.get();
 		if (obj.get("firstName") != null) {
 			contact.setFirstName(obj.get("firstName").asText());
 		}
@@ -95,7 +106,7 @@ public class ContactService {
 		if (obj.get("email") != null) {
 			contact.setEmail(obj.get("email").asText());
 		}
-		
+
 		if (obj.get("isActive") != null) {
 			contact.setIsActive(obj.get("isActive").asText());
 		}
@@ -105,23 +116,26 @@ public class ContactService {
 		if (obj.get("invitationLink") != null) {
 			contact.setInvitationLink(obj.get("invitationLink").asText());
 		}
-//			if (obj.get("inviteSentOn") != null) {
-//				contact.setInviteSentOn(obj.get("inviteSentOn"));
-//			}
 		if (obj.get("jobType") != null) {
 			contact.setJobType(obj.get("jobType").asText());
 		}
 		if (obj.get("notes") != null) {
 			contact.setNotes(obj.get("notes").asText());
 		}
-	 
+
 		Instant now = Instant.now();
 		contact.setUpdatedOn(now);
 		contact = contactRepository.save(contact);
-		logger.info("Updating Committee successfully: "+contact.toString());
+		if (contact != null) {
+			ContactActivity contactActivity = new ContactActivity();
+			BeanUtils.copyProperties(contact, contactActivity);
+			contactActivity.setContact(contact);
+			contactActivity = contactActivityRepository.save(contactActivity);
+			logger.info("Contact activity update successfully");
+		}
 		return contact;
 	}
-	
+
 	public List<Contact> searchContact(Map<String, String> requestObj) {
 		Contact contact = new Contact();
 		boolean isFilter = false;
@@ -175,14 +189,25 @@ public class ContactService {
 		} else {
 			list = this.contactRepository.findAll(Sort.by(Direction.DESC, "id"));
 		}
-		
-        logger.info("search data "+list);
+
+		logger.info("Contact search completed. Total records: " + list.size());
 		return list;
-		
+
 	}
-	
+
+	public Contact getContact(Long id) {
+		logger.info("Getting contact by id: " + id);
+		Optional<Contact> ovn = contactRepository.findById(id);
+		if (ovn.isPresent()) {
+			logger.info("contact: " + ovn.get().toString());
+			return ovn.get();
+		}
+		logger.warn("Contact not found");
+		return null;
+	}
+
 	public void deleteContact(Long id) {
-		 contactRepository.deleteById(id);
-	}	
-	
+		contactRepository.deleteById(id);
+	}
+
 }

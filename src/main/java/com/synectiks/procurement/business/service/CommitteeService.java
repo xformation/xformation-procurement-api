@@ -26,13 +26,24 @@ import com.synectiks.procurement.repository.CommitteeRepository;
 @Service
 public class CommitteeService {
 	private static final Logger logger = LoggerFactory.getLogger(CommitteeService.class);
-	
+
 	@Autowired
 	private CommitteeRepository committeeRepository;
-	
+
 	@Autowired
 	private CommitteeActivityRepository committeeActivityRepository;
-	
+
+	public Committee getCommittee(Long id) {
+		logger.info("Getting committee by id: " + id);
+		Optional<Committee> ovn = committeeRepository.findById(id);
+		if (ovn.isPresent()) {
+			logger.info("Committee: " + ovn.get().toString());
+			return ovn.get();
+		}
+		logger.warn("Committee not found");
+		return null;
+	}
+
 	public Committee addCommittee(ObjectNode obj) throws JSONException {
 		Committee committee = new Committee();
 
@@ -42,10 +53,11 @@ public class CommitteeService {
 		if (obj.get("type") != null) {
 			committee.setType(obj.get("type").asText());
 		}
-		
+
 		if (obj.get("notes") != null) {
 			committee.setNotes(obj.get("notes").asText());
 		}
+		committee.setStatus(Constants.Status);
 		committee.setCreatedBy(Constants.SYSTEM_ACCOUNT);
 		committee.setUpdatedBy(Constants.SYSTEM_ACCOUNT);
 		Instant now = Instant.now();
@@ -53,26 +65,27 @@ public class CommitteeService {
 		committee.setUpdatedOn(now);
 		committee = committeeRepository.save(committee);
 		logger.info("Committee added successfully");
-		
-		if(committee.getId() != null) {
+
+		if (committee.getId() != null) {
 			CommitteeActivity committeeActivity = new CommitteeActivity();
-				BeanUtils.copyProperties(committee, committeeActivity);	
-				committeeActivity.setCommittee(committee);
-				committeeActivity = committeeActivityRepository.save(committeeActivity);
-				logger.info("Invoice Activity added successfully");
+			BeanUtils.copyProperties(committee, committeeActivity);
+			committeeActivity.setCommittee(committee);
+			committeeActivity = committeeActivityRepository.save(committeeActivity);
+			logger.info("Committee activity added successfully");
 		}
-		logger.info("Committee added successfully"+committee.toString());
+		logger.info("Committee added successfully" + committee.toString());
 		return committee;
-		
+
 	}
-	
-	
+
 	public Committee updateCommittee(ObjectNode obj) throws JSONException, URISyntaxException {
 		Optional<Committee> ur = committeeRepository.findById(Long.parseLong(obj.get("id").asText()));
-		if(!ur.isPresent()) {
-				return null;
+		if (!ur.isPresent()) {
+			logger.info("Committee id not found");
+			return null;
 		}
-		Committee committee = new Committee();
+
+		Committee committee = ur.get();
 
 		if (obj.get("name") != null) {
 			committee.setName(obj.get("name").asText());
@@ -80,26 +93,33 @@ public class CommitteeService {
 		if (obj.get("type") != null) {
 			committee.setType(obj.get("type").asText());
 		}
-		
+
 		if (obj.get("notes") != null) {
 			committee.setNotes(obj.get("notes").asText());
 		}
-		
+
 		if (obj.get("user") != null) {
-			 committee.setUpdatedBy(obj.get("user").asText());
+			committee.setUpdatedBy(obj.get("user").asText());
 		} else {
-			 committee.setUpdatedBy(Constants.SYSTEM_ACCOUNT);
+			committee.setUpdatedBy(Constants.SYSTEM_ACCOUNT);
 		}
-		 
+
 		Instant now = Instant.now();
 		committee.setUpdatedOn(now);
 		committee = committeeRepository.save(committee);
-		logger.info("Updating requisition completed : "+committee);
+		logger.info("Updating committee completed : " + committee);
+		if (committee.getId() != null) {
+			CommitteeActivity committeeActivity = new CommitteeActivity();
+			BeanUtils.copyProperties(committee, committeeActivity);
+			committeeActivity.setCommittee(committee);
+			committeeActivity = committeeActivityRepository.save(committeeActivity);
+			logger.info("Committee activity update successfully");
+		}
 		return committee;
 	}
-	
+
 	public List<Committee> searchCommittee(Map<String, String> requestObj) {
-		logger.info("Request to get requisitionLineItem on given filter criteria");
+		logger.info("Request to get committee on given filter criteria");
 		Committee committee = new Committee();
 		boolean isFilter = false;
 		if (requestObj.get("id") != null) {
@@ -110,7 +130,7 @@ public class CommitteeService {
 //			requisition.setDepartment(requestObj.get("departmentId"));
 //			isFilter = true;
 //		}
-		
+
 		if (requestObj.get("name") != null) {
 			committee.setName(requestObj.get("name"));
 			isFilter = true;
@@ -129,11 +149,17 @@ public class CommitteeService {
 		} else {
 			list = this.committeeRepository.findAll(Sort.by(Direction.DESC, "id"));
 		}
-        logger.info("search data ");
+		logger.info("Committee search completed. Total records: " + list.size());
 		return list;
 	}
-	
+
 	public void deleteCommittee(Long id) {
-		 committeeRepository.deleteById(id);		 
+		Optional<Committee> oc = committeeRepository.findById(id);
+		if (oc.isPresent()) {
+			CommitteeActivity committeeActivity = new CommitteeActivity();
+			committeeActivity.setCommittee(oc.get());
+			committeeActivityRepository.deleteAll(committeeActivityRepository.findAll(Example.of(committeeActivity)));
+			committeeRepository.deleteById(id);
+		}
 	}
 }

@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.synectiks.procurement.business.service.ContactService;
+import com.synectiks.procurement.domain.Committee;
 import com.synectiks.procurement.domain.Contact;
 import com.synectiks.procurement.domain.Status;
 
@@ -39,6 +40,13 @@ public class ContactController {
 		Status st = new Status();
 		try {
 			Contact contact = contactService.addContact(obj);
+			if(contact == null) {
+				logger.error("Add contact failed");
+				st.setCode(HttpStatus.EXPECTATION_FAILED.value());
+				st.setType("ERROR");
+				st.setMessage("Add contact failed");
+				return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(st);
+			}
 		    st.setCode(HttpStatus.OK.value());
 		    st.setType("SUCCESS");
 		    st.setMessage("Contact added successfully");
@@ -59,6 +67,13 @@ public class ContactController {
 		Status st = new Status();
 		try {
 			Contact contact = contactService.updateContact(obj);
+			if(contact == null) {
+				logger.error("Update contact failed");
+				st.setCode(HttpStatus.EXPECTATION_FAILED.value());
+				st.setType("ERROR");
+				st.setMessage("Update contact failed");
+				return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(st);
+			}
 			st.setCode(HttpStatus.OK.value());
 			st.setType("SUCCESS");
 			st.setMessage("Contact updated successfully");
@@ -76,10 +91,16 @@ public class ContactController {
 	@GetMapping("/searchContact")
 	public ResponseEntity<Status> searchContact(@RequestParam Map<String, String> requestObj) {
 		logger.info("Request to get requisitionLineItem on given filter criteria");
-		
+		Status st = new Status();
 		try {
 			List<Contact> list = contactService.searchContact(requestObj);
-			Status st = new Status();
+			if(list == null) {
+				logger.error("Search contact failed");
+				st.setCode(HttpStatus.EXPECTATION_FAILED.value());
+				st.setType("ERROR");
+				st.setMessage("Search contact failed");
+				return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(st);
+			}
 			st.setCode(HttpStatus.OK.value());
 			st.setType("SUCCESS");
 			st.setMessage("Search contacts successful");
@@ -87,7 +108,6 @@ public class ContactController {
 			return ResponseEntity.status(HttpStatus.OK).body(st);
 		}catch (Exception e) {
 			logger.error("Searching contact failed. Exception: ", e);
-			Status st = new Status();
 			st.setCode(HttpStatus.EXPECTATION_FAILED.value());
 			st.setType("ERROR");
 			st.setMessage("search contact failed");
@@ -111,5 +131,32 @@ public class ContactController {
 			return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(st); 
 		}
 	}
+	@GetMapping("/getContact/{id}")
+	public ResponseEntity<Status> getContact(@PathVariable Long id) {
+		logger.info("Getting contact by id: " + id);
+		Status st = new Status();
+		try {
+			Contact contact = contactService.getContact(id);
+			if (contact == null) {
+				logger.warn("Contact not found.");
+				st.setCode(HttpStatus.EXPECTATION_FAILED.value());
+				st.setType("ERROR");
+				st.setMessage("Contact not found");
+				return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(st);
+			}
+			st.setCode(HttpStatus.OK.value());
+			st.setType("SUCCESS");
+			st.setMessage("Contact found");
+			st.setObject(contact);
+			return ResponseEntity.status(HttpStatus.OK).body(st);
+		} catch (Exception e) {
+			logger.error("Contact not found. Exception: ", e);
+			st.setCode(HttpStatus.EXPECTATION_FAILED.value());
+			st.setType("ERROR");
+			st.setMessage("Contact not found");
+			return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(st);
+		}
+	}
+	
 }
 	 

@@ -28,43 +28,43 @@ import com.synectiks.procurement.repository.RequisitionLineItemRepository;
 @Service
 public class DocumentService {
 	private static final Logger logger = LoggerFactory.getLogger(DocumentService.class);
-	
+
 	@Autowired
 	private RequisitionLineItemRepository requisitionLineItemRepository;
-	
+
 	@Autowired
 	private ContactRepository contactRepository;
-	
+
 	@Autowired
 	private DocumentRepository documentRepository;
-	
+
 	public Document getDocument(Long id) {
-		logger.info("Getting document by id: "+id);
+		logger.info("Getting document by id: " + id);
 		Optional<Document> oin = documentRepository.findById(id);
-		if(oin.isPresent()) {
-			logger.info("Document: "+oin.get().toString());
+		if (oin.isPresent()) {
+			logger.info("Document: " + oin.get().toString());
 			return oin.get();
 		}
 		logger.warn("Document not found");
 		return null;
 	}
-	
+
 	public Document addDocument(ObjectNode obj) throws JSONException {
 		Document document = new Document();
-		
+
 		Optional<Contact> oc = contactRepository.findById(Long.parseLong(obj.get("contactId").asText()));
-		if (!oc.isPresent()) {
+		if (oc.isPresent()) {
 			document.setContact(oc.get());
 		}
-		
+
 		Optional<RequisitionLineItem> orli = requisitionLineItemRepository
 				.findById(Long.parseLong(obj.get("requisitionLineItemId").asText()));
 		if (orli.isPresent()) {
 			document.setRequisitionLineItem(orli.get());
 		}
-		
+
 		if (obj.get("requisitionLineItemId") != null) {
-			
+
 		}
 		if (obj.get("fileName") != null) {
 			document.setFileName(obj.get("fileName").asText());
@@ -104,7 +104,7 @@ public class DocumentService {
 			logger.error("Document id not found");
 			return null;
 		}
-		Document document = new Document();
+		Document document = odc.get();
 
 		if (obj.get("fileName") != null) {
 			document.setFileName(obj.get("fileName").asText());
@@ -129,21 +129,19 @@ public class DocumentService {
 		if (!oc.isPresent()) {
 			document.setContact(oc.get());
 		}
-		
+
 		Optional<RequisitionLineItem> orli = requisitionLineItemRepository
 				.findById(Long.parseLong(obj.get("requisitionLineItemId").asText()));
 		if (orli.isPresent()) {
 			document.setRequisitionLineItem(orli.get());
 		}
-		
-		
+
 		if (obj.get("user") != null) {
 			document.setUpdatedBy(obj.get("user").asText());
 		} else {
 			document.setUpdatedBy(Constants.SYSTEM_ACCOUNT);
 		}
 
-		
 		Instant now = Instant.now();
 		document.setUpdatedOn(now);
 		document = documentRepository.save(document);
@@ -193,6 +191,12 @@ public class DocumentService {
 		} else {
 			list = this.documentRepository.findAll(Sort.by(Direction.DESC, "id"));
 		}
+		logger.info("Document search completed. Total records: " + list.size());
 		return list;
 	}
+
+	public void deleteDocument(Long id) {
+		documentRepository.deleteById(id);
+	}
+	
 }

@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.synectiks.procurement.business.service.CommitteeService;
 import com.synectiks.procurement.domain.Committee;
+import com.synectiks.procurement.domain.Department;
 import com.synectiks.procurement.domain.Status;
 
 @RestController
@@ -43,6 +44,13 @@ public class CommitteeController {
 		Status st = new Status();
 		try {
 			Committee committee = committeeService.addCommittee(obj);
+			if (committee == null) {
+				logger.error("Committee could not be added.");
+				st.setCode(HttpStatus.EXPECTATION_FAILED.value());
+				st.setType("ERROR");
+				st.setMessage("Add committee failed");
+				return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(st);
+			}
 			st.setCode(HttpStatus.OK.value());
 			st.setType("SUCCESS");
 			st.setMessage("Committee added successfully");
@@ -64,6 +72,13 @@ public class CommitteeController {
 		Status st = new Status();
 		try {
 			Committee committee = committeeService.updateCommittee(obj);
+			if (committee == null) {
+				logger.error("Committee could not be updated.");
+				st.setCode(HttpStatus.EXPECTATION_FAILED.value());
+				st.setType("ERROR");
+				st.setMessage("Update committee failed");
+				return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(st);
+			}
 			st.setCode(HttpStatus.OK.value());
 			st.setType("SUCCESS");
 			st.setMessage("Committee added successfully");
@@ -83,11 +98,18 @@ public class CommitteeController {
 		logger.info("Request to get list of committee on given filter criteria");
 		Status st = new Status();
 		try {
-			List<Committee> committee = committeeService.searchCommittee(requestObj);
+			List<Committee> list = committeeService.searchCommittee(requestObj);
+			if(list == null) {
+				logger.error("Search committee failed");
+				st.setCode(HttpStatus.EXPECTATION_FAILED.value());
+				st.setType("ERROR");
+				st.setMessage("Search committee failed");
+				return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(st);
+			}
 			st.setCode(HttpStatus.OK.value());
 			st.setType("SUCCESS");
 			st.setMessage("Search committee successful");
-			st.setObject(committee);
+			st.setObject(list);
 			return ResponseEntity.status(HttpStatus.OK).body(st);
 		}catch (Exception e) {
 			logger.error("Searching committee failed. Exception: ", e);
@@ -112,6 +134,33 @@ public class CommitteeController {
 			st.setType("ERROR");
 			st.setMessage("Delete committee failed");
 			return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(st); 
+		}
+	}
+	
+	@GetMapping("/getCommittee/{id}")
+	public ResponseEntity<Status> getCommittee(@PathVariable Long id) {
+		logger.info("Getting committee by id: " + id);
+		Status st = new Status();
+		try {
+			Committee committee = committeeService.getCommittee(id);
+			if (committee == null) {
+				logger.warn("Committee not found.");
+				st.setCode(HttpStatus.EXPECTATION_FAILED.value());
+				st.setType("ERROR");
+				st.setMessage("Committee not found");
+				return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(st);
+			}
+			st.setCode(HttpStatus.OK.value());
+			st.setType("SUCCESS");
+			st.setMessage("Department found");
+			st.setObject(committee);
+			return ResponseEntity.status(HttpStatus.OK).body(st);
+		} catch (Exception e) {
+			logger.error("Committee not found. Exception: ", e);
+			st.setCode(HttpStatus.EXPECTATION_FAILED.value());
+			st.setType("ERROR");
+			st.setMessage("Committee not found");
+			return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(st);
 		}
 	}
 		
