@@ -21,7 +21,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.synectiks.procurement.business.service.InvoiceService;
-import com.synectiks.procurement.domain.Department;
 import com.synectiks.procurement.domain.Invoice;
 import com.synectiks.procurement.domain.Status;
 

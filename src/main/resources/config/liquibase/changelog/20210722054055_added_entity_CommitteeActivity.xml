@@ -48,6 +48,5 @@
         <dropDefaultValue tableName="committee_activity" columnName="updated_on" columnDataType="datetime"/>
     </changeSet>
 
-    
 
 </databaseChangeLog>

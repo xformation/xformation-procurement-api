@@ -12,6 +12,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
+import javax.transaction.Transactional;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
@@ -34,6 +36,7 @@ import com.synectiks.procurement.domain.Department;
 import com.synectiks.procurement.domain.Requisition;
 import com.synectiks.procurement.domain.RequisitionActivity;
 import com.synectiks.procurement.domain.RequisitionLineItem;
+import com.synectiks.procurement.repository.RequisitionActivityRepository;
 import com.synectiks.procurement.repository.RequisitionRepository;
 
 @Service
@@ -42,6 +45,9 @@ public class RequisitionService {
 
 	@Autowired
 	private RequisitionRepository requisitionRepository;
+
+	@Autowired
+	private RequisitionActivityRepository requisitionActivityRepository;
 
 	@Autowired
 	private RequisitionActivityService requisitionActivityService;
@@ -66,6 +72,7 @@ public class RequisitionService {
 		return null;
 	}
 
+	@Transactional
 	public Requisition addRequisition(MultipartFile file, String obj) throws IOException, JSONException {
 		logger.info("Adding requistion");
 		Requisition requisition = new Requisition();
@@ -148,12 +155,12 @@ public class RequisitionService {
 		requisition = requisitionRepository.save(requisition);
 		logger.debug("Requisition saved");
 		if (requisition != null) {
-			logger.info("Saving requisition activity");
+			logger.info("Adding requisition activity");
 			RequisitionActivity requisitionActivity = new RequisitionActivity();
 			BeanUtils.copyProperties(requisition, requisitionActivity);
-			requisitionActivity.setRequisition(requisition);
+			requisitionActivity.setRequisitionId(requisition.getId());
 			requisitionActivity = requisitionActivityService.addRequisitionActivity(requisitionActivity);
-			logger.info("Requisition activity saved");
+			logger.info("Requisition activity added successfully");
 		}
 
 		JSONObject jsonObj = new JSONObject(obj);
@@ -176,6 +183,7 @@ public class RequisitionService {
 		return requisition;
 	}
 
+	@Transactional
 	public Requisition updateRequisition(ObjectNode obj) throws JSONException {
 		logger.info("Update requisition");
 
@@ -228,7 +236,9 @@ public class RequisitionService {
 		if (obj.get("notes") != null) {
 			requisition.setNotes(obj.get("notes").asText());
 		}
-
+		if (obj.get("status") != null) {
+			requisition.setStatus(obj.get("status").asText());
+		}
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern(Constants.DEFAULT_DATE_FORMAT);
 		if (obj.get("dueDate") != null) {
 			LocalDate localDate = LocalDate.parse(obj.get("dueDate").asText(), formatter);
@@ -250,7 +260,7 @@ public class RequisitionService {
 			logger.info("Adding requisition activity");
 			RequisitionActivity requisitionActivity = new RequisitionActivity();
 			BeanUtils.copyProperties(requisition, requisitionActivity);
-			requisitionActivity.setRequisition(requisition);
+			requisitionActivity.setRequisitionId(requisition.getId());
 			requisitionActivity = requisitionActivityService.addRequisitionActivity(requisitionActivity);
 			logger.info("Requisition activity added successfully");
 		}
@@ -327,6 +337,12 @@ public class RequisitionService {
 			list = this.requisitionRepository.findAll(Example.of(requisition), Sort.by(Direction.DESC, "id"));
 		} else {
 			list = this.requisitionRepository.findAll(Sort.by(Direction.DESC, "id"));
+		}
+		for (Requisition qou : list) {
+			RequisitionActivity ca = new RequisitionActivity();
+			ca.setRequisitionId(qou.getId());
+			List<RequisitionActivity> caList = requisitionActivityRepository.findAll(Example.of(ca));
+			qou.setActivityList(caList);
 		}
 
 		logger.info("Requisition search completed. Total records: " + list.size());

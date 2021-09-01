@@ -60,5 +60,6 @@
         <dropDefaultValue tableName="requisition_line_item_activity" columnName="updated_on" columnDataType="datetime"/>
     </changeSet>
 
-    
+   
+
 </databaseChangeLog>

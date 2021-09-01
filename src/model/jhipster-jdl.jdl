@@ -73,6 +73,7 @@ entity RequisitionActivity {
     totalPrice Integer 
     notes String maxlength(5000)
     dueDate LocalDate
+	requisitionId Long
 }
 
 entity RequisitionLineItem {
@@ -121,6 +122,7 @@ entity RequisitionLineItemActivity {
     priority String
     notes String maxlength(5000)
     dueDate LocalDate
+	requisitionLineItemId Long
 }
 
 entity PurchaseOrder {
@@ -155,6 +157,7 @@ entity QuotationActivity {
     updatedBy String
     dueDate LocalDate
     notes String maxlength(5000)
+	quotationId Long
 }
 
 entity Invoice {
@@ -187,6 +190,7 @@ entity InvoiceActivity {
     updatedBy String
     dueDate LocalDate
     notes String maxlength(5000)
+	invoiceId Long
 }
 
 entity Vendor {
@@ -244,6 +248,7 @@ entity ContactActivity {
     updatedOn Instant
     updatedBy String
     notes String maxlength(5000)
+	contactId Long
 }
 
 entity Committee {
@@ -266,6 +271,7 @@ entity CommitteeActivity {
     updatedOn Instant
     updatedBy String
     notes String maxlength(5000)
+	committeeId Long
 }
 
 relationship OneToOne {
@@ -282,20 +288,15 @@ relationship OneToOne {
 
 relationship OneToMany {
 	Requisition{requisitionLineItemList} to RequisitionLineItem,
-    Requisition{RequisitionActivityList} to RequisitionActivity,
     RequisitionLineItem{documentList} to Document,
-    RequisitionLineItem{requisitionLineItemActivityList} to RequisitionLineItemActivity,
-    Quotation{quotationActivityList} to QuotationActivity,
-    Invoice{invoiceActivityList} to InvoiceActivity,
     Contact{documentList} to Document,
-    Contact{contactActivityList} to ContactActivity,
-    Committee{committeeActivityList} to CommitteeActivity
-    
 }
 
 relationship ManyToMany {
 	Committee{contact} to Contact{committee}
 }
+
+
 
 paginate Document, Department, Requisition,
 RequisitionActivity, RequisitionLineItem, RequisitionLineItemActivity, 

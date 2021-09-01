@@ -48,6 +48,4 @@
         <dropDefaultValue tableName="quotation_activity" columnName="updated_on" columnDataType="datetime"/>
     </changeSet>
 
-    
-
 </databaseChangeLog>

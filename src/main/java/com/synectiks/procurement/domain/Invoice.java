@@ -4,11 +4,12 @@ package com.synectiks.procurement.domain;
 import javax.persistence.*;
 import javax.validation.constraints.*;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.io.Serializable;
 import java.time.Instant;
 import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.List;
 
 /**
  * A Invoice.
@@ -72,15 +73,25 @@ public class Invoice implements Serializable {
     @JoinColumn(unique = true)
     private Document document;
 
-    @OneToMany(mappedBy = "invoice")
-    private Set<InvoiceActivity> invoiceActivityLists = new HashSet<>();
+    
 
+	@Transient
+    @JsonProperty
+    private List<InvoiceActivity>  activityList;
     // jhipster-needle-entity-add-field - JHipster will add fields here
     public Long getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public List<InvoiceActivity> getActivityList() {
+		return activityList;
+	}
+
+	public void setActivityList(List<InvoiceActivity> activityList) {
+		this.activityList = activityList;
+	}
+
+	public void setId(Long id) {
         this.id = id;
     }
 
@@ -277,31 +288,6 @@ public class Invoice implements Serializable {
 
     public void setDocument(Document document) {
         this.document = document;
-    }
-
-    public Set<InvoiceActivity> getInvoiceActivityLists() {
-        return invoiceActivityLists;
-    }
-
-    public Invoice invoiceActivityLists(Set<InvoiceActivity> invoiceActivities) {
-        this.invoiceActivityLists = invoiceActivities;
-        return this;
-    }
-
-    public Invoice addInvoiceActivityList(InvoiceActivity invoiceActivity) {
-        this.invoiceActivityLists.add(invoiceActivity);
-        invoiceActivity.setInvoice(this);
-        return this;
-    }
-
-    public Invoice removeInvoiceActivityList(InvoiceActivity invoiceActivity) {
-        this.invoiceActivityLists.remove(invoiceActivity);
-        invoiceActivity.setInvoice(null);
-        return this;
-    }
-
-    public void setInvoiceActivityLists(Set<InvoiceActivity> invoiceActivities) {
-        this.invoiceActivityLists = invoiceActivities;
     }
     // jhipster-needle-entity-add-getters-setters - JHipster will add getters and setters here
 

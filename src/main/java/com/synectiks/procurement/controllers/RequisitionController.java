@@ -32,17 +32,18 @@ import com.synectiks.procurement.domain.Status;
 @RequestMapping("/api")
 public class RequisitionController {
 	private static final Logger logger = LoggerFactory.getLogger(RequisitionController.class);
-	
+
 	@Autowired
 	private RequisitionService requisitionService;
-	
+
 	@RequestMapping(value = "/addRequisition", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<Status> addRequisition(@RequestParam("file") MultipartFile file, @RequestParam("obj") String obj) throws IOException {
+	public ResponseEntity<Status> addRequisition(@RequestParam("file") MultipartFile file,
+			@RequestParam("obj") String obj) throws IOException {
 		logger.info("Request to add a requsition");
 		Status st = new Status();
 		try {
 			Requisition requisition = requisitionService.addRequisition(file, obj);
-			if(requisition == null) {
+			if (requisition == null) {
 				logger.error("Add requisition failed");
 				st.setCode(HttpStatus.EXPECTATION_FAILED.value());
 				st.setType("ERROR");
@@ -54,7 +55,7 @@ public class RequisitionController {
 			st.setMessage("Add requisition successful");
 			st.setObject(requisition);
 			return ResponseEntity.status(HttpStatus.OK).body(st);
-		}catch (Exception e) {
+		} catch (Exception e) {
 			logger.error("Add requisition failed. Exception: ", e);
 			st.setCode(HttpStatus.EXPECTATION_FAILED.value());
 			st.setType("ERROR");
@@ -62,14 +63,15 @@ public class RequisitionController {
 			return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(st);
 		}
 	}
-	
+
 	@PostMapping("/updateRequisition")
-	public ResponseEntity<Status> updateRequisition(@RequestBody ObjectNode obj) throws JSONException, URISyntaxException {
+	public ResponseEntity<Status> updateRequisition(@RequestBody ObjectNode obj)
+			throws JSONException, URISyntaxException {
 		logger.info("Request to update a requsition");
-		Status st = new Status(); 
+		Status st = new Status();
 		try {
 			Requisition requisition = requisitionService.updateRequisition(obj);
-			if(requisition == null) {
+			if (requisition == null) {
 				logger.error("Update requisition failed");
 				st.setCode(HttpStatus.EXPECTATION_FAILED.value());
 				st.setType("ERROR");
@@ -81,7 +83,7 @@ public class RequisitionController {
 			st.setMessage("Update requisition successful");
 			st.setObject(requisition);
 			return ResponseEntity.status(HttpStatus.OK).body(st);
-		}catch (Exception e) {
+		} catch (Exception e) {
 			logger.error("Update requisition failed. Exception: ", e);
 			st.setCode(HttpStatus.EXPECTATION_FAILED.value());
 			st.setType("ERROR");
@@ -89,14 +91,14 @@ public class RequisitionController {
 			return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(st);
 		}
 	}
-	
+
 	@GetMapping("/searchRequisition")
 	public ResponseEntity<Status> searchRequisition(@RequestParam Map<String, String> requestObj) {
 		logger.info("Request to search requsitions");
-		Status st = new Status(); 
+		Status st = new Status();
 		try {
 			List<Requisition> list = requisitionService.searchRequisition(requestObj);
-			if(list == null) {
+			if (list == null) {
 				logger.error("Search requisition failed");
 				st.setCode(HttpStatus.EXPECTATION_FAILED.value());
 				st.setType("ERROR");
@@ -108,18 +110,18 @@ public class RequisitionController {
 			st.setMessage("Search requisition successful");
 			st.setObject(list);
 			return ResponseEntity.status(HttpStatus.OK).body(st);
-		}catch (Exception e) {
+		} catch (Exception e) {
 			logger.error("Search requisition failed. Exception: ", e);
 			st.setCode(HttpStatus.EXPECTATION_FAILED.value());
 			st.setType("ERROR");
 			st.setMessage("Search requisition failed");
 			return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(st);
 		}
-		
+
 	}
-	
+
 	@DeleteMapping("/requisition/{id}")
-    public ResponseEntity<Status> deletePost(@PathVariable Long id) {
+	public ResponseEntity<Status> deletePost(@PathVariable Long id) {
 		Status st = new Status();
 		try {
 			requisitionService.deleteRequisition(id);
@@ -138,10 +140,10 @@ public class RequisitionController {
 	@GetMapping("/getAllRequisition")
 	private ResponseEntity<Status> getAllRequisition() {
 		logger.info("Request to get all requsitions");
-		Status st = new Status(); 
+		Status st = new Status();
 		try {
 			List<Requisition> list = requisitionService.getAllRequisitions();
-			if(list == null) {
+			if (list == null) {
 				logger.error("Search all requisition failed");
 				st.setCode(HttpStatus.EXPECTATION_FAILED.value());
 				st.setType("ERROR");
@@ -153,7 +155,7 @@ public class RequisitionController {
 			st.setMessage("Search all requisition successful");
 			st.setObject(list);
 			return ResponseEntity.status(HttpStatus.OK).body(st);
-		}catch (Exception e) {
+		} catch (Exception e) {
 			logger.error("Search all requisition failed. Exception: ", e);
 			st.setCode(HttpStatus.EXPECTATION_FAILED.value());
 			st.setType("ERROR");

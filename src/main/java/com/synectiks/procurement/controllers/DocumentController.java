@@ -38,7 +38,7 @@ public class DocumentController {
 		Status st = new Status();
 		try {
 			Document document = documentService.addDocument(obj);
-			if(document == null) {
+			if (document == null) {
 				logger.error("Add document failed");
 				st.setCode(HttpStatus.EXPECTATION_FAILED.value());
 				st.setType("ERROR");
@@ -65,7 +65,7 @@ public class DocumentController {
 		Status st = new Status();
 		try {
 			Document document = documentService.updateDocument(obj);
-			if(document == null) {
+			if (document == null) {
 				logger.error("Update document failed");
 				st.setCode(HttpStatus.EXPECTATION_FAILED.value());
 				st.setType("ERROR");
@@ -92,7 +92,7 @@ public class DocumentController {
 		Status st = new Status();
 		try {
 			List<Document> list = documentService.searchdocument(requestObj);
-			if(list == null) {
+			if (list == null) {
 				logger.error("Search document failed");
 				st.setCode(HttpStatus.EXPECTATION_FAILED.value());
 				st.setType("ERROR");
@@ -130,6 +130,7 @@ public class DocumentController {
 			return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(st);
 		}
 	}
+
 	@GetMapping("/getDocument/{id}")
 	public ResponseEntity<Status> getDepartment(@PathVariable Long id) {
 		logger.info("Getting document by id: " + id);

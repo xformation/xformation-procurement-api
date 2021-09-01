@@ -1,6 +1,5 @@
 package com.synectiks.procurement.domain;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import javax.persistence.*;
 import javax.validation.constraints.*;
@@ -71,9 +70,8 @@ public class ContactActivity implements Serializable {
     @Column(name = "notes", length = 5000)
     private String notes;
 
-    @ManyToOne
-    @JsonIgnoreProperties(value = "contactActivityLists", allowSetters = true)
-    private Contact contact;
+    @Column(name = "contact_id")
+    private Long contactId;
 
     // jhipster-needle-entity-add-field - JHipster will add fields here
     public Long getId() {
@@ -292,17 +290,17 @@ public class ContactActivity implements Serializable {
         this.notes = notes;
     }
 
-    public Contact getContact() {
-        return contact;
+    public Long getContactId() {
+        return contactId;
     }
 
-    public ContactActivity contact(Contact contact) {
-        this.contact = contact;
+    public ContactActivity contactId(Long contactId) {
+        this.contactId = contactId;
         return this;
     }
 
-    public void setContact(Contact contact) {
-        this.contact = contact;
+    public void setContactId(Long contactId) {
+        this.contactId = contactId;
     }
     // jhipster-needle-entity-add-getters-setters - JHipster will add getters and setters here
 
@@ -343,6 +341,7 @@ public class ContactActivity implements Serializable {
             ", updatedOn='" + getUpdatedOn() + "'" +
             ", updatedBy='" + getUpdatedBy() + "'" +
             ", notes='" + getNotes() + "'" +
+            ", contactId=" + getContactId() +
             "}";
     }
 }

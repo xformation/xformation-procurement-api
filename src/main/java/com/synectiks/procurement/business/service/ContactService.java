@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import javax.transaction.Transactional;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
@@ -32,6 +34,7 @@ public class ContactService {
 	@Autowired
 	ContactActivityRepository contactActivityRepository;
 
+	@Transactional
 	public Contact addContact(ObjectNode obj) throws JSONException {
 		Contact contact = new Contact();
 
@@ -67,8 +70,14 @@ public class ContactService {
 		if (obj.get("notes") != null) {
 			contact.setNotes(obj.get("notes").asText());
 		}
-		contact.setCreatedBy(Constants.SYSTEM_ACCOUNT);
-		contact.setUpdatedBy(Constants.SYSTEM_ACCOUNT);
+		if (obj.get("user") != null) {
+			contact.setCreatedBy(obj.get("user").asText());
+			contact.setUpdatedBy(obj.get("user").asText());
+		} else {
+			contact.setCreatedBy(Constants.SYSTEM_ACCOUNT);
+			contact.setUpdatedBy(Constants.SYSTEM_ACCOUNT);
+		}
+
 		Instant now = Instant.now();
 		contact.setInviteSentOn(now);
 		contact.setCreatedOn(now);
@@ -77,13 +86,14 @@ public class ContactService {
 		if (contact != null) {
 			ContactActivity contactActivity = new ContactActivity();
 			BeanUtils.copyProperties(contact, contactActivity);
-			contactActivity.setContact(contact);
+			contactActivity.setContactId(contact.getId());
 			contactActivity = contactActivityRepository.save(contactActivity);
 			logger.info("Contact activity add successfully");
 		}
 		return contact;
 	}
 
+	@Transactional
 	public Contact updateContact(ObjectNode obj) throws JSONException, URISyntaxException {
 		Optional<Contact> ur = contactRepository.findById(Long.parseLong(obj.get("id").asText()));
 		if (!ur.isPresent()) {
@@ -122,6 +132,13 @@ public class ContactService {
 		if (obj.get("notes") != null) {
 			contact.setNotes(obj.get("notes").asText());
 		}
+		if (obj.get("user") != null) {
+			contact.setCreatedBy(obj.get("user").asText());
+			contact.setUpdatedBy(obj.get("user").asText());
+		} else {
+			contact.setCreatedBy(Constants.SYSTEM_ACCOUNT);
+			contact.setUpdatedBy(Constants.SYSTEM_ACCOUNT);
+		}
 
 		Instant now = Instant.now();
 		contact.setUpdatedOn(now);
@@ -129,7 +146,7 @@ public class ContactService {
 		if (contact != null) {
 			ContactActivity contactActivity = new ContactActivity();
 			BeanUtils.copyProperties(contact, contactActivity);
-			contactActivity.setContact(contact);
+			contactActivity.setContactId(contact.getId());
 			contactActivity = contactActivityRepository.save(contactActivity);
 			logger.info("Contact activity update successfully");
 		}
@@ -188,6 +205,12 @@ public class ContactService {
 			list = this.contactRepository.findAll(Example.of(contact), Sort.by(Direction.DESC, "id"));
 		} else {
 			list = this.contactRepository.findAll(Sort.by(Direction.DESC, "id"));
+		}
+		for (Contact con : list) {
+			ContactActivity ca = new ContactActivity();
+			ca.setContactId(con.getId());
+			List<ContactActivity> caList = contactActivityRepository.findAll(Example.of(ca));
+			con.setActivityList(caList);
 		}
 
 		logger.info("Contact search completed. Total records: " + list.size());

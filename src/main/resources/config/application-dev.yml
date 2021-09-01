@@ -68,8 +68,11 @@ spring:
       discovery:
         enabled: true
 
+
 server:
   port: 7050
+
+
 
 # ===================================================================
 # JHipster specific properties

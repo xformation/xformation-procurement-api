@@ -79,6 +79,9 @@ public class ContactActivityResourceIT {
     private static final String DEFAULT_NOTES = "AAAAAAAAAA";
     private static final String UPDATED_NOTES = "BBBBBBBBBB";
 
+    private static final Long DEFAULT_CONTACT_ID = 1L;
+    private static final Long UPDATED_CONTACT_ID = 2L;
+
     @Autowired
     private ContactActivityRepository contactActivityRepository;
 
@@ -113,7 +116,8 @@ public class ContactActivityResourceIT {
             .createdBy(DEFAULT_CREATED_BY)
             .updatedOn(DEFAULT_UPDATED_ON)
             .updatedBy(DEFAULT_UPDATED_BY)
-            .notes(DEFAULT_NOTES);
+            .notes(DEFAULT_NOTES)
+            .contactId(DEFAULT_CONTACT_ID);
         return contactActivity;
     }
     /**
@@ -139,7 +143,8 @@ public class ContactActivityResourceIT {
             .createdBy(UPDATED_CREATED_BY)
             .updatedOn(UPDATED_UPDATED_ON)
             .updatedBy(UPDATED_UPDATED_BY)
-            .notes(UPDATED_NOTES);
+            .notes(UPDATED_NOTES)
+            .contactId(UPDATED_CONTACT_ID);
         return contactActivity;
     }
 
@@ -178,6 +183,7 @@ public class ContactActivityResourceIT {
         assertThat(testContactActivity.getUpdatedOn()).isEqualTo(DEFAULT_UPDATED_ON);
         assertThat(testContactActivity.getUpdatedBy()).isEqualTo(DEFAULT_UPDATED_BY);
         assertThat(testContactActivity.getNotes()).isEqualTo(DEFAULT_NOTES);
+        assertThat(testContactActivity.getContactId()).isEqualTo(DEFAULT_CONTACT_ID);
     }
 
     @Test
@@ -226,7 +232,8 @@ public class ContactActivityResourceIT {
             .andExpect(jsonPath("$.[*].createdBy").value(hasItem(DEFAULT_CREATED_BY)))
             .andExpect(jsonPath("$.[*].updatedOn").value(hasItem(DEFAULT_UPDATED_ON.toString())))
             .andExpect(jsonPath("$.[*].updatedBy").value(hasItem(DEFAULT_UPDATED_BY)))
-            .andExpect(jsonPath("$.[*].notes").value(hasItem(DEFAULT_NOTES)));
+            .andExpect(jsonPath("$.[*].notes").value(hasItem(DEFAULT_NOTES)))
+            .andExpect(jsonPath("$.[*].contactId").value(hasItem(DEFAULT_CONTACT_ID.intValue())));
     }
     
     @Test
@@ -255,7 +262,8 @@ public class ContactActivityResourceIT {
             .andExpect(jsonPath("$.createdBy").value(DEFAULT_CREATED_BY))
             .andExpect(jsonPath("$.updatedOn").value(DEFAULT_UPDATED_ON.toString()))
             .andExpect(jsonPath("$.updatedBy").value(DEFAULT_UPDATED_BY))
-            .andExpect(jsonPath("$.notes").value(DEFAULT_NOTES));
+            .andExpect(jsonPath("$.notes").value(DEFAULT_NOTES))
+            .andExpect(jsonPath("$.contactId").value(DEFAULT_CONTACT_ID.intValue()));
     }
     @Test
     @Transactional
@@ -293,7 +301,8 @@ public class ContactActivityResourceIT {
             .createdBy(UPDATED_CREATED_BY)
             .updatedOn(UPDATED_UPDATED_ON)
             .updatedBy(UPDATED_UPDATED_BY)
-            .notes(UPDATED_NOTES);
+            .notes(UPDATED_NOTES)
+            .contactId(UPDATED_CONTACT_ID);
 
         restContactActivityMockMvc.perform(put("/api/contact-activities")
             .contentType(MediaType.APPLICATION_JSON)
@@ -320,6 +329,7 @@ public class ContactActivityResourceIT {
         assertThat(testContactActivity.getUpdatedOn()).isEqualTo(UPDATED_UPDATED_ON);
         assertThat(testContactActivity.getUpdatedBy()).isEqualTo(UPDATED_UPDATED_BY);
         assertThat(testContactActivity.getNotes()).isEqualTo(UPDATED_NOTES);
+        assertThat(testContactActivity.getContactId()).isEqualTo(UPDATED_CONTACT_ID);
     }
 
     @Test

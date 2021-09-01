@@ -1,6 +1,5 @@
 package com.synectiks.procurement.domain;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import javax.persistence.*;
 import javax.validation.constraints.*;
@@ -47,9 +46,8 @@ public class CommitteeActivity implements Serializable {
     @Column(name = "notes", length = 5000)
     private String notes;
 
-    @ManyToOne
-    @JsonIgnoreProperties(value = "committeeActivityLists", allowSetters = true)
-    private Committee committee;
+    @Column(name = "committee_id")
+    private Long committeeId;
 
     // jhipster-needle-entity-add-field - JHipster will add fields here
     public Long getId() {
@@ -164,17 +162,17 @@ public class CommitteeActivity implements Serializable {
         this.notes = notes;
     }
 
-    public Committee getCommittee() {
-        return committee;
+    public Long getCommitteeId() {
+        return committeeId;
     }
 
-    public CommitteeActivity committee(Committee committee) {
-        this.committee = committee;
+    public CommitteeActivity committeeId(Long committeeId) {
+        this.committeeId = committeeId;
         return this;
     }
 
-    public void setCommittee(Committee committee) {
-        this.committee = committee;
+    public void setCommitteeId(Long committeeId) {
+        this.committeeId = committeeId;
     }
     // jhipster-needle-entity-add-getters-setters - JHipster will add getters and setters here
 
@@ -207,6 +205,7 @@ public class CommitteeActivity implements Serializable {
             ", updatedOn='" + getUpdatedOn() + "'" +
             ", updatedBy='" + getUpdatedBy() + "'" +
             ", notes='" + getNotes() + "'" +
+            ", committeeId=" + getCommitteeId() +
             "}";
     }
 }

@@ -1,6 +1,8 @@
 package com.synectiks.procurement.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import io.swagger.annotations.ApiModelProperty;
 
 import javax.persistence.*;
@@ -10,6 +12,7 @@ import java.io.Serializable;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -70,14 +73,24 @@ public class RequisitionLineItem implements Serializable {
     @OneToMany(mappedBy = "requisitionLineItem")
     private Set<Document> documentLists = new HashSet<>();
 
-    @OneToMany(mappedBy = "requisitionLineItem")
-    private Set<RequisitionLineItemActivity> requisitionLineItemActivityLists = new HashSet<>();
-
     @ManyToOne
     @JsonIgnoreProperties(value = "requisitionLineItemLists", allowSetters = true)
     private Requisition requisition;
 
-    // jhipster-needle-entity-add-field - JHipster will add fields here
+    
+	@Transient
+    @JsonProperty
+    private List<RequisitionLineItemActivity>  activityList;
+
+    public List<RequisitionLineItemActivity> getActivityList() {
+		return activityList;
+	}
+
+	public void setActivityList(List<RequisitionLineItemActivity> activityList) {
+		this.activityList = activityList;
+	}
+
+	// jhipster-needle-entity-add-field - JHipster will add fields here
     public Long getId() {
         return id;
     }
@@ -265,31 +278,6 @@ public class RequisitionLineItem implements Serializable {
 
     public void setDocumentLists(Set<Document> documents) {
         this.documentLists = documents;
-    }
-
-    public Set<RequisitionLineItemActivity> getRequisitionLineItemActivityLists() {
-        return requisitionLineItemActivityLists;
-    }
-
-    public RequisitionLineItem requisitionLineItemActivityLists(Set<RequisitionLineItemActivity> requisitionLineItemActivities) {
-        this.requisitionLineItemActivityLists = requisitionLineItemActivities;
-        return this;
-    }
-
-    public RequisitionLineItem addRequisitionLineItemActivityList(RequisitionLineItemActivity requisitionLineItemActivity) {
-        this.requisitionLineItemActivityLists.add(requisitionLineItemActivity);
-        requisitionLineItemActivity.setRequisitionLineItem(this);
-        return this;
-    }
-
-    public RequisitionLineItem removeRequisitionLineItemActivityList(RequisitionLineItemActivity requisitionLineItemActivity) {
-        this.requisitionLineItemActivityLists.remove(requisitionLineItemActivity);
-        requisitionLineItemActivity.setRequisitionLineItem(null);
-        return this;
-    }
-
-    public void setRequisitionLineItemActivityLists(Set<RequisitionLineItemActivity> requisitionLineItemActivities) {
-        this.requisitionLineItemActivityLists = requisitionLineItemActivities;
     }
 
     public Requisition getRequisition() {

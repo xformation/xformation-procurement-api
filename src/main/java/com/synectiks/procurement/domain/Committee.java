@@ -1,13 +1,26 @@
 package com.synectiks.procurement.domain;
 
 
-import javax.persistence.*;
-import javax.validation.constraints.*;
-
 import java.io.Serializable;
 import java.time.Instant;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
+import javax.persistence.SequenceGenerator;
+import javax.persistence.Table;
+import javax.persistence.Transient;
+import javax.validation.constraints.Size;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * A Committee.
@@ -48,16 +61,25 @@ public class Committee implements Serializable {
     @Column(name = "notes", length = 5000)
     private String notes;
 
-    @OneToMany(mappedBy = "committee")
-    private Set<CommitteeActivity> committeeActivityLists = new HashSet<>();
-
     @ManyToMany
     @JoinTable(name = "committee_contact",
                joinColumns = @JoinColumn(name = "committee_id", referencedColumnName = "id"),
                inverseJoinColumns = @JoinColumn(name = "contact_id", referencedColumnName = "id"))
     private Set<Contact> contacts = new HashSet<>();
 
-    // jhipster-needle-entity-add-field - JHipster will add fields here
+	@Transient
+    @JsonProperty
+    private List<CommitteeActivity>  activityList;
+    
+    public List<CommitteeActivity> getActivityList() {
+		return activityList;
+	}
+
+	public void setActivityList(List<CommitteeActivity> activityList) {
+		this.activityList = activityList;
+	}
+
+	// jhipster-needle-entity-add-field - JHipster will add fields here
     public Long getId() {
         return id;
     }
@@ -168,31 +190,6 @@ public class Committee implements Serializable {
 
     public void setNotes(String notes) {
         this.notes = notes;
-    }
-
-    public Set<CommitteeActivity> getCommitteeActivityLists() {
-        return committeeActivityLists;
-    }
-
-    public Committee committeeActivityLists(Set<CommitteeActivity> committeeActivities) {
-        this.committeeActivityLists = committeeActivities;
-        return this;
-    }
-
-    public Committee addCommitteeActivityList(CommitteeActivity committeeActivity) {
-        this.committeeActivityLists.add(committeeActivity);
-        committeeActivity.setCommittee(this);
-        return this;
-    }
-
-    public Committee removeCommitteeActivityList(CommitteeActivity committeeActivity) {
-        this.committeeActivityLists.remove(committeeActivity);
-        committeeActivity.setCommittee(null);
-        return this;
-    }
-
-    public void setCommitteeActivityLists(Set<CommitteeActivity> committeeActivities) {
-        this.committeeActivityLists = committeeActivities;
     }
 
     public Set<Contact> getContacts() {

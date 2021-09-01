@@ -11,21 +11,20 @@ import com.synectiks.procurement.repository.RequisitionLineItemActivityRepositor
 @Service
 public class RequisitionLineItemActivityService {
 	private static final Logger logger = LoggerFactory.getLogger(RequisitionLineItemActivityService.class);
-	
+
 //	@Autowired
 //	private RequisitionLineItemService requisitionLineItemService;
-	
+
 	@Autowired
 	private RequisitionLineItemActivityRepository requisitionLineItemActivityRepository;
-	
+
 //	@Autowired
 //	private RequisitionService requisitionService;
-	
+
 	public RequisitionLineItemActivity addRequisitionLineItemActivity(RequisitionLineItemActivity obj) {
 		logger.info("Add Requisition line item activity");
 		obj = requisitionLineItemActivityRepository.save(obj);
 		return obj;
 	}
-	
-	
+
 }

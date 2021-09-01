@@ -1,6 +1,5 @@
 package com.synectiks.procurement.domain;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import javax.persistence.*;
 import javax.validation.constraints.*;
@@ -48,9 +47,8 @@ public class QuotationActivity implements Serializable {
     @Column(name = "notes", length = 5000)
     private String notes;
 
-    @ManyToOne
-    @JsonIgnoreProperties(value = "quotationActivityLists", allowSetters = true)
-    private Quotation quotation;
+    @Column(name = "quotation_id")
+    private Long quotationId;
 
     // jhipster-needle-entity-add-field - JHipster will add fields here
     public Long getId() {
@@ -165,17 +163,17 @@ public class QuotationActivity implements Serializable {
         this.notes = notes;
     }
 
-    public Quotation getQuotation() {
-        return quotation;
+    public Long getQuotationId() {
+        return quotationId;
     }
 
-    public QuotationActivity quotation(Quotation quotation) {
-        this.quotation = quotation;
+    public QuotationActivity quotationId(Long quotationId) {
+        this.quotationId = quotationId;
         return this;
     }
 
-    public void setQuotation(Quotation quotation) {
-        this.quotation = quotation;
+    public void setQuotationId(Long quotationId) {
+        this.quotationId = quotationId;
     }
     // jhipster-needle-entity-add-getters-setters - JHipster will add getters and setters here
 
@@ -208,6 +206,7 @@ public class QuotationActivity implements Serializable {
             ", updatedBy='" + getUpdatedBy() + "'" +
             ", dueDate='" + getDueDate() + "'" +
             ", notes='" + getNotes() + "'" +
+            ", quotationId=" + getQuotationId() +
             "}";
     }
 }

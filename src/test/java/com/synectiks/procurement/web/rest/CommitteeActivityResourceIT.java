@@ -55,6 +55,9 @@ public class CommitteeActivityResourceIT {
     private static final String DEFAULT_NOTES = "AAAAAAAAAA";
     private static final String UPDATED_NOTES = "BBBBBBBBBB";
 
+    private static final Long DEFAULT_COMMITTEE_ID = 1L;
+    private static final Long UPDATED_COMMITTEE_ID = 2L;
+
     @Autowired
     private CommitteeActivityRepository committeeActivityRepository;
 
@@ -81,7 +84,8 @@ public class CommitteeActivityResourceIT {
             .createdBy(DEFAULT_CREATED_BY)
             .updatedOn(DEFAULT_UPDATED_ON)
             .updatedBy(DEFAULT_UPDATED_BY)
-            .notes(DEFAULT_NOTES);
+            .notes(DEFAULT_NOTES)
+            .committeeId(DEFAULT_COMMITTEE_ID);
         return committeeActivity;
     }
     /**
@@ -99,7 +103,8 @@ public class CommitteeActivityResourceIT {
             .createdBy(UPDATED_CREATED_BY)
             .updatedOn(UPDATED_UPDATED_ON)
             .updatedBy(UPDATED_UPDATED_BY)
-            .notes(UPDATED_NOTES);
+            .notes(UPDATED_NOTES)
+            .committeeId(UPDATED_COMMITTEE_ID);
         return committeeActivity;
     }
 
@@ -130,6 +135,7 @@ public class CommitteeActivityResourceIT {
         assertThat(testCommitteeActivity.getUpdatedOn()).isEqualTo(DEFAULT_UPDATED_ON);
         assertThat(testCommitteeActivity.getUpdatedBy()).isEqualTo(DEFAULT_UPDATED_BY);
         assertThat(testCommitteeActivity.getNotes()).isEqualTo(DEFAULT_NOTES);
+        assertThat(testCommitteeActivity.getCommitteeId()).isEqualTo(DEFAULT_COMMITTEE_ID);
     }
 
     @Test
@@ -170,7 +176,8 @@ public class CommitteeActivityResourceIT {
             .andExpect(jsonPath("$.[*].createdBy").value(hasItem(DEFAULT_CREATED_BY)))
             .andExpect(jsonPath("$.[*].updatedOn").value(hasItem(DEFAULT_UPDATED_ON.toString())))
             .andExpect(jsonPath("$.[*].updatedBy").value(hasItem(DEFAULT_UPDATED_BY)))
-            .andExpect(jsonPath("$.[*].notes").value(hasItem(DEFAULT_NOTES)));
+            .andExpect(jsonPath("$.[*].notes").value(hasItem(DEFAULT_NOTES)))
+            .andExpect(jsonPath("$.[*].committeeId").value(hasItem(DEFAULT_COMMITTEE_ID.intValue())));
     }
     
     @Test
@@ -191,7 +198,8 @@ public class CommitteeActivityResourceIT {
             .andExpect(jsonPath("$.createdBy").value(DEFAULT_CREATED_BY))
             .andExpect(jsonPath("$.updatedOn").value(DEFAULT_UPDATED_ON.toString()))
             .andExpect(jsonPath("$.updatedBy").value(DEFAULT_UPDATED_BY))
-            .andExpect(jsonPath("$.notes").value(DEFAULT_NOTES));
+            .andExpect(jsonPath("$.notes").value(DEFAULT_NOTES))
+            .andExpect(jsonPath("$.committeeId").value(DEFAULT_COMMITTEE_ID.intValue()));
     }
     @Test
     @Transactional
@@ -221,7 +229,8 @@ public class CommitteeActivityResourceIT {
             .createdBy(UPDATED_CREATED_BY)
             .updatedOn(UPDATED_UPDATED_ON)
             .updatedBy(UPDATED_UPDATED_BY)
-            .notes(UPDATED_NOTES);
+            .notes(UPDATED_NOTES)
+            .committeeId(UPDATED_COMMITTEE_ID);
 
         restCommitteeActivityMockMvc.perform(put("/api/committee-activities")
             .contentType(MediaType.APPLICATION_JSON)
@@ -240,6 +249,7 @@ public class CommitteeActivityResourceIT {
         assertThat(testCommitteeActivity.getUpdatedOn()).isEqualTo(UPDATED_UPDATED_ON);
         assertThat(testCommitteeActivity.getUpdatedBy()).isEqualTo(UPDATED_UPDATED_BY);
         assertThat(testCommitteeActivity.getNotes()).isEqualTo(UPDATED_NOTES);
+        assertThat(testCommitteeActivity.getCommitteeId()).isEqualTo(UPDATED_COMMITTEE_ID);
     }
 
     @Test

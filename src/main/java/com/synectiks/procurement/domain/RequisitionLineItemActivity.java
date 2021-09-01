@@ -1,6 +1,5 @@
 package com.synectiks.procurement.domain;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.swagger.annotations.ApiModelProperty;
 
 import javax.persistence.*;
@@ -65,9 +64,8 @@ public class RequisitionLineItemActivity implements Serializable {
     @Column(name = "due_date")
     private LocalDate dueDate;
 
-    @ManyToOne
-    @JsonIgnoreProperties(value = "requisitionLineItemActivityLists", allowSetters = true)
-    private RequisitionLineItem requisitionLineItem;
+    @Column(name = "requisition_line_item_id")
+    private Long requisitionLineItemId;
 
     // jhipster-needle-entity-add-field - JHipster will add fields here
     public Long getId() {
@@ -234,17 +232,17 @@ public class RequisitionLineItemActivity implements Serializable {
         this.dueDate = dueDate;
     }
 
-    public RequisitionLineItem getRequisitionLineItem() {
-        return requisitionLineItem;
+    public Long getRequisitionLineItemId() {
+        return requisitionLineItemId;
     }
 
-    public RequisitionLineItemActivity requisitionLineItem(RequisitionLineItem requisitionLineItem) {
-        this.requisitionLineItem = requisitionLineItem;
+    public RequisitionLineItemActivity requisitionLineItemId(Long requisitionLineItemId) {
+        this.requisitionLineItemId = requisitionLineItemId;
         return this;
     }
 
-    public void setRequisitionLineItem(RequisitionLineItem requisitionLineItem) {
-        this.requisitionLineItem = requisitionLineItem;
+    public void setRequisitionLineItemId(Long requisitionLineItemId) {
+        this.requisitionLineItemId = requisitionLineItemId;
     }
     // jhipster-needle-entity-add-getters-setters - JHipster will add getters and setters here
 
@@ -281,6 +279,7 @@ public class RequisitionLineItemActivity implements Serializable {
             ", priority='" + getPriority() + "'" +
             ", notes='" + getNotes() + "'" +
             ", dueDate='" + getDueDate() + "'" +
+            ", requisitionLineItemId=" + getRequisitionLineItemId() +
             "}";
     }
 }

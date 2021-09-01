@@ -69,6 +69,9 @@ public class RequisitionActivityResourceIT {
     private static final LocalDate DEFAULT_DUE_DATE = LocalDate.ofEpochDay(0L);
     private static final LocalDate UPDATED_DUE_DATE = LocalDate.now(ZoneId.systemDefault());
 
+    private static final Long DEFAULT_REQUISITION_ID = 1L;
+    private static final Long UPDATED_REQUISITION_ID = 2L;
+
     @Autowired
     private RequisitionActivityRepository requisitionActivityRepository;
 
@@ -99,7 +102,8 @@ public class RequisitionActivityResourceIT {
             .type(DEFAULT_TYPE)
             .totalPrice(DEFAULT_TOTAL_PRICE)
             .notes(DEFAULT_NOTES)
-            .dueDate(DEFAULT_DUE_DATE);
+            .dueDate(DEFAULT_DUE_DATE)
+            .requisitionId(DEFAULT_REQUISITION_ID);
         return requisitionActivity;
     }
     /**
@@ -121,7 +125,8 @@ public class RequisitionActivityResourceIT {
             .type(UPDATED_TYPE)
             .totalPrice(UPDATED_TOTAL_PRICE)
             .notes(UPDATED_NOTES)
-            .dueDate(UPDATED_DUE_DATE);
+            .dueDate(UPDATED_DUE_DATE)
+            .requisitionId(UPDATED_REQUISITION_ID);
         return requisitionActivity;
     }
 
@@ -156,6 +161,7 @@ public class RequisitionActivityResourceIT {
         assertThat(testRequisitionActivity.getTotalPrice()).isEqualTo(DEFAULT_TOTAL_PRICE);
         assertThat(testRequisitionActivity.getNotes()).isEqualTo(DEFAULT_NOTES);
         assertThat(testRequisitionActivity.getDueDate()).isEqualTo(DEFAULT_DUE_DATE);
+        assertThat(testRequisitionActivity.getRequisitionId()).isEqualTo(DEFAULT_REQUISITION_ID);
     }
 
     @Test
@@ -200,7 +206,8 @@ public class RequisitionActivityResourceIT {
             .andExpect(jsonPath("$.[*].type").value(hasItem(DEFAULT_TYPE)))
             .andExpect(jsonPath("$.[*].totalPrice").value(hasItem(DEFAULT_TOTAL_PRICE)))
             .andExpect(jsonPath("$.[*].notes").value(hasItem(DEFAULT_NOTES)))
-            .andExpect(jsonPath("$.[*].dueDate").value(hasItem(DEFAULT_DUE_DATE.toString())));
+            .andExpect(jsonPath("$.[*].dueDate").value(hasItem(DEFAULT_DUE_DATE.toString())))
+            .andExpect(jsonPath("$.[*].requisitionId").value(hasItem(DEFAULT_REQUISITION_ID.intValue())));
     }
     
     @Test
@@ -225,7 +232,8 @@ public class RequisitionActivityResourceIT {
             .andExpect(jsonPath("$.type").value(DEFAULT_TYPE))
             .andExpect(jsonPath("$.totalPrice").value(DEFAULT_TOTAL_PRICE))
             .andExpect(jsonPath("$.notes").value(DEFAULT_NOTES))
-            .andExpect(jsonPath("$.dueDate").value(DEFAULT_DUE_DATE.toString()));
+            .andExpect(jsonPath("$.dueDate").value(DEFAULT_DUE_DATE.toString()))
+            .andExpect(jsonPath("$.requisitionId").value(DEFAULT_REQUISITION_ID.intValue()));
     }
     @Test
     @Transactional
@@ -259,7 +267,8 @@ public class RequisitionActivityResourceIT {
             .type(UPDATED_TYPE)
             .totalPrice(UPDATED_TOTAL_PRICE)
             .notes(UPDATED_NOTES)
-            .dueDate(UPDATED_DUE_DATE);
+            .dueDate(UPDATED_DUE_DATE)
+            .requisitionId(UPDATED_REQUISITION_ID);
 
         restRequisitionActivityMockMvc.perform(put("/api/requisition-activities")
             .contentType(MediaType.APPLICATION_JSON)
@@ -282,6 +291,7 @@ public class RequisitionActivityResourceIT {
         assertThat(testRequisitionActivity.getTotalPrice()).isEqualTo(UPDATED_TOTAL_PRICE);
         assertThat(testRequisitionActivity.getNotes()).isEqualTo(UPDATED_NOTES);
         assertThat(testRequisitionActivity.getDueDate()).isEqualTo(UPDATED_DUE_DATE);
+        assertThat(testRequisitionActivity.getRequisitionId()).isEqualTo(UPDATED_REQUISITION_ID);
     }
 
     @Test

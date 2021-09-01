@@ -21,21 +21,21 @@ import com.synectiks.procurement.repository.CurrencyRepository;
 @Service
 public class CurrencyService {
 	private static final Logger logger = LoggerFactory.getLogger(CurrencyService.class);
-	
+
 	@Autowired
 	private CurrencyRepository currencyRepository;
-	
+
 	public Currency getCurrency(Long id) {
-		logger.info("Getting currency by id: "+id);
+		logger.info("Getting currency by id: " + id);
 		Optional<Currency> o = currencyRepository.findById(id);
-		if(o.isPresent()) {
-			logger.info("Currency: "+o.get().toString());
+		if (o.isPresent()) {
+			logger.info("Currency: " + o.get().toString());
 			return o.get();
 		}
 		logger.warn("Currency not found");
 		return null;
 	}
-	
+
 	public Currency addCurrency(ObjectNode obj) throws JSONException {
 		Currency currency = new Currency();
 
@@ -53,13 +53,13 @@ public class CurrencyService {
 		}
 
 		currency = currencyRepository.save(currency);
-		logger.info("Currency added successfully. "+currency.toString());
+		logger.info("Currency added successfully. " + currency.toString());
 		return currency;
 	}
-	
+
 	public Currency updateCurrency(ObjectNode obj) throws JSONException, URISyntaxException {
 		Optional<Currency> ur = currencyRepository.findById(Long.parseLong(obj.get("id").asText()));
-		if(!ur.isPresent()) {
+		if (!ur.isPresent()) {
 			logger.warn("Currency id not found");
 			return null;
 		}
@@ -77,12 +77,11 @@ public class CurrencyService {
 		if (obj.get("symbolFilePath") != null) {
 			currency.setSymbolFilePath(obj.get("symbolFilePath").asText());
 		}
-
-	    currency = currencyRepository.save(currency);
-		logger.info("Updating currency completed"+currency.toString());
+		currency = currencyRepository.save(currency);
+		logger.info("Updating currency completed" + currency.toString());
 		return currency;
 	}
-	
+
 	public List<Currency> searchCurrency(Map<String, String> requestObj) {
 		Currency currency = new Currency();
 		boolean isFilter = false;
@@ -94,7 +93,7 @@ public class CurrencyService {
 //			requisition.setDepartment(requestObj.get("departmentId"));
 //			isFilter = true;
 //		}
-		
+
 		if (requestObj.get("code") != null) {
 			currency.setCode(requestObj.get("code"));
 			isFilter = true;
@@ -117,12 +116,12 @@ public class CurrencyService {
 		} else {
 			list = this.currencyRepository.findAll(Sort.by(Direction.DESC, "id"));
 		}
-		
+
 		logger.info("Currency search completed. Total records: " + list.size());
 		return list;
-		
+
 	}
-	
+
 	public void deleteCurrency(Long id) {
 		currencyRepository.deleteById(id);
 	}

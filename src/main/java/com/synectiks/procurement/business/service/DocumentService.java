@@ -84,9 +84,13 @@ public class DocumentService {
 		if (obj.get("sourceOfOrigin") != null) {
 			document.setSourceOfOrigin(obj.get("sourceOfOrigin").asText());
 		}
-
-		document.setCreatedBy(Constants.SYSTEM_ACCOUNT);
-		document.setUpdatedBy(Constants.SYSTEM_ACCOUNT);
+		if (obj.get("user") != null) {
+			document.setCreatedBy(obj.get("user").asText());
+			document.setUpdatedBy(obj.get("user").asText());
+		} else {
+			document.setCreatedBy(Constants.SYSTEM_ACCOUNT);
+			document.setUpdatedBy(Constants.SYSTEM_ACCOUNT);
+		}
 		Instant now = Instant.now();
 		document.setCreatedOn(now);
 		document.setUpdatedOn(now);
@@ -198,5 +202,5 @@ public class DocumentService {
 	public void deleteDocument(Long id) {
 		documentRepository.deleteById(id);
 	}
-	
+
 }

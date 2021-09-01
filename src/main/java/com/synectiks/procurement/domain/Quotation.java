@@ -4,11 +4,12 @@ package com.synectiks.procurement.domain;
 import javax.persistence.*;
 import javax.validation.constraints.*;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.io.Serializable;
 import java.time.Instant;
 import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.List;
 
 /**
  * A Quotation.
@@ -61,15 +62,24 @@ public class Quotation implements Serializable {
     @JoinColumn(unique = true)
     private Document document;
 
-    @OneToMany(mappedBy = "quotation")
-    private Set<QuotationActivity> quotationActivityLists = new HashSet<>();
 
+	@Transient
+    @JsonProperty
+    private List<QuotationActivity>  activityList;
     // jhipster-needle-entity-add-field - JHipster will add fields here
     public Long getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public List<QuotationActivity> getActivityList() {
+		return activityList;
+	}
+
+	public void setActivityList(List<QuotationActivity> activityList) {
+		this.activityList = activityList;
+	}
+
+	public void setId(Long id) {
         this.id = id;
     }
 
@@ -214,31 +224,6 @@ public class Quotation implements Serializable {
 
     public void setDocument(Document document) {
         this.document = document;
-    }
-
-    public Set<QuotationActivity> getQuotationActivityLists() {
-        return quotationActivityLists;
-    }
-
-    public Quotation quotationActivityLists(Set<QuotationActivity> quotationActivities) {
-        this.quotationActivityLists = quotationActivities;
-        return this;
-    }
-
-    public Quotation addQuotationActivityList(QuotationActivity quotationActivity) {
-        this.quotationActivityLists.add(quotationActivity);
-        quotationActivity.setQuotation(this);
-        return this;
-    }
-
-    public Quotation removeQuotationActivityList(QuotationActivity quotationActivity) {
-        this.quotationActivityLists.remove(quotationActivity);
-        quotationActivity.setQuotation(null);
-        return this;
-    }
-
-    public void setQuotationActivityLists(Set<QuotationActivity> quotationActivities) {
-        this.quotationActivityLists = quotationActivities;
     }
     // jhipster-needle-entity-add-getters-setters - JHipster will add getters and setters here
 

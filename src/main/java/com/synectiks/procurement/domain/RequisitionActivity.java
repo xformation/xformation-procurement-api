@@ -1,6 +1,5 @@
 package com.synectiks.procurement.domain;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.swagger.annotations.ApiModelProperty;
 
 import javax.persistence.*;
@@ -65,9 +64,8 @@ public class RequisitionActivity implements Serializable {
     @Column(name = "due_date")
     private LocalDate dueDate;
 
-    @ManyToOne
-    @JsonIgnoreProperties(value = "requisitionActivityLists", allowSetters = true)
-    private Requisition requisition;
+    @Column(name = "requisition_id")
+    private Long requisitionId;
 
     // jhipster-needle-entity-add-field - JHipster will add fields here
     public Long getId() {
@@ -234,17 +232,17 @@ public class RequisitionActivity implements Serializable {
         this.dueDate = dueDate;
     }
 
-    public Requisition getRequisition() {
-        return requisition;
+    public Long getRequisitionId() {
+        return requisitionId;
     }
 
-    public RequisitionActivity requisition(Requisition requisition) {
-        this.requisition = requisition;
+    public RequisitionActivity requisitionId(Long requisitionId) {
+        this.requisitionId = requisitionId;
         return this;
     }
 
-    public void setRequisition(Requisition requisition) {
-        this.requisition = requisition;
+    public void setRequisitionId(Long requisitionId) {
+        this.requisitionId = requisitionId;
     }
     // jhipster-needle-entity-add-getters-setters - JHipster will add getters and setters here
 
@@ -281,6 +279,7 @@ public class RequisitionActivity implements Serializable {
             ", totalPrice=" + getTotalPrice() +
             ", notes='" + getNotes() + "'" +
             ", dueDate='" + getDueDate() + "'" +
+            ", requisitionId=" + getRequisitionId() +
             "}";
     }
 }

@@ -5,10 +5,13 @@ import io.swagger.annotations.ApiModelProperty;
 import javax.persistence.*;
 import javax.validation.constraints.*;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.io.Serializable;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -76,11 +79,21 @@ public class Requisition implements Serializable {
 
     @OneToMany(mappedBy = "requisition")
     private Set<RequisitionLineItem> requisitionLineItemLists = new HashSet<>();
+    
 
-    @OneToMany(mappedBy = "requisition")
-    private Set<RequisitionActivity> requisitionActivityLists = new HashSet<>();
+	@Transient
+    @JsonProperty
+    private List<RequisitionActivity>  activityList;
 
-    // jhipster-needle-entity-add-field - JHipster will add fields here
+    public List<RequisitionActivity> getActivityList() {
+		return activityList;
+	}
+
+	public void setActivityList(List<RequisitionActivity> activityList) {
+		this.activityList = activityList;
+	}
+
+	// jhipster-needle-entity-add-field - JHipster will add fields here
     public Long getId() {
         return id;
     }
@@ -294,31 +307,6 @@ public class Requisition implements Serializable {
 
     public void setRequisitionLineItemLists(Set<RequisitionLineItem> requisitionLineItems) {
         this.requisitionLineItemLists = requisitionLineItems;
-    }
-
-    public Set<RequisitionActivity> getRequisitionActivityLists() {
-        return requisitionActivityLists;
-    }
-
-    public Requisition requisitionActivityLists(Set<RequisitionActivity> requisitionActivities) {
-        this.requisitionActivityLists = requisitionActivities;
-        return this;
-    }
-
-    public Requisition addRequisitionActivityList(RequisitionActivity requisitionActivity) {
-        this.requisitionActivityLists.add(requisitionActivity);
-        requisitionActivity.setRequisition(this);
-        return this;
-    }
-
-    public Requisition removeRequisitionActivityList(RequisitionActivity requisitionActivity) {
-        this.requisitionActivityLists.remove(requisitionActivity);
-        requisitionActivity.setRequisition(null);
-        return this;
-    }
-
-    public void setRequisitionActivityLists(Set<RequisitionActivity> requisitionActivities) {
-        this.requisitionActivityLists = requisitionActivities;
     }
     // jhipster-needle-entity-add-getters-setters - JHipster will add getters and setters here
 

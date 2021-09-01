@@ -16,7 +16,6 @@ import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.synectiks.procurement.domain.Department;
-import com.synectiks.procurement.domain.Requisition;
 import com.synectiks.procurement.repository.DepartmentRepository;
 
 @Service

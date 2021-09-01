@@ -22,12 +22,14 @@ import org.springframework.web.bind.annotation.RestController;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.synectiks.procurement.business.service.DepartmentService;
 import com.synectiks.procurement.domain.Department;
-import com.synectiks.procurement.domain.Quotation;
-import com.synectiks.procurement.domain.Requisition;
 import com.synectiks.procurement.domain.Status;
+
+import io.swagger.annotations.Api;
 
 @RestController
 @RequestMapping("/api")
+
+@Api(value = "/api", tags = "Department Management")
 public class DepartmentController {
 	private static final Logger logger = LoggerFactory.getLogger(DepartmentController.class);
 

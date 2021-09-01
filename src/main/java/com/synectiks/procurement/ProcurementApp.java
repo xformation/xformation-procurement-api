@@ -22,7 +22,6 @@ import io.github.jhipster.config.DefaultProfileUtil;
 import io.github.jhipster.config.JHipsterConstants;
 
 @SpringBootApplication
-
 @EnableConfigurationProperties({LiquibaseProperties.class, ApplicationProperties.class})
 public class ProcurementApp {
 	

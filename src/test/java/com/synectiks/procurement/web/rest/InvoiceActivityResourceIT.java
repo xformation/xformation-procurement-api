@@ -72,6 +72,9 @@ public class InvoiceActivityResourceIT {
     private static final String DEFAULT_NOTES = "AAAAAAAAAA";
     private static final String UPDATED_NOTES = "BBBBBBBBBB";
 
+    private static final Long DEFAULT_INVOICE_ID = 1L;
+    private static final Long UPDATED_INVOICE_ID = 2L;
+
     @Autowired
     private InvoiceActivityRepository invoiceActivityRepository;
 
@@ -103,7 +106,8 @@ public class InvoiceActivityResourceIT {
             .updatedOn(DEFAULT_UPDATED_ON)
             .updatedBy(DEFAULT_UPDATED_BY)
             .dueDate(DEFAULT_DUE_DATE)
-            .notes(DEFAULT_NOTES);
+            .notes(DEFAULT_NOTES)
+            .invoiceId(DEFAULT_INVOICE_ID);
         return invoiceActivity;
     }
     /**
@@ -126,7 +130,8 @@ public class InvoiceActivityResourceIT {
             .updatedOn(UPDATED_UPDATED_ON)
             .updatedBy(UPDATED_UPDATED_BY)
             .dueDate(UPDATED_DUE_DATE)
-            .notes(UPDATED_NOTES);
+            .notes(UPDATED_NOTES)
+            .invoiceId(UPDATED_INVOICE_ID);
         return invoiceActivity;
     }
 
@@ -162,6 +167,7 @@ public class InvoiceActivityResourceIT {
         assertThat(testInvoiceActivity.getUpdatedBy()).isEqualTo(DEFAULT_UPDATED_BY);
         assertThat(testInvoiceActivity.getDueDate()).isEqualTo(DEFAULT_DUE_DATE);
         assertThat(testInvoiceActivity.getNotes()).isEqualTo(DEFAULT_NOTES);
+        assertThat(testInvoiceActivity.getInvoiceId()).isEqualTo(DEFAULT_INVOICE_ID);
     }
 
     @Test
@@ -207,7 +213,8 @@ public class InvoiceActivityResourceIT {
             .andExpect(jsonPath("$.[*].updatedOn").value(hasItem(DEFAULT_UPDATED_ON.toString())))
             .andExpect(jsonPath("$.[*].updatedBy").value(hasItem(DEFAULT_UPDATED_BY)))
             .andExpect(jsonPath("$.[*].dueDate").value(hasItem(DEFAULT_DUE_DATE.toString())))
-            .andExpect(jsonPath("$.[*].notes").value(hasItem(DEFAULT_NOTES)));
+            .andExpect(jsonPath("$.[*].notes").value(hasItem(DEFAULT_NOTES)))
+            .andExpect(jsonPath("$.[*].invoiceId").value(hasItem(DEFAULT_INVOICE_ID.intValue())));
     }
     
     @Test
@@ -233,7 +240,8 @@ public class InvoiceActivityResourceIT {
             .andExpect(jsonPath("$.updatedOn").value(DEFAULT_UPDATED_ON.toString()))
             .andExpect(jsonPath("$.updatedBy").value(DEFAULT_UPDATED_BY))
             .andExpect(jsonPath("$.dueDate").value(DEFAULT_DUE_DATE.toString()))
-            .andExpect(jsonPath("$.notes").value(DEFAULT_NOTES));
+            .andExpect(jsonPath("$.notes").value(DEFAULT_NOTES))
+            .andExpect(jsonPath("$.invoiceId").value(DEFAULT_INVOICE_ID.intValue()));
     }
     @Test
     @Transactional
@@ -268,7 +276,8 @@ public class InvoiceActivityResourceIT {
             .updatedOn(UPDATED_UPDATED_ON)
             .updatedBy(UPDATED_UPDATED_BY)
             .dueDate(UPDATED_DUE_DATE)
-            .notes(UPDATED_NOTES);
+            .notes(UPDATED_NOTES)
+            .invoiceId(UPDATED_INVOICE_ID);
 
         restInvoiceActivityMockMvc.perform(put("/api/invoice-activities")
             .contentType(MediaType.APPLICATION_JSON)
@@ -292,6 +301,7 @@ public class InvoiceActivityResourceIT {
         assertThat(testInvoiceActivity.getUpdatedBy()).isEqualTo(UPDATED_UPDATED_BY);
         assertThat(testInvoiceActivity.getDueDate()).isEqualTo(UPDATED_DUE_DATE);
         assertThat(testInvoiceActivity.getNotes()).isEqualTo(UPDATED_NOTES);
+        assertThat(testInvoiceActivity.getInvoiceId()).isEqualTo(UPDATED_INVOICE_ID);
     }
 
     @Test

@@ -1,6 +1,5 @@
 package com.synectiks.procurement.domain;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import javax.persistence.*;
 import javax.validation.constraints.*;
@@ -63,9 +62,8 @@ public class InvoiceActivity implements Serializable {
     @Column(name = "notes", length = 5000)
     private String notes;
 
-    @ManyToOne
-    @JsonIgnoreProperties(value = "invoiceActivityLists", allowSetters = true)
-    private Invoice invoice;
+    @Column(name = "invoice_id")
+    private Long invoiceId;
 
     // jhipster-needle-entity-add-field - JHipster will add fields here
     public Long getId() {
@@ -245,17 +243,17 @@ public class InvoiceActivity implements Serializable {
         this.notes = notes;
     }
 
-    public Invoice getInvoice() {
-        return invoice;
+    public Long getInvoiceId() {
+        return invoiceId;
     }
 
-    public InvoiceActivity invoice(Invoice invoice) {
-        this.invoice = invoice;
+    public InvoiceActivity invoiceId(Long invoiceId) {
+        this.invoiceId = invoiceId;
         return this;
     }
 
-    public void setInvoice(Invoice invoice) {
-        this.invoice = invoice;
+    public void setInvoiceId(Long invoiceId) {
+        this.invoiceId = invoiceId;
     }
     // jhipster-needle-entity-add-getters-setters - JHipster will add getters and setters here
 
@@ -293,6 +291,7 @@ public class InvoiceActivity implements Serializable {
             ", updatedBy='" + getUpdatedBy() + "'" +
             ", dueDate='" + getDueDate() + "'" +
             ", notes='" + getNotes() + "'" +
+            ", invoiceId=" + getInvoiceId() +
             "}";
     }
 }

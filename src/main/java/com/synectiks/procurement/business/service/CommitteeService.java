@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import javax.transaction.Transactional;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
@@ -44,7 +46,8 @@ public class CommitteeService {
 		return null;
 	}
 
-	public Committee addCommittee(ObjectNode obj) throws JSONException {
+	@Transactional
+	public Committee addCommittee(ObjectNode obj) throws Exception {
 		Committee committee = new Committee();
 
 		if (obj.get("name") != null) {
@@ -57,19 +60,29 @@ public class CommitteeService {
 		if (obj.get("notes") != null) {
 			committee.setNotes(obj.get("notes").asText());
 		}
-		committee.setStatus(Constants.Status);
-		committee.setCreatedBy(Constants.SYSTEM_ACCOUNT);
-		committee.setUpdatedBy(Constants.SYSTEM_ACCOUNT);
+
+		if (obj.get("status") != null) {
+			committee.setStatus(obj.get("status").asText());
+		}
+
+		if (obj.get("user") != null) {
+			committee.setCreatedBy(obj.get("user").asText());
+			committee.setUpdatedBy(obj.get("user").asText());
+		} else {
+			committee.setCreatedBy(Constants.SYSTEM_ACCOUNT);
+			committee.setUpdatedBy(Constants.SYSTEM_ACCOUNT);
+		}
+
 		Instant now = Instant.now();
 		committee.setCreatedOn(now);
 		committee.setUpdatedOn(now);
 		committee = committeeRepository.save(committee);
 		logger.info("Committee added successfully");
 
-		if (committee.getId() != null) {
+		if (committee != null) {
 			CommitteeActivity committeeActivity = new CommitteeActivity();
 			BeanUtils.copyProperties(committee, committeeActivity);
-			committeeActivity.setCommittee(committee);
+			committeeActivity.setCommitteeId(committee.getId());
 			committeeActivity = committeeActivityRepository.save(committeeActivity);
 			logger.info("Committee activity added successfully");
 		}
@@ -78,6 +91,7 @@ public class CommitteeService {
 
 	}
 
+	@Transactional
 	public Committee updateCommittee(ObjectNode obj) throws JSONException, URISyntaxException {
 		Optional<Committee> ur = committeeRepository.findById(Long.parseLong(obj.get("id").asText()));
 		if (!ur.isPresent()) {
@@ -108,10 +122,10 @@ public class CommitteeService {
 		committee.setUpdatedOn(now);
 		committee = committeeRepository.save(committee);
 		logger.info("Updating committee completed : " + committee);
-		if (committee.getId() != null) {
+		if (committee != null) {
 			CommitteeActivity committeeActivity = new CommitteeActivity();
 			BeanUtils.copyProperties(committee, committeeActivity);
-			committeeActivity.setCommittee(committee);
+			committeeActivity.setCommitteeId(committee.getId());
 			committeeActivity = committeeActivityRepository.save(committeeActivity);
 			logger.info("Committee activity update successfully");
 		}
@@ -149,17 +163,19 @@ public class CommitteeService {
 		} else {
 			list = this.committeeRepository.findAll(Sort.by(Direction.DESC, "id"));
 		}
+
+		for (Committee cmt : list) {
+			CommitteeActivity ca = new CommitteeActivity();
+			ca.setCommitteeId(cmt.getId());
+			List<CommitteeActivity> caList = committeeActivityRepository.findAll(Example.of(ca));
+			cmt.setActivityList(caList);
+		}
+
 		logger.info("Committee search completed. Total records: " + list.size());
 		return list;
 	}
 
 	public void deleteCommittee(Long id) {
-		Optional<Committee> oc = committeeRepository.findById(id);
-		if (oc.isPresent()) {
-			CommitteeActivity committeeActivity = new CommitteeActivity();
-			committeeActivity.setCommittee(oc.get());
-			committeeActivityRepository.deleteAll(committeeActivityRepository.findAll(Example.of(committeeActivity)));
-			committeeRepository.deleteById(id);
-		}
+		committeeRepository.deleteById(id);
 	}
 }

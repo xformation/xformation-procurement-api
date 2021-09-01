@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import javax.transaction.Transactional;
+
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,6 +60,7 @@ public class QuotationService {
 		return null;
 	}
 
+	@Transactional
 	public Quotation addQuotation(ObjectNode obj) {
 		Quotation quotation = new Quotation();
 		if (obj.get("documentId") != null) {
@@ -82,6 +85,18 @@ public class QuotationService {
 			logger.error("Vendor not provided. Quotation cannot be added");
 			return null;
 		}
+		if (obj.get("purchaseOrderId") != null) {
+			PurchaseOrder purchaseOrder = purchaseOrderService
+					.getPurchaseOrder(Long.parseLong(obj.get("purchaseOrderId").asText()));
+			if (purchaseOrder == null) {
+				logger.error("purchaseOrder not found. Quotation cannot be added");
+				return null;
+			}
+			quotation.setPurchaseOrder(purchaseOrder);
+		} else {
+			logger.error("Vendor not provided. Quotation cannot be added");
+			return null;
+		}
 
 		if (obj.get("quotationNo") != null) {
 			quotation.setQuotationNo(obj.get("quotationNo").asText());
@@ -90,7 +105,9 @@ public class QuotationService {
 		if (obj.get("notes") != null) {
 			quotation.setNotes(obj.get("notes").asText());
 		}
-
+		if (obj.get("status") != null) {
+			quotation.setStatus(obj.get("status").asText());
+		}
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern(Constants.DEFAULT_DATE_FORMAT);
 		if (obj.get("dueDate") != null) {
 			LocalDate localDate = LocalDate.parse(obj.get("dueDate").asText(), formatter);
@@ -103,7 +120,6 @@ public class QuotationService {
 			LocalDate localDate = datew.plusDays(Constants.DEFAULT_DUE_DAYS);
 			quotation.setDueDate(localDate);
 		}
-		quotation.setStatus(Constants.Status);
 		if (obj.get("user") != null) {
 			quotation.setCreatedBy(obj.get("user").asText());
 			quotation.setUpdatedBy(obj.get("user").asText());
@@ -119,16 +135,17 @@ public class QuotationService {
 		quotation = quotationRepository.save(quotation);
 
 		logger.info("New quotation added successfully");
-		if (quotation.getId() != null) {
+		if (quotation != null) {
 			QuotationActivity quotationActivity = new QuotationActivity();
 			BeanUtils.copyProperties(quotation, quotationActivity);
-			quotationActivity.setQuotation(quotation);
+			quotationActivity.setQuotationId(quotation.getId());
 			quotationActivity = quotationActivityRepository.save(quotationActivity);
 			logger.info("Quotation activity added");
 		}
 		return quotation;
 	}
 
+	@Transactional
 	public Quotation updateQuotation(ObjectNode obj) {
 		logger.info("Updating quotation");
 		Optional<Quotation> ur = quotationRepository.findById(Long.parseLong(obj.get("id").asText()));
@@ -139,6 +156,9 @@ public class QuotationService {
 
 		Quotation quotation = ur.get();
 
+		if (obj.get("quotationNo") != null) {
+			quotation.setQuotationNo(obj.get("quotationNo").asText());
+		}
 		if (obj.get("notes") != null) {
 			quotation.setNotes(obj.get("notes").asText());
 		}
@@ -147,9 +167,16 @@ public class QuotationService {
 			quotation.setStatus(obj.get("status").asText());
 		}
 
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern(Constants.DEFAULT_DATE_FORMAT);
 		if (obj.get("dueDate") != null) {
-			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("d/MM/yyyy");
 			LocalDate localDate = LocalDate.parse(obj.get("dueDate").asText(), formatter);
+			quotation.setDueDate(localDate);
+		} else {
+			long millis = System.currentTimeMillis();
+			java.sql.Date date = new java.sql.Date(millis);
+
+			LocalDate datew = LocalDate.parse(date.toString());
+			LocalDate localDate = datew.plusDays(Constants.DEFAULT_DUE_DAYS);
 			quotation.setDueDate(localDate);
 		}
 
@@ -163,7 +190,13 @@ public class QuotationService {
 		quotation.setUpdatedOn(now);
 		quotation = quotationRepository.save(quotation);
 		logger.info("Quotation updated");
-
+		if (quotation != null) {
+			QuotationActivity quotationActivity = new QuotationActivity();
+			BeanUtils.copyProperties(quotation, quotationActivity);
+			quotationActivity.setQuotationId(quotation.getId());
+			quotationActivity = quotationActivityRepository.save(quotationActivity);
+			logger.info("Quotation activity added");
+		}
 		return quotation;
 	}
 
@@ -225,6 +258,12 @@ public class QuotationService {
 			list = this.quotationRepository.findAll(Example.of(quotation), Sort.by(Direction.DESC, "id"));
 		} else {
 			list = this.quotationRepository.findAll(Sort.by(Direction.DESC, "id"));
+		}
+		for (Quotation qou : list) {
+			QuotationActivity ca = new QuotationActivity();
+			ca.setQuotationId(qou.getId());
+			List<QuotationActivity> caList = quotationActivityRepository.findAll(Example.of(ca));
+			qou.setActivityList(caList);
 		}
 
 		logger.info("Quotation search completed. Total records: " + list.size());

@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import javax.transaction.Transactional;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
@@ -22,6 +24,7 @@ import com.synectiks.procurement.config.Constants;
 import com.synectiks.procurement.domain.Requisition;
 import com.synectiks.procurement.domain.RequisitionLineItem;
 import com.synectiks.procurement.domain.RequisitionLineItemActivity;
+import com.synectiks.procurement.repository.RequisitionLineItemActivityRepository;
 import com.synectiks.procurement.repository.RequisitionLineItemRepository;
 import com.synectiks.procurement.repository.RequisitionRepository;
 
@@ -37,6 +40,8 @@ public class RequisitionLineItemService {
 
 	@Autowired
 	private RequisitionRepository requisitionRepository;
+	@Autowired
+	private RequisitionLineItemActivityRepository requisitionLineItemActivityRepository;
 
 	public RequisitionLineItem addRequisitionLineItem(RequisitionLineItem obj) {
 		logger.info("Add requisition line item");
@@ -46,7 +51,7 @@ public class RequisitionLineItemService {
 			logger.info("Saving requisition line item acitivity");
 			RequisitionLineItemActivity requisitionLineItemActivity = new RequisitionLineItemActivity();
 			BeanUtils.copyProperties(obj, requisitionLineItemActivity);
-			requisitionLineItemActivity.setRequisitionLineItem(obj);
+			requisitionLineItemActivity.setRequisitionLineItemId(obj.getId());
 			requisitionLineItemActivity = requisitionLineItemActivityService
 					.addRequisitionLineItemActivity(requisitionLineItemActivity);
 			logger.info("Requisition line item acitivity saved successfully");
@@ -55,6 +60,7 @@ public class RequisitionLineItemService {
 		return obj;
 	}
 
+	@Transactional
 	public RequisitionLineItem addRequisitionLineItem(ObjectNode obj) throws JSONException {
 		RequisitionLineItem requisitionLineItem = new RequisitionLineItem();
 
@@ -92,7 +98,9 @@ public class RequisitionLineItemService {
 		if (obj.get("notes") != null) {
 			requisitionLineItem.setNotes(obj.get("notes").asText());
 		}
-
+		if (obj.get("status") != null) {
+			requisitionLineItem.setStatus(obj.get("status").asText());
+		}
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern(Constants.DEFAULT_DATE_FORMAT);
 		if (obj.get("dueDate") != null) {
 			LocalDate localDate = LocalDate.parse(obj.get("dueDate").asText(), formatter);
@@ -127,7 +135,7 @@ public class RequisitionLineItemService {
 			logger.info("Adding requisition line item acitivity");
 			RequisitionLineItemActivity requisitionLineItemActivity = new RequisitionLineItemActivity();
 			BeanUtils.copyProperties(requisitionLineItem, requisitionLineItemActivity);
-			requisitionLineItemActivity.setRequisitionLineItem(requisitionLineItem);
+			requisitionLineItemActivity.setRequisitionLineItemId(requisitionLineItem.getId());
 			requisitionLineItemActivity = requisitionLineItemActivityService
 					.addRequisitionLineItemActivity(requisitionLineItemActivity);
 			logger.info("Requisition line item acitivity added successfully");
@@ -136,6 +144,7 @@ public class RequisitionLineItemService {
 		return requisitionLineItem;
 	}
 
+	@Transactional
 	public RequisitionLineItem updateRequisitionLineItem(ObjectNode obj) throws JSONException {
 		logger.info("Update Requisition line item");
 
@@ -201,7 +210,7 @@ public class RequisitionLineItemService {
 			logger.info("Adding requisition line item acitivity");
 			RequisitionLineItemActivity requisitionLineItemActivity = new RequisitionLineItemActivity();
 			BeanUtils.copyProperties(requisitionLineItem, requisitionLineItemActivity);
-			requisitionLineItemActivity.setRequisitionLineItem(requisitionLineItem);
+			requisitionLineItemActivity.setRequisitionLineItemId(requisitionLineItem.getId());
 			requisitionLineItemActivity = requisitionLineItemActivityService
 					.addRequisitionLineItemActivity(requisitionLineItemActivity);
 			logger.info("Requisition line item acitivity added successfully");
@@ -250,6 +259,13 @@ public class RequisitionLineItemService {
 		} else {
 			list = this.requisitionLineItemRepository.findAll(Sort.by(Direction.DESC, "id"));
 		}
+		for (RequisitionLineItem qou : list) {
+			RequisitionLineItemActivity ca = new RequisitionLineItemActivity();
+			ca.setRequisitionLineItemId(qou.getId());
+			List<RequisitionLineItemActivity> caList = requisitionLineItemActivityRepository.findAll(Example.of(ca));
+			qou.setActivityList(caList);
+		}
+
 		logger.info("Requisition line item order search completed. Total records: " + list.size());
 		return list;
 	}

@@ -1,6 +1,7 @@
 package com.synectiks.procurement.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import javax.persistence.*;
 import javax.validation.constraints.*;
@@ -8,6 +9,7 @@ import javax.validation.constraints.*;
 import java.io.Serializable;
 import java.time.Instant;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -15,7 +17,6 @@ import java.util.Set;
  */
 @Entity
 @Table(name = "contact")
-
 public class Contact implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -81,14 +82,23 @@ public class Contact implements Serializable {
     @OneToMany(mappedBy = "contact")
     private Set<Document> documentLists = new HashSet<>();
 
-    @OneToMany(mappedBy = "contact")
-    private Set<ContactActivity> contactActivityLists = new HashSet<>();
-
     @ManyToMany(mappedBy = "contacts")
     @JsonIgnore
     private Set<Committee> committees = new HashSet<>();
+    
+	@Transient
+    @JsonProperty
+    private List<ContactActivity>  activityList;
 
-    // jhipster-needle-entity-add-field - JHipster will add fields here
+    public List<ContactActivity> getActivityList() {
+		return activityList;
+	}
+
+	public void setActivityList(List<ContactActivity> activityList) {
+		this.activityList = activityList;
+	}
+
+	// jhipster-needle-entity-add-field - JHipster will add fields here
     public Long getId() {
         return id;
     }
@@ -341,31 +351,6 @@ public class Contact implements Serializable {
 
     public void setDocumentLists(Set<Document> documents) {
         this.documentLists = documents;
-    }
-
-    public Set<ContactActivity> getContactActivityLists() {
-        return contactActivityLists;
-    }
-
-    public Contact contactActivityLists(Set<ContactActivity> contactActivities) {
-        this.contactActivityLists = contactActivities;
-        return this;
-    }
-
-    public Contact addContactActivityList(ContactActivity contactActivity) {
-        this.contactActivityLists.add(contactActivity);
-        contactActivity.setContact(this);
-        return this;
-    }
-
-    public Contact removeContactActivityList(ContactActivity contactActivity) {
-        this.contactActivityLists.remove(contactActivity);
-        contactActivity.setContact(null);
-        return this;
-    }
-
-    public void setContactActivityLists(Set<ContactActivity> contactActivities) {
-        this.contactActivityLists = contactActivities;
     }
 
     public Set<Committee> getCommittees() {

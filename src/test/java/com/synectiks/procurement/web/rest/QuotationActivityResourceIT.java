@@ -57,6 +57,9 @@ public class QuotationActivityResourceIT {
     private static final String DEFAULT_NOTES = "AAAAAAAAAA";
     private static final String UPDATED_NOTES = "BBBBBBBBBB";
 
+    private static final Long DEFAULT_QUOTATION_ID = 1L;
+    private static final Long UPDATED_QUOTATION_ID = 2L;
+
     @Autowired
     private QuotationActivityRepository quotationActivityRepository;
 
@@ -83,7 +86,8 @@ public class QuotationActivityResourceIT {
             .updatedOn(DEFAULT_UPDATED_ON)
             .updatedBy(DEFAULT_UPDATED_BY)
             .dueDate(DEFAULT_DUE_DATE)
-            .notes(DEFAULT_NOTES);
+            .notes(DEFAULT_NOTES)
+            .quotationId(DEFAULT_QUOTATION_ID);
         return quotationActivity;
     }
     /**
@@ -101,7 +105,8 @@ public class QuotationActivityResourceIT {
             .updatedOn(UPDATED_UPDATED_ON)
             .updatedBy(UPDATED_UPDATED_BY)
             .dueDate(UPDATED_DUE_DATE)
-            .notes(UPDATED_NOTES);
+            .notes(UPDATED_NOTES)
+            .quotationId(UPDATED_QUOTATION_ID);
         return quotationActivity;
     }
 
@@ -132,6 +137,7 @@ public class QuotationActivityResourceIT {
         assertThat(testQuotationActivity.getUpdatedBy()).isEqualTo(DEFAULT_UPDATED_BY);
         assertThat(testQuotationActivity.getDueDate()).isEqualTo(DEFAULT_DUE_DATE);
         assertThat(testQuotationActivity.getNotes()).isEqualTo(DEFAULT_NOTES);
+        assertThat(testQuotationActivity.getQuotationId()).isEqualTo(DEFAULT_QUOTATION_ID);
     }
 
     @Test
@@ -172,7 +178,8 @@ public class QuotationActivityResourceIT {
             .andExpect(jsonPath("$.[*].updatedOn").value(hasItem(DEFAULT_UPDATED_ON.toString())))
             .andExpect(jsonPath("$.[*].updatedBy").value(hasItem(DEFAULT_UPDATED_BY)))
             .andExpect(jsonPath("$.[*].dueDate").value(hasItem(DEFAULT_DUE_DATE.toString())))
-            .andExpect(jsonPath("$.[*].notes").value(hasItem(DEFAULT_NOTES)));
+            .andExpect(jsonPath("$.[*].notes").value(hasItem(DEFAULT_NOTES)))
+            .andExpect(jsonPath("$.[*].quotationId").value(hasItem(DEFAULT_QUOTATION_ID.intValue())));
     }
     
     @Test
@@ -193,7 +200,8 @@ public class QuotationActivityResourceIT {
             .andExpect(jsonPath("$.updatedOn").value(DEFAULT_UPDATED_ON.toString()))
             .andExpect(jsonPath("$.updatedBy").value(DEFAULT_UPDATED_BY))
             .andExpect(jsonPath("$.dueDate").value(DEFAULT_DUE_DATE.toString()))
-            .andExpect(jsonPath("$.notes").value(DEFAULT_NOTES));
+            .andExpect(jsonPath("$.notes").value(DEFAULT_NOTES))
+            .andExpect(jsonPath("$.quotationId").value(DEFAULT_QUOTATION_ID.intValue()));
     }
     @Test
     @Transactional
@@ -223,7 +231,8 @@ public class QuotationActivityResourceIT {
             .updatedOn(UPDATED_UPDATED_ON)
             .updatedBy(UPDATED_UPDATED_BY)
             .dueDate(UPDATED_DUE_DATE)
-            .notes(UPDATED_NOTES);
+            .notes(UPDATED_NOTES)
+            .quotationId(UPDATED_QUOTATION_ID);
 
         restQuotationActivityMockMvc.perform(put("/api/quotation-activities")
             .contentType(MediaType.APPLICATION_JSON)
@@ -242,6 +251,7 @@ public class QuotationActivityResourceIT {
         assertThat(testQuotationActivity.getUpdatedBy()).isEqualTo(UPDATED_UPDATED_BY);
         assertThat(testQuotationActivity.getDueDate()).isEqualTo(UPDATED_DUE_DATE);
         assertThat(testQuotationActivity.getNotes()).isEqualTo(UPDATED_NOTES);
+        assertThat(testQuotationActivity.getQuotationId()).isEqualTo(UPDATED_QUOTATION_ID);
     }
 
     @Test

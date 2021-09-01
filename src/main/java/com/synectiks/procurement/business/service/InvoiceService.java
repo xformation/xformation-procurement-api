@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import javax.transaction.Transactional;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
@@ -45,6 +47,7 @@ public class InvoiceService {
 	@Autowired
 	private DocumentRepository documentRepository;
 
+	@Transactional
 	public Invoice addInvoice(ObjectNode obj) throws JSONException {
 		Invoice invoice = new Invoice();
 
@@ -83,6 +86,9 @@ public class InvoiceService {
 		if (obj.get("notes") != null) {
 			invoice.setNotes(obj.get("notes").asText());
 		}
+		if (obj.get("status") != null) {
+			invoice.setStatus(obj.get("status").asText());
+		}
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern(Constants.DEFAULT_DATE_FORMAT);
 		if (obj.get("dueDate") != null) {
 			LocalDate localDate = LocalDate.parse(obj.get("dueDate").asText(), formatter);
@@ -95,9 +101,13 @@ public class InvoiceService {
 			LocalDate localDate = datew.plusDays(Constants.DEFAULT_DUE_DAYS);
 			invoice.setDueDate(localDate);
 		}
-		invoice.setStatus(Constants.Status);
-		invoice.setCreatedBy(Constants.SYSTEM_ACCOUNT);
-		invoice.setUpdatedBy(Constants.SYSTEM_ACCOUNT);
+		if (obj.get("user") != null) {
+			invoice.setCreatedBy(obj.get("user").asText());
+			invoice.setUpdatedBy(obj.get("user").asText());
+		} else {
+			invoice.setCreatedBy(Constants.SYSTEM_ACCOUNT);
+			invoice.setUpdatedBy(Constants.SYSTEM_ACCOUNT);
+		}
 		Instant now = Instant.now();
 		invoice.setCreatedOn(now);
 		invoice.setUpdatedOn(now);
@@ -107,13 +117,14 @@ public class InvoiceService {
 		if (invoice != null) {
 			InvoiceActivity invoiceActivity = new InvoiceActivity();
 			BeanUtils.copyProperties(invoice, invoiceActivity);
-			invoiceActivity.setInvoice(invoice);
+			invoiceActivity.setInvoiceId(invoice.getId());
 			invoiceActivity = invoiceActivityRepository.save(invoiceActivity);
 			logger.info("Invoice activity added successfully");
 		}
 		return invoice;
 	}
 
+	@Transactional
 	public Invoice updateinvoice(ObjectNode obj) throws JSONException, URISyntaxException {
 		Optional<Invoice> ur = invoiceRepository.findById(Long.parseLong(obj.get("id").asText()));
 		if (!ur.isPresent()) {
@@ -174,6 +185,14 @@ public class InvoiceService {
 		invoice.setUpdatedOn(now);
 		invoice = invoiceRepository.save(invoice);
 		logger.info("Updating invoice completed" + invoice.toString());
+
+		if (invoice != null) {
+			InvoiceActivity invoiceActivity = new InvoiceActivity();
+			BeanUtils.copyProperties(invoice, invoiceActivity);
+			invoiceActivity.setInvoiceId(invoice.getId());
+			invoiceActivity = invoiceActivityRepository.save(invoiceActivity);
+			logger.info("Invoice activity added successfully");
+		}
 		return invoice;
 
 	}
@@ -220,6 +239,12 @@ public class InvoiceService {
 			list = this.invoiceRepository.findAll(Example.of(invoice), Sort.by(Direction.DESC, "id"));
 		} else {
 			list = this.invoiceRepository.findAll(Sort.by(Direction.DESC, "id"));
+		}
+		for (Invoice inv : list) {
+			InvoiceActivity ca = new InvoiceActivity();
+			ca.setInvoiceId(inv.getId());
+			List<InvoiceActivity> caList = invoiceActivityRepository.findAll(Example.of(ca));
+			inv.setActivityList(caList);
 		}
 
 		logger.info("Invoice search completed. Total records: " + list.size());

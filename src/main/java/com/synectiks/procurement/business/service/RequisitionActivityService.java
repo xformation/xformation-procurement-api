@@ -16,24 +16,24 @@ import com.synectiks.procurement.repository.RequisitionActivityRepository;
 
 @Service
 public class RequisitionActivityService {
-	
+
 	private static final Logger logger = LoggerFactory.getLogger(RequisitionActivityService.class);
-	
+
 	@Autowired
 	private RequisitionActivityRepository requisitionActivityRepository;
-	
+
 	public RequisitionActivity addRequisitionActivity(RequisitionActivity requisitionActivity) {
 		logger.info("Adding requisition activity");
 		requisitionActivity = requisitionActivityRepository.save(requisitionActivity);
 		logger.info("Requisition activity added successfully");
 		return requisitionActivity;
 	}
-	
+
 	public List<RequisitionActivity> searchRequisitionActivity(Map<String, String> requestObj) {
 		logger.info("Request to search requisition activity on given filter criteria");
 		RequisitionActivity requisitionActivity = new RequisitionActivity();
 		boolean isFilter = false;
-		
+
 		if (requestObj.get("id") != null) {
 			requisitionActivity.setId(Long.parseLong(requestObj.get("id")));
 			isFilter = true;
@@ -43,19 +43,19 @@ public class RequisitionActivityService {
 			requisitionActivity.setRequisitionNo(requestObj.get("requisitionNo"));
 			isFilter = true;
 		}
-		
+
 		if (requestObj.get("status") != null) {
 			requisitionActivity.setStatus(requestObj.get("status"));
 			isFilter = true;
 		}
-		
+
 		if (requestObj.get("progressStage") != null) {
 			requisitionActivity.setProgressStage(requestObj.get("progressStage"));
 			isFilter = true;
 		}
-		
+
 		if (requestObj.get("financialYear") != null) {
-			//requisition.setFinancialYear(requestObj.get("progressStage"));
+			// requisition.setFinancialYear(requestObj.get("progressStage"));
 			isFilter = true;
 		}
 		if (requestObj.get("type") != null) {
@@ -70,18 +70,19 @@ public class RequisitionActivityService {
 			requisitionActivity.setNotes(requestObj.get("notes"));
 			isFilter = true;
 		}
-		
+
 		List<RequisitionActivity> list = null;
 		if (isFilter) {
-			list = this.requisitionActivityRepository.findAll(Example.of(requisitionActivity), Sort.by(Direction.DESC, "id"));
+			list = this.requisitionActivityRepository.findAll(Example.of(requisitionActivity),
+					Sort.by(Direction.DESC, "id"));
 		} else {
 			list = this.requisitionActivityRepository.findAll(Sort.by(Direction.DESC, "id"));
 		}
-		
-		logger.info("Requistion activity search completed. Total records: "+list.size());
+
+		logger.info("Requistion activity search completed. Total records: " + list.size());
 		return list;
 	}
-	
+
 	public void deletePost(Long id) {
 		requisitionActivityRepository.deleteById(id);
 		logger.info("Requistion activity deleted successfully");

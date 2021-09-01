@@ -72,6 +72,4 @@
         <dropDefaultValue tableName="contact_activity" columnName="created_on" columnDataType="datetime"/>
         <dropDefaultValue tableName="contact_activity" columnName="updated_on" columnDataType="datetime"/>
     </changeSet>
-
-    
 </databaseChangeLog>

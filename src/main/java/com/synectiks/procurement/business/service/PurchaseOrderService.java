@@ -66,6 +66,9 @@ public class PurchaseOrderService {
 		if (obj.get("notes") != null) {
 			purchaseOrder.setNotes(obj.get("notes").asText());
 		}
+		if (obj.get("status") != null) {
+			purchaseOrder.setStatus(obj.get("status").asText());
+		}
 
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern(Constants.DEFAULT_DATE_FORMAT);
 		if (obj.get("dueDate") != null) {
@@ -79,9 +82,13 @@ public class PurchaseOrderService {
 			LocalDate localDate = datew.plusDays(Constants.DEFAULT_DUE_DAYS);
 			purchaseOrder.setDueDate(localDate);
 		}
-		purchaseOrder.setStatus(Constants.Status);
-		purchaseOrder.setCreatedBy(Constants.SYSTEM_ACCOUNT);
-		purchaseOrder.setUpdatedBy(Constants.SYSTEM_ACCOUNT);
+		if (obj.get("user") != null) {
+			purchaseOrder.setCreatedBy(obj.get("user").asText());
+			purchaseOrder.setUpdatedBy(obj.get("user").asText());
+		} else {
+			purchaseOrder.setCreatedBy(Constants.SYSTEM_ACCOUNT);
+			purchaseOrder.setUpdatedBy(Constants.SYSTEM_ACCOUNT);
+		}
 		Instant now = Instant.now();
 		purchaseOrder.setCreatedOn(now);
 		purchaseOrder.setUpdatedOn(now);
@@ -114,7 +121,7 @@ public class PurchaseOrderService {
 		} else {
 			SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
 			Calendar c = Calendar.getInstance();
-			c.setTime(new Date()); 
+			c.setTime(new Date());
 			c.add(Calendar.DATE, 5);
 			String output = sdf.format(c.getTime());
 			System.out.println(output);

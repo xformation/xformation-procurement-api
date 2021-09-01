@@ -39,7 +39,7 @@ public class RequisitionLineItemController {
 		Status st = new Status();
 		try {
 			RequisitionLineItem requisitionLineItem = requisitionLineItemService.addRequisitionLineItem(obj);
-			if(requisitionLineItem == null) {
+			if (requisitionLineItem == null) {
 				logger.error("Add requisition line item failed");
 				st.setCode(HttpStatus.EXPECTATION_FAILED.value());
 				st.setType("ERROR");
@@ -65,10 +65,10 @@ public class RequisitionLineItemController {
 	public ResponseEntity<Object> updateRequisitionLineItem(@RequestBody ObjectNode obj)
 			throws JSONException, URISyntaxException {
 		logger.info("Request to update a requsition");
-		Status st = new Status(); 
+		Status st = new Status();
 		try {
 			RequisitionLineItem requisitionLineItem = requisitionLineItemService.updateRequisitionLineItem(obj);
-			if(requisitionLineItem == null) {
+			if (requisitionLineItem == null) {
 				logger.error("Update requisition line item failed");
 				st.setCode(HttpStatus.EXPECTATION_FAILED.value());
 				st.setType("ERROR");
@@ -80,7 +80,7 @@ public class RequisitionLineItemController {
 			st.setMessage("Update requisition line item successful");
 			st.setObject(requisitionLineItem);
 			return ResponseEntity.status(HttpStatus.OK).body(st);
-		}catch (Exception e) {
+		} catch (Exception e) {
 			logger.error("Update requisition line item failed. Exception: ", e);
 			st.setCode(HttpStatus.EXPECTATION_FAILED.value());
 			st.setType("ERROR");
@@ -88,14 +88,14 @@ public class RequisitionLineItemController {
 			return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(st);
 		}
 	}
-	
+
 	@GetMapping("/searchRequisitionLineItem")
 	public ResponseEntity<Status> searchRequisitionLineItem(@RequestParam Map<String, String> requestObj) {
 		logger.info("Request to get requisition line item on given filter criteria");
 		Status st = new Status();
 		try {
 			List<RequisitionLineItem> list = requisitionLineItemService.searchRequisitionLineItem(requestObj);
-			if(list == null) {
+			if (list == null) {
 				logger.error("Search requisition line item failed");
 				st.setCode(HttpStatus.EXPECTATION_FAILED.value());
 				st.setType("ERROR");
@@ -107,7 +107,7 @@ public class RequisitionLineItemController {
 			st.setMessage("Search requisition line item successful");
 			st.setObject(list);
 			return ResponseEntity.status(HttpStatus.OK).body(st);
-		}catch (Exception e) {
+		} catch (Exception e) {
 			logger.error("Searching requisition line item failed. Exception: ", e);
 			st.setCode(HttpStatus.EXPECTATION_FAILED.value());
 			st.setType("ERROR");
@@ -115,7 +115,7 @@ public class RequisitionLineItemController {
 			return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(st);
 		}
 	}
-	
+
 	@DeleteMapping("/deleteRequisitionLineItem/{id}")
 	public ResponseEntity<Status> deleteRequisitionLineItem(@PathVariable Long id) {
 		Status st = new Status();
@@ -124,14 +124,15 @@ public class RequisitionLineItemController {
 			st.setCode(HttpStatus.OK.value());
 			st.setType("SUCCESS");
 			st.setMessage("Delete requisitionLineItem successful");
-			return ResponseEntity.status(HttpStatus.OK).body(st); 
+			return ResponseEntity.status(HttpStatus.OK).body(st);
 		} catch (Throwable e) {
 			st.setCode(HttpStatus.EXPECTATION_FAILED.value());
 			st.setType("ERROR");
 			st.setMessage("Delete requisitionLineItem failed");
-			return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(st); 
+			return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(st);
 		}
 	}
+
 	@GetMapping("/getRequisitionLineItem/{id}")
 	public ResponseEntity<Status> getRequisitionLineItem(@PathVariable Long id) {
 		logger.info("Getting requisitionLineItem by id: " + id);
@@ -158,9 +159,5 @@ public class RequisitionLineItemController {
 			return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(st);
 		}
 	}
-	
+
 }
-	
-
-	
-
