@@ -64,6 +64,9 @@ public class VendorService {
 		if (obj.get("zipCode") != null) {
 			vendor.setZipCode(obj.get("zipCode").asText());
 		}
+		if (obj.get("status") != null) {
+			vendor.setStatus(obj.get("status").asText());
+		}
 		if (obj.get("user") != null) {
 			vendor.setCreatedBy(obj.get("user").asText());
 			vendor.setUpdatedBy(obj.get("user").asText());
@@ -109,7 +112,9 @@ public class VendorService {
 		if (obj.get("zipCode") != null) {
 			vendor.setZipCode(obj.get("zipCode").asText());
 		}
-
+		if (obj.get("status") != null) {
+			vendor.setStatus(obj.get("status").asText());
+		}
 		if (obj.get("user") != null) {
 			vendor.setUpdatedBy(obj.get("user").asText());
 		} else {

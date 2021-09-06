@@ -119,7 +119,7 @@ public class CommitteeController {
 		}
 	}
 
-	@DeleteMapping("/committee/{id}")
+	@DeleteMapping("/deleteCommittee/{id}")
 	public ResponseEntity<Status> deleteCommittee(@PathVariable Long id) {
 		Status st = new Status();
 		try {

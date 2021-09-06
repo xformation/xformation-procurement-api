@@ -274,6 +274,16 @@ entity CommitteeActivity {
 	committeeId Long
 }
 
+entity VendorRequisitionBucket{
+	status String
+	stages String
+    createdOn Instant
+    createdBy String
+    updatedOn Instant
+    updatedBy String
+    notes String maxlength(5000)
+}
+
 relationship OneToOne {
 	Requisition{department} to Department,
     Requisition{currency} to Currency,
@@ -290,6 +300,8 @@ relationship OneToMany {
 	Requisition{requisitionLineItemList} to RequisitionLineItem,
     RequisitionLineItem{documentList} to Document,
     Contact{documentList} to Document,
+    Requisition {requisition} to VendorRequisitionBucket,
+    Vendor {vendor} to VendorRequisitionBucket,
 }
 
 relationship ManyToMany {

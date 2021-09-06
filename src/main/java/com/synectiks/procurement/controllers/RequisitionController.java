@@ -22,7 +22,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.synectiks.procurement.business.service.RequisitionService;
 import com.synectiks.procurement.domain.Requisition;
@@ -120,8 +119,8 @@ public class RequisitionController {
 
 	}
 
-	@DeleteMapping("/requisition/{id}")
-	public ResponseEntity<Status> deletePost(@PathVariable Long id) {
+	@DeleteMapping("/deleteRequisition/{id}")
+	public ResponseEntity<Status> deleteRequisition(@PathVariable Long id) {
 		Status st = new Status();
 		try {
 			requisitionService.deleteRequisition(id);
@@ -137,8 +136,8 @@ public class RequisitionController {
 		}
 	}
 
-	@GetMapping("/getAllRequisition")
-	private ResponseEntity<Status> getAllRequisition() {
+	@GetMapping("/getAllRequisitions")
+	private ResponseEntity<Status> getAllRequisitions() {
 		logger.info("Request to get all requsitions");
 		Status st = new Status();
 		try {
@@ -160,6 +159,73 @@ public class RequisitionController {
 			st.setCode(HttpStatus.EXPECTATION_FAILED.value());
 			st.setType("ERROR");
 			st.setMessage("Search all requisition failed");
+			return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(st);
+		}
+	}
+
+	@GetMapping("/getRequisition/{id}")
+	public ResponseEntity<Status> getRequisition(@PathVariable Long id) {
+		logger.info("Getting requisition by id: " + id);
+		Status st = new Status();
+		try {
+			Requisition requisition = requisitionService.getRequisition(id);
+			if (requisition == null) {
+				logger.warn("Requisition not found.");
+				st.setCode(HttpStatus.EXPECTATION_FAILED.value());
+				st.setType("ERROR");
+				st.setMessage("Requisition not found");
+				return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(st);
+			}
+			st.setCode(HttpStatus.OK.value());
+			st.setType("SUCCESS");
+			st.setMessage("Requisition found");
+			st.setObject(requisition);
+			return ResponseEntity.status(HttpStatus.OK).body(st);
+		} catch (Exception e) {
+			logger.error("Requisition not found. Exception: ", e);
+			st.setCode(HttpStatus.EXPECTATION_FAILED.value());
+			st.setType("ERROR");
+			st.setMessage("Requisition not found");
+			return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(st);
+		}
+	}
+
+	@PostMapping("/sendRequisitionToVendor")
+	public ResponseEntity<Status> sendRequisitionToVendor(@RequestBody List<ObjectNode> list) {
+		logger.info("Assigning requisitions to vendors ");
+		Status st = new Status();
+		try {
+			requisitionService.sendRequisitionToVendor(list);
+			st.setCode(HttpStatus.OK.value());
+			st.setType("SUCCESS");
+			st.setMessage("Requisition to vendor found");
+			return ResponseEntity.status(HttpStatus.OK).body(st);
+		} catch (Exception e) {
+			logger.error("Requisition not found. Exception: ", e);
+			st.setCode(HttpStatus.EXPECTATION_FAILED.value());
+			st.setType("ERROR");
+			st.setMessage("Requisition not found");
+			return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(st);
+		}
+	}
+
+	@PostMapping("/updateRequisitionToVendor")
+	public ResponseEntity<Status> updateRequisitionToVendor(@RequestBody List<ObjectNode> list) {
+		logger.info("Assigning requisitions to vendors ");
+		Status st = new Status();
+		try {
+			requisitionService.updateRequisitionToVendor(list);
+			st.setCode(HttpStatus.OK.value());
+			st.setType("SUCCESS");
+			st.setMessage("Requisition to vendor not found");
+			st.setObject("All the requisition to vendor  updated updated successfully");
+			logger.info("All the requisition to vendor  updated updated successfully");
+			return ResponseEntity.status(HttpStatus.OK).body(st);
+		} catch (Exception e) {
+			logger.error(" update of  failed");
+			st.setCode(HttpStatus.EXPECTATION_FAILED.value());
+			st.setType("ERROR");
+			st.setMessage("Requisition to vendor update  failed");
 			return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(st);
 		}
 	}

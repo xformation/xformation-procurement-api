@@ -1,5 +1,6 @@
 package com.synectiks.procurement.business.service;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -36,8 +37,11 @@ import com.synectiks.procurement.domain.Department;
 import com.synectiks.procurement.domain.Requisition;
 import com.synectiks.procurement.domain.RequisitionActivity;
 import com.synectiks.procurement.domain.RequisitionLineItem;
+import com.synectiks.procurement.domain.Vendor;
+import com.synectiks.procurement.domain.VendorRequisitionBucket;
 import com.synectiks.procurement.repository.RequisitionActivityRepository;
 import com.synectiks.procurement.repository.RequisitionRepository;
+import com.synectiks.procurement.repository.VendorRequisitionBucketRepository;
 
 @Service
 public class RequisitionService {
@@ -61,6 +65,12 @@ public class RequisitionService {
 	@Autowired
 	private RequisitionLineItemService requisitionLineItemService;
 
+	@Autowired
+	private VendorRequisitionBucketRepository vendorRequisitionBucketRepository;
+
+	@Autowired
+	private VendorService vendorService;
+
 	public Requisition getRequisition(Long id) {
 		logger.info("Getting requisition by id: " + id);
 		Optional<Requisition> ovn = requisitionRepository.findById(id);
@@ -82,7 +92,11 @@ public class RequisitionService {
 			filename = filename.toLowerCase().replaceAll(" ", "-");
 			String uniqueID = UUID.randomUUID().toString();
 			filename = uniqueID.concat(filename);
-			Path path = Paths.get(Constants.LOCAL_REQUISITION_FILE_STORAGE_DIRECTORY + "/" + filename);
+			File localStorage = new File(Constants.LOCAL_REQUISITION_FILE_STORAGE_DIRECTORY);
+			if(!localStorage.exists()) {
+				localStorage.mkdirs();
+			}
+			Path path = Paths.get(Constants.LOCAL_REQUISITION_FILE_STORAGE_DIRECTORY + File.pathSeparatorChar + filename);
 			Files.write(path, bytes);
 		}
 		ObjectMapper mapper = new ObjectMapper();
@@ -360,5 +374,86 @@ public class RequisitionService {
 		List<Requisition> list = requisitionRepository.findAll(Sort.by(Direction.ASC, "id"));
 		logger.info("All requisitions. Total records: " + list.size());
 		return list;
+	}
+
+	@Transactional
+	public void sendRequisitionToVendor(List<ObjectNode> list) {
+		for (ObjectNode obj : list) {
+			VendorRequisitionBucket bucket = new VendorRequisitionBucket();
+			logger.debug("Send new requisition to vendor: " + obj.toString());
+			if (obj.get("requisitionId") != null) {
+				Optional<Requisition> or = requisitionRepository.findById(obj.get("requisitionId").asLong());
+				if (or.isPresent()) {
+					bucket.setRequisition(or.get());
+				}
+			}
+			if (obj.get("vendorId") != null) {
+				Vendor vendor = vendorService.getVendor(obj.get("vendorId").asLong());
+
+				if (vendor != null) {
+					bucket.setVendor(vendor);
+				}
+			}
+			if (obj.get("stages") != null) {
+				bucket.setStages(obj.get("stages").asText());
+			}
+			if (obj.get("notes") != null) {
+				bucket.setNotes(obj.get("notes").asText());
+			}
+			if (obj.get("status") != null) {
+				bucket.setStatus(obj.get("status").asText());
+			}
+			if (obj.get("user") != null) {
+				bucket.setCreatedBy(obj.get("user").asText());
+				bucket.setUpdatedBy(obj.get("user").asText());
+			} else {
+				bucket.setCreatedBy(Constants.SYSTEM_ACCOUNT);
+				bucket.setUpdatedBy(Constants.SYSTEM_ACCOUNT);
+			}
+
+			Instant now = Instant.now();
+			bucket.setCreatedOn(now);
+			bucket.setUpdatedOn(now);
+			bucket = vendorRequisitionBucketRepository.save(bucket);
+			logger.info("Bucket added successfully");
+		}
+	}
+
+	@Transactional
+	public void updateRequisitionToVendor(List<ObjectNode> list) {
+//		VendorRequisitionBucket bucket = new VendorRequisitionBucket();
+		for (ObjectNode obj : list) {
+			logger.debug("Update requisition to vendor: " + obj.toString());
+			Optional<VendorRequisitionBucket> ur = vendorRequisitionBucketRepository
+					.findById(Long.parseLong(obj.get("id").asText()));
+			if (!ur.isPresent()) {
+				logger.error("Vendor requisition bucket not found");
+			}
+			VendorRequisitionBucket bucket = ur.get();
+			if (obj.get("stages") != null) {
+				bucket.setStages(obj.get("stages").asText());
+			}
+			if (obj.get("notes") != null) {
+				bucket.setNotes(obj.get("notes").asText());
+			}
+			if (obj.get("status") != null) {
+				bucket.setStatus(obj.get("status").asText());
+			}
+
+			if (obj.get("user") != null) {
+				bucket.setCreatedBy(obj.get("user").asText());
+				bucket.setUpdatedBy(obj.get("user").asText());
+			} else {
+				bucket.setCreatedBy(Constants.SYSTEM_ACCOUNT);
+				bucket.setUpdatedBy(Constants.SYSTEM_ACCOUNT);
+			}
+
+			Instant now = Instant.now();
+			bucket.setCreatedOn(now);
+			bucket.setUpdatedOn(now);
+			bucket = vendorRequisitionBucketRepository.save(bucket);
+			logger.info("Bucket update successfully");
+		}
+
 	}
 }
