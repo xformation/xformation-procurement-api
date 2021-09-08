@@ -1,5 +1,9 @@
 package com.synectiks.procurement.domain;
 
+import org.springframework.cloud.cloudfoundry.com.fasterxml.jackson.annotation.JsonAutoDetect;
+import org.springframework.cloud.cloudfoundry.com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
+
+@JsonAutoDetect(fieldVisibility = Visibility.ANY)
 public class Status {
 
 	private int code;

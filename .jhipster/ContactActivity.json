@@ -64,21 +64,15 @@
     {
       "fieldName": "notes",
       "fieldType": "String",
-      "fieldValidateRules": [
-        "maxlength"
-      ],
+      "fieldValidateRules": ["maxlength"],
       "fieldValidateRulesMaxlength": "5000"
-    }
-  ],
-  "relationships": [
+    },
     {
-      "relationshipType": "many-to-one",
-      "otherEntityName": "contact",
-      "otherEntityRelationshipName": "contactActivityList",
-      "relationshipName": "contact",
-      "otherEntityField": "id"
+      "fieldName": "contactId",
+      "fieldType": "Long"
     }
   ],
+  "relationships": [],
   "changelogDate": "20210722053855",
   "entityTableName": "contact_activity",
   "dto": "no",
@@ -90,5 +84,6 @@
   "embedded": false,
   "clientRootFolder": "procurement",
   "applications": "*",
-  "microserviceName": "procurement"
+  "microserviceName": "procurement",
+  "databaseType": "sql"
 }

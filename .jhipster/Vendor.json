@@ -50,7 +50,14 @@
       "fieldType": "String"
     }
   ],
-  "relationships": [],
+  "relationships": [
+    {
+      "relationshipType": "one-to-many",
+      "otherEntityName": "vendorRequisitionBucket",
+      "otherEntityRelationshipName": "vendor",
+      "relationshipName": "vendor"
+    }
+  ],
   "changelogDate": "20210722053655",
   "entityTableName": "vendor",
   "dto": "no",
@@ -62,5 +69,6 @@
   "embedded": false,
   "clientRootFolder": "procurement",
   "applications": "*",
-  "microserviceName": "procurement"
+  "microserviceName": "procurement",
+  "databaseType": "sql"
 }

@@ -18,5 +18,6 @@
   "embedded": false,
   "clientRootFolder": "procurement",
   "applications": "*",
-  "microserviceName": "procurement"
+  "microserviceName": "procurement",
+  "databaseType": "sql"
 }

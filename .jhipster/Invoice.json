@@ -52,9 +52,7 @@
     {
       "fieldName": "notes",
       "fieldType": "String",
-      "fieldValidateRules": [
-        "maxlength"
-      ],
+      "fieldValidateRules": ["maxlength"],
       "fieldValidateRulesMaxlength": "5000"
     }
   ],
@@ -64,7 +62,6 @@
       "otherEntityName": "quotation",
       "otherEntityRelationshipName": "invoice",
       "relationshipName": "quotation",
-      "otherEntityField": "id",
       "ownerSide": true
     },
     {
@@ -72,14 +69,7 @@
       "otherEntityName": "document",
       "otherEntityRelationshipName": "invoice",
       "relationshipName": "document",
-      "otherEntityField": "id",
       "ownerSide": true
-    },
-    {
-      "relationshipType": "one-to-many",
-      "otherEntityName": "invoiceActivity",
-      "otherEntityRelationshipName": "invoice",
-      "relationshipName": "invoiceActivityList"
     }
   ],
   "changelogDate": "20210722053455",
@@ -93,5 +83,6 @@
   "embedded": false,
   "clientRootFolder": "procurement",
   "applications": "*",
-  "microserviceName": "procurement"
+  "microserviceName": "procurement",
+  "databaseType": "sql"
 }

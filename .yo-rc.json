@@ -32,6 +32,29 @@
     "clientPackageManager": "npm",
     "blueprints": [],
     "skipClient": true,
-    "skipUserManagement": true
+    "skipUserManagement": true,
+    "entities": [
+      "Document",
+      "Requisition",
+      "RequisitionActivity",
+      "RequisitionLineItem",
+      "RequisitionLineItemActivity",
+      "PurchaseOrder",
+      "Quotation",
+      "QuotationActivity",
+      "Invoice",
+      "InvoiceActivity",
+      "Vendor",
+      "Contact",
+      "ContactActivity",
+      "Committee",
+      "CommitteeActivity",
+      "VendorRequisitionBucket",
+      "Roles",
+      "Department",
+      "Currency",
+      "RolesGroup"
+    ],
+    "lastLiquibaseTimestamp": 1630926826000
   }
 }

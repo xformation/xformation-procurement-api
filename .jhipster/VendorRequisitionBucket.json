@@ -1,12 +1,12 @@
 {
-  "name": "QuotationActivity",
+  "name": "VendorRequisitionBucket",
   "fields": [
     {
-      "fieldName": "quotationNo",
+      "fieldName": "status",
       "fieldType": "String"
     },
     {
-      "fieldName": "status",
+      "fieldName": "stages",
       "fieldType": "String"
     },
     {
@@ -26,32 +26,37 @@
       "fieldType": "String"
     },
     {
-      "fieldName": "dueDate",
-      "fieldType": "LocalDate"
-    },
-    {
       "fieldName": "notes",
       "fieldType": "String",
       "fieldValidateRules": ["maxlength"],
       "fieldValidateRulesMaxlength": "5000"
-    },
-    {
-      "fieldName": "quotationId",
-      "fieldType": "Long"
     }
   ],
-  "relationships": [],
-  "changelogDate": "20210722053355",
-  "entityTableName": "quotation_activity",
+  "relationships": [
+    {
+      "relationshipType": "many-to-one",
+      "otherEntityName": "requisition",
+      "otherEntityRelationshipName": "requisition",
+      "relationshipName": "requisition"
+    },
+    {
+      "relationshipType": "many-to-one",
+      "otherEntityName": "vendor",
+      "otherEntityRelationshipName": "vendor",
+      "relationshipName": "vendor"
+    }
+  ],
+  "entityTableName": "vendor_requisition_bucket",
   "dto": "no",
-  "pagination": "infinite-scroll",
+  "pagination": "no",
   "service": "no",
   "jpaMetamodelFiltering": false,
   "fluentMethods": true,
   "readOnly": false,
   "embedded": false,
-  "clientRootFolder": "procurement",
   "applications": "*",
   "microserviceName": "procurement",
-  "databaseType": "sql"
+  "clientRootFolder": "procurement",
+  "databaseType": "sql",
+  "changelogDate": "20210906073556"
 }

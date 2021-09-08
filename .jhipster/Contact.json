@@ -64,9 +64,7 @@
     {
       "fieldName": "notes",
       "fieldType": "String",
-      "fieldValidateRules": [
-        "maxlength"
-      ],
+      "fieldValidateRules": ["maxlength"],
       "fieldValidateRulesMaxlength": "5000"
     }
   ],
@@ -76,7 +74,6 @@
       "otherEntityName": "contact",
       "otherEntityRelationshipName": "contact",
       "relationshipName": "owner",
-      "otherEntityField": "id",
       "ownerSide": true
     },
     {
@@ -86,17 +83,10 @@
       "relationshipName": "documentList"
     },
     {
-      "relationshipType": "one-to-many",
-      "otherEntityName": "contactActivity",
-      "otherEntityRelationshipName": "contact",
-      "relationshipName": "contactActivityList"
-    },
-    {
       "relationshipType": "many-to-many",
       "otherEntityName": "committee",
       "otherEntityRelationshipName": "contact",
       "relationshipName": "committee",
-      "otherEntityField": "id",
       "ownerSide": false
     }
   ],
@@ -111,5 +101,6 @@
   "embedded": false,
   "clientRootFolder": "procurement",
   "applications": "*",
-  "microserviceName": "procurement"
+  "microserviceName": "procurement",
+  "databaseType": "sql"
 }

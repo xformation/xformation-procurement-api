@@ -33,6 +33,13 @@
     <include file="config/liquibase/changelog/20210722054055_added_entity_CommitteeActivity.xml" relativeToChangelogFile="false"/>
     <include file="config/liquibase/changelog/20210901100449_added_entity_VendorRequisitionBucket.xml" relativeToChangelogFile="false"/>
     
+    <include file="config/liquibase/changelog/20210901100449_added_entity_VendorRequisitionBucket.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20210906073557_added_entity_Roles.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20210901100449_added_entity_VendorRequisitionBucket.xml" relativeToChangelogFile="false"/>
+  
+  
+    <include file="config/liquibase/changelog/20210906111346_added_entity_RolesGroup.xml" relativeToChangelogFile="false"/>
+
     <!-- jhipster-needle-liquibase-add-changelog - JHipster will add liquibase changelogs here -->
     <include file="config/liquibase/changelog/20210722052455_added_entity_constraints_Document.xml" relativeToChangelogFile="false"/>
     <include file="config/liquibase/changelog/20210722052755_added_entity_constraints_Requisition.xml" relativeToChangelogFile="false"/>
@@ -49,6 +56,4 @@
     <include file="config/liquibase/changelog/20210722053955_added_entity_constraints_Committee.xml" relativeToChangelogFile="false"/>
     <include file="config/liquibase/changelog/20210722054055_added_entity_constraints_CommitteeActivity.xml" relativeToChangelogFile="false"/>
     <include file="config/liquibase/changelog/20210901100449_added_entity_constraints_VendorRequisitionBucket.xml" relativeToChangelogFile="false"/>
-    
-    
 </databaseChangeLog>

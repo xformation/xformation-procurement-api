@@ -32,17 +32,13 @@
     {
       "fieldName": "termsAndConditions",
       "fieldType": "String",
-      "fieldValidateRules": [
-        "maxlength"
-      ],
+      "fieldValidateRules": ["maxlength"],
       "fieldValidateRulesMaxlength": "5000"
     },
     {
       "fieldName": "notes",
       "fieldType": "String",
-      "fieldValidateRules": [
-        "maxlength"
-      ],
+      "fieldValidateRules": ["maxlength"],
       "fieldValidateRulesMaxlength": "5000"
     }
   ],
@@ -52,7 +48,6 @@
       "otherEntityName": "requisition",
       "otherEntityRelationshipName": "purchaseOrder",
       "relationshipName": "requisition",
-      "otherEntityField": "id",
       "ownerSide": true
     }
   ],
@@ -67,5 +62,6 @@
   "embedded": false,
   "clientRootFolder": "procurement",
   "applications": "*",
-  "microserviceName": "procurement"
+  "microserviceName": "procurement",
+  "databaseType": "sql"
 }

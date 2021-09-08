@@ -284,6 +284,22 @@ entity VendorRequisitionBucket{
     notes String maxlength(5000)
 }
 
+entity Roles {
+	name String
+    description String
+    status String
+    createdOn Instant
+    createdBy String
+    updatedOn Instant
+    updatedBy String
+   securityserviceId Long
+   
+}
+
+entity RolesGroup {		 
+  group Boolean
+}
+
 relationship OneToOne {
 	Requisition{department} to Department,
     Requisition{currency} to Currency,
@@ -293,7 +309,8 @@ relationship OneToOne {
     Invoice{quotation} to Quotation,
     Quotation{document} to Document,
     Invoice{document} to Document,
-    Contact{owner} to Contact
+    Contact{owner} to Contact,
+    RolesGroup{roles} to Roles,
 }
 
 relationship OneToMany {

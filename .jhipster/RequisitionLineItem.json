@@ -45,9 +45,7 @@
     {
       "fieldName": "notes",
       "fieldType": "String",
-      "fieldValidateRules": [
-        "maxlength"
-      ],
+      "fieldValidateRules": ["maxlength"],
       "fieldValidateRulesMaxlength": "5000"
     },
     {
@@ -63,17 +61,10 @@
       "relationshipName": "documentList"
     },
     {
-      "relationshipType": "one-to-many",
-      "otherEntityName": "requisitionLineItemActivity",
-      "otherEntityRelationshipName": "requisitionLineItem",
-      "relationshipName": "requisitionLineItemActivityList"
-    },
-    {
       "relationshipType": "many-to-one",
       "otherEntityName": "requisition",
       "otherEntityRelationshipName": "requisitionLineItemList",
-      "relationshipName": "requisition",
-      "otherEntityField": "id"
+      "relationshipName": "requisition"
     }
   ],
   "changelogDate": "20210722052955",
@@ -87,5 +78,6 @@
   "embedded": false,
   "clientRootFolder": "procurement",
   "applications": "*",
-  "microserviceName": "procurement"
+  "microserviceName": "procurement",
+  "databaseType": "sql"
 }

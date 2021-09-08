@@ -32,21 +32,15 @@
     {
       "fieldName": "notes",
       "fieldType": "String",
-      "fieldValidateRules": [
-        "maxlength"
-      ],
+      "fieldValidateRules": ["maxlength"],
       "fieldValidateRulesMaxlength": "5000"
-    }
-  ],
-  "relationships": [
+    },
     {
-      "relationshipType": "many-to-one",
-      "otherEntityName": "committee",
-      "otherEntityRelationshipName": "committeeActivityList",
-      "relationshipName": "committee",
-      "otherEntityField": "id"
+      "fieldName": "committeeId",
+      "fieldType": "Long"
     }
   ],
+  "relationships": [],
   "changelogDate": "20210722054055",
   "entityTableName": "committee_activity",
   "dto": "no",
@@ -58,5 +52,6 @@
   "embedded": false,
   "clientRootFolder": "procurement",
   "applications": "*",
-  "microserviceName": "procurement"
+  "microserviceName": "procurement",
+  "databaseType": "sql"
 }

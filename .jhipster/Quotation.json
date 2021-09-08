@@ -32,9 +32,7 @@
     {
       "fieldName": "notes",
       "fieldType": "String",
-      "fieldValidateRules": [
-        "maxlength"
-      ],
+      "fieldValidateRules": ["maxlength"],
       "fieldValidateRulesMaxlength": "5000"
     }
   ],
@@ -44,7 +42,6 @@
       "otherEntityName": "purchaseOrder",
       "otherEntityRelationshipName": "quotation",
       "relationshipName": "purchaseOrder",
-      "otherEntityField": "id",
       "ownerSide": true
     },
     {
@@ -52,7 +49,6 @@
       "otherEntityName": "vendor",
       "otherEntityRelationshipName": "quotation",
       "relationshipName": "vendor",
-      "otherEntityField": "id",
       "ownerSide": true
     },
     {
@@ -60,14 +56,7 @@
       "otherEntityName": "document",
       "otherEntityRelationshipName": "quotation",
       "relationshipName": "document",
-      "otherEntityField": "id",
       "ownerSide": true
-    },
-    {
-      "relationshipType": "one-to-many",
-      "otherEntityName": "quotationActivity",
-      "otherEntityRelationshipName": "quotation",
-      "relationshipName": "quotationActivityList"
     }
   ],
   "changelogDate": "20210722053255",
@@ -81,5 +70,6 @@
   "embedded": false,
   "clientRootFolder": "procurement",
   "applications": "*",
-  "microserviceName": "procurement"
+  "microserviceName": "procurement",
+  "databaseType": "sql"
 }

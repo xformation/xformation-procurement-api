@@ -1,0 +1,31 @@
+{
+  "name": "RolesGroup",
+  "fields": [
+    {
+      "fieldName": "group",
+      "fieldType": "Boolean"
+    }
+  ],
+  "relationships": [
+    {
+      "relationshipType": "one-to-one",
+      "otherEntityName": "roles",
+      "otherEntityRelationshipName": "rolesGroup",
+      "relationshipName": "roles",
+      "ownerSide": true
+    }
+  ],
+  "entityTableName": "roles_group",
+  "dto": "no",
+  "pagination": "no",
+  "service": "no",
+  "jpaMetamodelFiltering": false,
+  "fluentMethods": true,
+  "readOnly": false,
+  "embedded": false,
+  "applications": "*",
+  "microserviceName": "procurement",
+  "clientRootFolder": "procurement",
+  "databaseType": "sql",
+  "changelogDate": "20210906111346"
+}

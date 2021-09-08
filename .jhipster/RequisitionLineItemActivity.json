@@ -45,25 +45,19 @@
     {
       "fieldName": "notes",
       "fieldType": "String",
-      "fieldValidateRules": [
-        "maxlength"
-      ],
+      "fieldValidateRules": ["maxlength"],
       "fieldValidateRulesMaxlength": "5000"
     },
     {
       "fieldName": "dueDate",
       "fieldType": "LocalDate"
-    }
-  ],
-  "relationships": [
+    },
     {
-      "relationshipType": "many-to-one",
-      "otherEntityName": "requisitionLineItem",
-      "otherEntityRelationshipName": "requisitionLineItemActivityList",
-      "relationshipName": "requisitionLineItem",
-      "otherEntityField": "id"
+      "fieldName": "requisitionLineItemId",
+      "fieldType": "Long"
     }
   ],
+  "relationships": [],
   "changelogDate": "20210722053055",
   "entityTableName": "requisition_line_item_activity",
   "dto": "no",
@@ -75,5 +69,6 @@
   "embedded": false,
   "clientRootFolder": "procurement",
   "applications": "*",
-  "microserviceName": "procurement"
+  "microserviceName": "procurement",
+  "databaseType": "sql"
 }

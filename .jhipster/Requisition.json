@@ -45,9 +45,7 @@
     {
       "fieldName": "notes",
       "fieldType": "String",
-      "fieldValidateRules": [
-        "maxlength"
-      ],
+      "fieldValidateRules": ["maxlength"],
       "fieldValidateRulesMaxlength": "5000"
     },
     {
@@ -61,7 +59,6 @@
       "otherEntityName": "department",
       "otherEntityRelationshipName": "requisition",
       "relationshipName": "department",
-      "otherEntityField": "id",
       "ownerSide": true
     },
     {
@@ -69,7 +66,6 @@
       "otherEntityName": "currency",
       "otherEntityRelationshipName": "requisition",
       "relationshipName": "currency",
-      "otherEntityField": "id",
       "ownerSide": true
     },
     {
@@ -80,9 +76,9 @@
     },
     {
       "relationshipType": "one-to-many",
-      "otherEntityName": "requisitionActivity",
+      "otherEntityName": "vendorRequisitionBucket",
       "otherEntityRelationshipName": "requisition",
-      "relationshipName": "requisitionActivityList"
+      "relationshipName": "requisition"
     }
   ],
   "changelogDate": "20210722052755",
@@ -96,5 +92,6 @@
   "embedded": false,
   "clientRootFolder": "procurement",
   "applications": "*",
-  "microserviceName": "procurement"
+  "microserviceName": "procurement",
+  "databaseType": "sql"
 }

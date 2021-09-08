@@ -52,21 +52,15 @@
     {
       "fieldName": "notes",
       "fieldType": "String",
-      "fieldValidateRules": [
-        "maxlength"
-      ],
+      "fieldValidateRules": ["maxlength"],
       "fieldValidateRulesMaxlength": "5000"
-    }
-  ],
-  "relationships": [
+    },
     {
-      "relationshipType": "many-to-one",
-      "otherEntityName": "invoice",
-      "otherEntityRelationshipName": "invoiceActivityList",
-      "relationshipName": "invoice",
-      "otherEntityField": "id"
+      "fieldName": "invoiceId",
+      "fieldType": "Long"
     }
   ],
+  "relationships": [],
   "changelogDate": "20210722053555",
   "entityTableName": "invoice_activity",
   "dto": "no",
@@ -78,5 +72,6 @@
   "embedded": false,
   "clientRootFolder": "procurement",
   "applications": "*",
-  "microserviceName": "procurement"
+  "microserviceName": "procurement",
+  "databaseType": "sql"
 }

@@ -47,15 +47,13 @@
       "relationshipType": "many-to-one",
       "otherEntityName": "requisitionLineItem",
       "otherEntityRelationshipName": "documentList",
-      "relationshipName": "requisitionLineItem",
-      "otherEntityField": "id"
+      "relationshipName": "requisitionLineItem"
     },
     {
       "relationshipType": "many-to-one",
       "otherEntityName": "contact",
       "otherEntityRelationshipName": "documentList",
-      "relationshipName": "contact",
-      "otherEntityField": "id"
+      "relationshipName": "contact"
     }
   ],
   "changelogDate": "20210722052455",
@@ -69,5 +67,6 @@
   "embedded": false,
   "clientRootFolder": "procurement",
   "applications": "*",
-  "microserviceName": "procurement"
+  "microserviceName": "procurement",
+  "databaseType": "sql"
 }
