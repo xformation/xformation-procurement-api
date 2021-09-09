@@ -53,8 +53,9 @@
       "Roles",
       "Department",
       "Currency",
-      "RolesGroup"
+      "RolesGroup",
+      "Rules"
     ],
-    "lastLiquibaseTimestamp": 1630926826000
+    "lastLiquibaseTimestamp": 1631096744000
   }
 }

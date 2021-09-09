@@ -421,7 +421,6 @@ public class RequisitionService {
 
 	@Transactional
 	public void updateRequisitionToVendor(List<ObjectNode> list) {
-//		VendorRequisitionBucket bucket = new VendorRequisitionBucket();
 		for (ObjectNode obj : list) {
 			logger.debug("Update requisition to vendor: " + obj.toString());
 			Optional<VendorRequisitionBucket> ur = vendorRequisitionBucketRepository

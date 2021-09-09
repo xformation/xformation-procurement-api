@@ -300,6 +300,17 @@ entity RolesGroup {
   group Boolean
 }
 
+entity Rules{
+    name String
+    description String maxlength(5000)
+    status String
+    rule String maxlength(10000)
+    createdOn Instant
+    createdBy String
+    updatedOn Instant
+    updatedBy String
+}
+
 relationship OneToOne {
 	Requisition{department} to Department,
     Requisition{currency} to Currency,

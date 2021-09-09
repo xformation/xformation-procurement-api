@@ -7,20 +7,23 @@
                         http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
 
     <!--
-        Added the entity Roles.
+        Added the entity Rules.
     -->
-    <changeSet id="20210906073557-1" author="jhipster">
-        <createTable tableName="roles">
+    <changeSet id="20210908102544-1" author="jhipster">
+        <createTable tableName="rules">
             <column name="id" type="bigint">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
             <column name="name" type="varchar(255)">
                 <constraints nullable="true" />
             </column>
-            <column name="description" type="varchar(255)">
+            <column name="description" type="varchar(5000)">
                 <constraints nullable="true" />
             </column>
             <column name="status" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+            <column name="rule" type="varchar(10000)">
                 <constraints nullable="true" />
             </column>
             <column name="created_on" type="datetime">
@@ -35,12 +38,9 @@
             <column name="updated_by" type="varchar(255)">
                 <constraints nullable="true" />
             </column>
-            <column name="securityservice_id" type="bigint">
-                <constraints nullable="true" />
-            </column>
             <!-- jhipster-needle-liquibase-add-column - JHipster will add columns here -->
         </createTable>
-        <dropDefaultValue tableName="roles" columnName="created_on" columnDataType="datetime"/>
-        <dropDefaultValue tableName="roles" columnName="updated_on" columnDataType="datetime"/>
+        <dropDefaultValue tableName="rules" columnName="created_on" columnDataType="datetime"/>
+        <dropDefaultValue tableName="rules" columnName="updated_on" columnDataType="datetime"/>
     </changeSet>
 </databaseChangeLog>

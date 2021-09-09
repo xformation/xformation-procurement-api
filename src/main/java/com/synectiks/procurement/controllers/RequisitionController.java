@@ -217,9 +217,8 @@ public class RequisitionController {
 			requisitionService.updateRequisitionToVendor(list);
 			st.setCode(HttpStatus.OK.value());
 			st.setType("SUCCESS");
-			st.setMessage("Requisition to vendor not found");
-			st.setObject("All the requisition to vendor  updated updated successfully");
-			logger.info("All the requisition to vendor  updated updated successfully");
+			st.setMessage("Requisition to vendor  found");
+			st.setObject("All the requisition to vendor  updated  successfully");
 			return ResponseEntity.status(HttpStatus.OK).body(st);
 		} catch (Exception e) {
 			logger.error(" update of  failed");

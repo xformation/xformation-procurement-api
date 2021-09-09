@@ -47,7 +47,6 @@ public class RolesService {
 	@Transactional
 	public Roles addRoles(ObjectNode obj) throws Exception {
 		Roles roles = new Roles();
-
 		if (obj.get("name") != null) {
 			roles.setName(obj.get("name").asText());
 		}
@@ -78,8 +77,7 @@ public class RolesService {
 		objectNode.set("grp", mapper.convertValue(obj.get("isGroup").asBoolean(), JsonNode.class));
 		objectNode.set("description", mapper.convertValue(roles.getDescription().toString(), JsonNode.class));
 		Map<String, Object> map = new HashMap<String, Object>();
-		ObjectNode obj3 = restTemplate.postForObject("http://localhost:8094/security/roles/create", objectNode,
-				ObjectNode.class, map);
+		ObjectNode obj3 = restTemplate.postForObject(Constants.SECURITY_SERVICE_URL, objectNode, ObjectNode.class, map);
 		if (obj3 != null) {
 			roles.setSecurityserviceId(obj3.get("id").asLong());
 		}
@@ -205,8 +203,13 @@ public class RolesService {
 	}
 
 	public void deleteRoles(Long id) {
-		rolesRepository.deleteById(id);
-		logger.info("Role deleted successfully");
+		Optional<Roles> oc = rolesRepository.findById(id);
+		if (oc.isPresent()) {
+			RolesGroup rolesGroup = new RolesGroup();
+			rolesGroup.setRoles(oc.get());
+			rolesGroupRepository.deleteAll(rolesGroupRepository.findAll(Example.of(rolesGroup)));
+			rolesRepository.deleteById(id);
+		}
 	}
 
 }

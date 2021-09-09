@@ -24,6 +24,7 @@ import com.synectiks.procurement.business.service.RolesService;
 import com.synectiks.procurement.domain.Roles;
 import com.synectiks.procurement.domain.Status;
 import com.synectiks.procurement.repository.RolesGroupRepository;
+import com.synectiks.procurement.repository.RolesRepository;
 
 @RestController
 @RequestMapping("/api")
@@ -35,6 +36,9 @@ public class RolesController {
 
 	@Autowired
 	RolesGroupRepository rolesGroupRepository;
+
+	@Autowired
+	RolesRepository rolesRepository;
 
 	@PostMapping("/addRoles")
 	public ResponseEntity<Status> addRoles(@RequestBody ObjectNode obj) throws JSONException {

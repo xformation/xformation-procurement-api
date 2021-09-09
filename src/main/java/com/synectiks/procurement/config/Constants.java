@@ -18,6 +18,8 @@ public final class Constants {
     public static final String DEFAULT_DATE_FORMAT =  DATE_FORMAT_YYYY_MM_DD;
     public static final int DEFAULT_DUE_DAYS = 5;
     
+    public static final String  SECURITY_SERVICE_URL ="http://localhost:8094/security/roles/create";
+    
     public static final String Status_Active = "Active";
     public static final String Status_Inactive = "Inactive";
     public static final String Status_Draft = "Draft";
