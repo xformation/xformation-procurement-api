@@ -82,20 +82,21 @@ public class TokenProvider {
     }
 
     public Authentication getAuthentication(String token) {
-        Claims claims = Jwts.parserBuilder()
-            .setSigningKey(key)
-            .build()
-            .parseClaimsJws(token)
-            .getBody();
+    	//Claims claims = Jwts.parserBuilder()
+        // .setSigningKey(key)
+         //.build()
+        // .parseClaimsJws(token)
+         //.getBody();
 
-        Collection<? extends GrantedAuthority> authorities =
-            Arrays.stream(claims.get(AUTHORITIES_KEY).toString().split(","))
-                .map(SimpleGrantedAuthority::new)
-                .collect(Collectors.toList());
-
-        User principal = new User(claims.getSubject(), "", authorities);
-
-        return new UsernamePasswordAuthenticationToken(principal, token, authorities);
+	     Collection<? extends GrantedAuthority> authorities = new ArrayList<>();
+	        // Arrays.stream(claims.get(AUTHORITIES_KEY).toString().split(","))
+	             //.map(SimpleGrantedAuthority::new)
+	          //   .collect(Collectors.toList());
+	
+	   //  User principal = new User(claims.getSubject(), "", authorities);
+	
+	    // return new UsernamePasswordAuthenticationToken(principal, token, authorities);
+	    return new UsernamePasswordAuthenticationToken("", "", authorities);
     }
 
     public boolean validateToken(String authToken) {
