@@ -7,7 +7,6 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.configurationprocessor.json.JSONException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -29,9 +28,6 @@ import com.synectiks.procurement.domain.Status;
 @RequestMapping("/api")
 public class CommitteeController {
 	private static final Logger logger = LoggerFactory.getLogger(CommitteeController.class);
-
-	@Value("${jhipster.clientApp.name}")
-	private String applicationName;
 
 	@Autowired
 	private CommitteeService committeeService;

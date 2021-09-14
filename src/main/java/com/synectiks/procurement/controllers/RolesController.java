@@ -25,6 +25,7 @@ import com.synectiks.procurement.domain.Roles;
 import com.synectiks.procurement.domain.Status;
 import com.synectiks.procurement.repository.RolesGroupRepository;
 import com.synectiks.procurement.repository.RolesRepository;
+import com.synectiks.procurement.web.rest.errors.UniqueConstraintException;
 
 @RestController
 @RequestMapping("/api")
@@ -46,12 +47,26 @@ public class RolesController {
 		Status st = new Status();
 		try {
 			Roles roles = rolesService.addRoles(obj);
+			if(roles==null) {
+				st.setCode(HttpStatus.OK.value());
+				st.setType("FIALED");
+				st.setMessage("Add role failed");
+				st.setObject(roles);
+				return ResponseEntity.status(HttpStatus.CONFLICT).body(st);
+			}
 			st.setCode(HttpStatus.OK.value());
 			st.setType("SUCCESS");
 			st.setMessage("Role added successfully");
 			st.setObject(roles);
 			return ResponseEntity.status(HttpStatus.OK).body(st);
-		} catch (Exception e) {
+		}catch (UniqueConstraintException e) {
+			logger.error("Add role failed. Exception: ", e.getMessage());
+			st.setCode(HttpStatus.EXPECTATION_FAILED.value());
+			st.setType("ERROR");
+			st.setMessage(e.getMessage());
+			return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(st);
+		} 
+		catch (Exception e) {
 			logger.error("Add role failed. Exception: ", e);
 			st.setCode(HttpStatus.EXPECTATION_FAILED.value());
 			st.setType("ERROR");
@@ -66,12 +81,26 @@ public class RolesController {
 		Status st = new Status();
 		try {
 			Roles roles = rolesService.updateRoles(obj);
+			if(roles==null) {
+				st.setCode(HttpStatus.OK.value());
+				st.setType("FIALED");
+				st.setMessage("Updated role failed");
+				st.setObject(roles);
+				return ResponseEntity.status(HttpStatus.CONFLICT).body(st);
+			}
 			st.setCode(HttpStatus.OK.value());
 			st.setType("SUCCESS");
 			st.setMessage("Role updated successfully");
 			st.setObject(roles);
 			return ResponseEntity.status(HttpStatus.OK).body(st);
-		} catch (Exception e) {
+		}catch (UniqueConstraintException e) {
+			logger.error("Update role failed. Exception: ", e.getMessage());
+			st.setCode(HttpStatus.EXPECTATION_FAILED.value());
+			st.setType("ERROR");
+			st.setMessage(e.getMessage());
+			return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(st);
+		} 
+		catch (Exception e) {
 			logger.error("Updating role failed. Exception: ", e);
 			st.setCode(HttpStatus.EXPECTATION_FAILED.value());
 			st.setType("ERROR");

@@ -115,7 +115,7 @@ public class PurchaseOrderController {
 		}
 	}
 
-	@DeleteMapping("/purchaseOrder/{id}")
+	@DeleteMapping("/deletePurchaseOrder/{id}")
 	public ResponseEntity<Status> deletePurchaseOrder(@PathVariable Long id) {
 		Status st = new Status();
 		try {

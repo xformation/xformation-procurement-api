@@ -37,10 +37,13 @@ import com.synectiks.procurement.domain.Department;
 import com.synectiks.procurement.domain.Requisition;
 import com.synectiks.procurement.domain.RequisitionActivity;
 import com.synectiks.procurement.domain.RequisitionLineItem;
+import com.synectiks.procurement.domain.Roles;
+import com.synectiks.procurement.domain.Rules;
 import com.synectiks.procurement.domain.Vendor;
 import com.synectiks.procurement.domain.VendorRequisitionBucket;
 import com.synectiks.procurement.repository.RequisitionActivityRepository;
 import com.synectiks.procurement.repository.RequisitionRepository;
+import com.synectiks.procurement.repository.RulesRepository;
 import com.synectiks.procurement.repository.VendorRequisitionBucketRepository;
 
 @Service
@@ -71,6 +74,15 @@ public class RequisitionService {
 	@Autowired
 	private VendorService vendorService;
 
+	@Autowired
+	private RolesService rolesService;
+	
+	@Autowired
+	private RulesService rulesService;
+	
+	@Autowired
+	private RulesRepository rulesRepository;
+
 	public Requisition getRequisition(Long id) {
 		logger.info("Getting requisition by id: " + id);
 		Optional<Requisition> ovn = requisitionRepository.findById(id);
@@ -93,7 +105,7 @@ public class RequisitionService {
 			String uniqueID = UUID.randomUUID().toString();
 			filename = uniqueID.concat(filename);
 			File localStorage = new File(Constants.LOCAL_REQUISITION_FILE_STORAGE_DIRECTORY);
-			if(!localStorage.exists()) {
+			if (!localStorage.exists()) {
 				localStorage.mkdirs();
 			}
 			Path path = Paths.get(Constants.LOCAL_REQUISITION_FILE_STORAGE_DIRECTORY + File.pathSeparatorChar + filename);
@@ -101,7 +113,7 @@ public class RequisitionService {
 		}
 		ObjectMapper mapper = new ObjectMapper();
 
-//		ObjectNode json = (ObjectNode) new ObjectMapper().readTree(obj);
+//	ObjectNode json = (ObjectNode) new ObjectMapper().readTree(obj);
 		ObjectNode json = (ObjectNode) mapper.readTree(obj);
 
 		Department department = departmentService.getDepartment(Long.parseLong(json.get("departmentId").asText()));
@@ -139,7 +151,9 @@ public class RequisitionService {
 		if (json.get("notes") != null) {
 			requisition.setNotes(json.get("notes").asText());
 		}
-
+		if (json.get("status") != null) {
+			requisition.setStatus(json.get("status").asText());
+		}
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern(Constants.DEFAULT_DATE_FORMAT);
 		if (json.get("dueDate") != null) {
 			LocalDate localDate = LocalDate.parse(json.get("dueDate").asText(), formatter);
@@ -152,8 +166,6 @@ public class RequisitionService {
 			LocalDate localDate = datew.plusDays(Constants.DEFAULT_DUE_DAYS);
 			requisition.setDueDate(localDate);
 		}
-		requisition.setStatus(Constants.Status);
-
 		if (json.get("user") != null) {
 			requisition.setCreatedBy(json.get("user").asText());
 			requisition.setUpdatedBy(json.get("user").asText());
@@ -352,11 +364,11 @@ public class RequisitionService {
 		} else {
 			list = this.requisitionRepository.findAll(Sort.by(Direction.DESC, "id"));
 		}
-		for (Requisition qou : list) {
+		for (Requisition req : list) {
 			RequisitionActivity ca = new RequisitionActivity();
-			ca.setRequisitionId(qou.getId());
+			ca.setRequisitionId(req.getId());
 			List<RequisitionActivity> caList = requisitionActivityRepository.findAll(Example.of(ca));
-			qou.setActivityList(caList);
+			req.setActivityList(caList);
 		}
 
 		logger.info("Requisition search completed. Total records: " + list.size());
@@ -446,13 +458,90 @@ public class RequisitionService {
 				bucket.setCreatedBy(Constants.SYSTEM_ACCOUNT);
 				bucket.setUpdatedBy(Constants.SYSTEM_ACCOUNT);
 			}
-
 			Instant now = Instant.now();
 			bucket.setCreatedOn(now);
 			bucket.setUpdatedOn(now);
 			bucket = vendorRequisitionBucketRepository.save(bucket);
 			logger.info("Bucket update successfully");
 		}
-
 	}
+
+	public boolean approveRequisition(ObjectNode obj) throws JSONException {
+		logger.info("Getting requisition by id: " + obj);
+		
+		try {
+			if(obj.get("requisitionId") == null) {
+				logger.error("Requision id not found. Cannot approve requisition.");
+				return false;
+			}
+			
+			if(obj.get("roleName") == null) {
+				logger.error("Role not found. Cannot approve requisition.");
+				return false;
+			}
+			
+			Optional<Requisition> req = requisitionRepository.findById(obj.get("requisitionId").asLong());
+			if (!req.isPresent()) {
+				logger.error("Requision not found. Cannot approve requisition.");
+				return false;
+			}
+			
+			Roles role = rolesService.getRolesByName(obj.get("roleName").asText());
+			if (role == null) {
+				logger.error("Given role "+obj.get("roleName").asText()+" not found. Cannot approve requisition.");
+				return false;
+			}
+			
+			Requisition requisition = req.get();
+			Rules rule = rulesService.getRulesByRoleAndRuleName(role, Constants.RULE_APPROVE_REQUISITION);
+			if(rule == null) {
+				logger.error("Approval rule not found. Cannot approve requisition.");
+				return false;
+			}
+			
+			JSONObject jsonObject = new JSONObject(rule.getRule());
+			
+			int price = 0;
+			if(requisition.getTotalPrice() != null) {
+				price = requisition.getTotalPrice().intValue();
+			}
+			
+			int minRulePrice = 0;
+			int maxRulePrice = 0;
+			
+			try {
+				minRulePrice = jsonObject.getInt("min");
+			}catch(Exception e) {
+				logger.error("Minimum price rule not found. Cannot approve requisiont. Exception: ",e);
+				return false;
+			}
+			
+			if(jsonObject.get("max") != null) {
+				try {
+					maxRulePrice = jsonObject.getInt("max");
+				}catch(Exception e) {
+					logger.error("Incorrect maximum price rule. Cannot approve requisiont. Exception: ",e);
+					return false;
+				}
+			}
+			
+			if(price >= minRulePrice && jsonObject.get("max") == null) {
+				requisition.setStatus(Constants.PROGRESS_STAGE_APPROVED);
+			}
+			
+			if(price >= minRulePrice && jsonObject.get("max") != null && price <= maxRulePrice) {
+				requisition.setStatus(Constants.PROGRESS_STAGE_APPROVED);
+			}
+
+			requisition = requisitionRepository.save(requisition);
+			return true;
+		}catch(Exception e) {
+			logger.error("Approve requisition failed. Exception: ", e);
+			return false;
+		}
+		
+		
+		
+	}
+
 }

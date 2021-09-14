@@ -113,8 +113,6 @@ public class RequisitionLineItemService {
 			LocalDate localDate = datew.plusDays(Constants.DEFAULT_DUE_DAYS);
 			requisitionLineItem.setDueDate(localDate);
 		}
-		requisitionLineItem.setStatus(Constants.Status);
-
 		if (obj.get("user") != null) {
 			requisitionLineItem.setCreatedBy(obj.get("user").asText());
 			requisitionLineItem.setUpdatedBy(obj.get("user").asText());
@@ -123,7 +121,6 @@ public class RequisitionLineItemService {
 			requisitionLineItem.setUpdatedBy(Constants.SYSTEM_ACCOUNT);
 
 		}
-
 		Instant now = Instant.now();
 		requisitionLineItem.setCreatedOn(now);
 		requisitionLineItem.setUpdatedOn(now);

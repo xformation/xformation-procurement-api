@@ -25,7 +25,6 @@ import com.synectiks.procurement.domain.Contact;
 import com.synectiks.procurement.domain.Status;
 
 @RestController
-
 @RequestMapping("/api")
 public class ContactController {
 	private static final Logger logger = LoggerFactory.getLogger(ContactController.class);
@@ -114,7 +113,7 @@ public class ContactController {
 		}
 	}
 
-	@DeleteMapping("/contact/{id}")
+	@DeleteMapping("/deleteContact/{id}")
 	public ResponseEntity<Status> deleteContact(@PathVariable Long id) {
 		Status st = new Status();
 		try {

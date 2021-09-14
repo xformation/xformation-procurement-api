@@ -38,9 +38,14 @@
             <column name="updated_by" type="varchar(255)">
                 <constraints nullable="true" />
             </column>
+            <column name="roles_id" type="bigint">
+                <constraints nullable="true" />
+            </column>
             <!-- jhipster-needle-liquibase-add-column - JHipster will add columns here -->
         </createTable>
         <dropDefaultValue tableName="rules" columnName="created_on" columnDataType="datetime"/>
         <dropDefaultValue tableName="rules" columnName="updated_on" columnDataType="datetime"/>
     </changeSet>
+
+
 </databaseChangeLog>

@@ -23,6 +23,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.synectiks.procurement.business.service.RulesService;
 import com.synectiks.procurement.domain.Rules;
 import com.synectiks.procurement.domain.Status;
+import com.synectiks.procurement.web.rest.errors.UniqueConstraintException;
 
 @RestController
 @RequestMapping("/api")
@@ -41,7 +42,7 @@ public class RulesController {
 			if(rules==null) {
 				st.setCode(HttpStatus.OK.value());
 				st.setType("FIALED");
-				st.setMessage("Rule name is already exist");
+				st.setMessage("Add rule failed");
 				st.setObject(rules);
 				return ResponseEntity.status(HttpStatus.CONFLICT).body(st);
 			}
@@ -50,7 +51,14 @@ public class RulesController {
 			st.setMessage("Rule added successfully");
 			st.setObject(rules);
 			return ResponseEntity.status(HttpStatus.OK).body(st);
-		} catch (Exception e) {
+		}catch (UniqueConstraintException e) {
+			logger.error("Add rule failed. Exception: ", e.getMessage());
+			st.setCode(HttpStatus.EXPECTATION_FAILED.value());
+			st.setType("ERROR");
+			st.setMessage(e.getMessage());
+			return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(st);
+		} 
+		catch (Exception e) {
 			logger.error("Add rule failed. Exception: ", e);
 			st.setCode(HttpStatus.EXPECTATION_FAILED.value());
 			st.setType("ERROR");
@@ -68,7 +76,7 @@ public class RulesController {
 			if(rules==null) {
 				st.setCode(HttpStatus.OK.value());
 				st.setType("FIALED");
-				st.setMessage("Rule name is already exist");
+				st.setMessage("Updating rule failed");
 				st.setObject(rules);
 				return ResponseEntity.status(HttpStatus.CONFLICT).body(st);
 			}
@@ -77,6 +85,12 @@ public class RulesController {
 			st.setMessage("Rule updated successfully");
 			st.setObject(rules);
 			return ResponseEntity.status(HttpStatus.OK).body(st);
+		} catch (UniqueConstraintException e) {
+			logger.error("Update Rule failed. Exception: ", e.getMessage());
+			st.setCode(HttpStatus.EXPECTATION_FAILED.value());
+			st.setType("ERROR");
+			st.setMessage(e.getMessage());
+			return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(st);
 		} catch (Exception e) {
 			logger.error("Updating rule failed. Exception: ", e);
 			st.setCode(HttpStatus.EXPECTATION_FAILED.value());

@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.synectiks.procurement.business.service.RequisitionService;
 import com.synectiks.procurement.domain.Requisition;
@@ -34,6 +35,12 @@ public class RequisitionController {
 
 	@Autowired
 	private RequisitionService requisitionService;
+
+//	@Autowired
+//	private RequisitionRepository requisitionRepository;
+
+//	@Autowired
+//	private RulesRepository rulesRepository;
 
 	@RequestMapping(value = "/addRequisition", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<Status> addRequisition(@RequestParam("file") MultipartFile file,
@@ -136,32 +143,32 @@ public class RequisitionController {
 		}
 	}
 
-	@GetMapping("/getAllRequisitions")
-	private ResponseEntity<Status> getAllRequisitions() {
-		logger.info("Request to get all requsitions");
-		Status st = new Status();
-		try {
-			List<Requisition> list = requisitionService.getAllRequisitions();
-			if (list == null) {
-				logger.error("Search all requisition failed");
-				st.setCode(HttpStatus.EXPECTATION_FAILED.value());
-				st.setType("ERROR");
-				st.setMessage("Search all requisition failed");
-				return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(st);
-			}
-			st.setCode(HttpStatus.OK.value());
-			st.setType("SUCCESS");
-			st.setMessage("Search all requisition successful");
-			st.setObject(list);
-			return ResponseEntity.status(HttpStatus.OK).body(st);
-		} catch (Exception e) {
-			logger.error("Search all requisition failed. Exception: ", e);
-			st.setCode(HttpStatus.EXPECTATION_FAILED.value());
-			st.setType("ERROR");
-			st.setMessage("Search all requisition failed");
-			return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(st);
-		}
-	}
+//	@GetMapping("/getAllRequisitions")
+//	private ResponseEntity<Status> getAllRequisitions() {
+//		logger.info("Request to get all requsitions");
+//		Status st = new Status();
+//		try {
+//			List<Requisition> list = requisitionService.getAllRequisitions();
+//			if (list == null) {
+//				logger.error("Search all requisition failed");
+//				st.setCode(HttpStatus.EXPECTATION_FAILED.value());
+//				st.setType("ERROR");
+//				st.setMessage("Search all requisition failed");
+//				return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(st);
+//			}
+//			st.setCode(HttpStatus.OK.value());
+//			st.setType("SUCCESS");
+//			st.setMessage("Search all requisition successfully");
+//			st.setObject(list);
+//			return ResponseEntity.status(HttpStatus.OK).body(st);
+//		} catch (Exception e) {
+//			logger.error("Search all requisition failed. Exception: ", e);
+//			st.setCode(HttpStatus.EXPECTATION_FAILED.value());
+//			st.setType("ERROR");
+//			st.setMessage("Search all requisition failed");
+//			return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(st);
+//		}
+//	}
 
 	@GetMapping("/getRequisition/{id}")
 	public ResponseEntity<Status> getRequisition(@PathVariable Long id) {
@@ -173,7 +180,7 @@ public class RequisitionController {
 				logger.warn("Requisition not found.");
 				st.setCode(HttpStatus.EXPECTATION_FAILED.value());
 				st.setType("ERROR");
-				st.setMessage("Requisition not found");
+				st.setMessage("Requisition found suses");
 				return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(st);
 			}
 			st.setCode(HttpStatus.OK.value());
@@ -209,23 +216,51 @@ public class RequisitionController {
 		}
 	}
 
-	@PostMapping("/updateRequisitionToVendor")
-	public ResponseEntity<Status> updateRequisitionToVendor(@RequestBody List<ObjectNode> list) {
-		logger.info("Assigning requisitions to vendors ");
+//	@PostMapping("/updateRequisitionToVendor")
+//	public ResponseEntity<Status> updateRequisitionToVendor(@RequestBody List<ObjectNode> list) {
+//		logger.info("Assigning requisitions to vendors ");
+//		Status st = new Status();
+//		try {
+//			requisitionService.updateRequisitionToVendor(list);
+//			st.setCode(HttpStatus.OK.value());
+//			st.setType("SUCCESS");
+//			st.setMessage("Requisition to vendor  found");
+//			st.setObject("All the requisition to vendor  updated  successfully");
+//			return ResponseEntity.status(HttpStatus.OK).body(st);
+//		} catch (Exception e) {
+//			logger.error(" update of  failed");
+//			st.setCode(HttpStatus.EXPECTATION_FAILED.value());
+//			st.setType("ERROR");
+//			st.setMessage("Requisition to vendor update  failed");
+//			return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(st);
+//		}
+//	}
+
+	@PostMapping("/approveRequisition")
+	public ResponseEntity<Status> approveRequisition(@RequestBody ObjectNode obj)
+			throws JSONException {
+		logger.info("Request to approve a requsition");
+		
 		Status st = new Status();
 		try {
-			requisitionService.updateRequisitionToVendor(list);
-			st.setCode(HttpStatus.OK.value());
-			st.setType("SUCCESS");
-			st.setMessage("Requisition to vendor  found");
-			st.setObject("All the requisition to vendor  updated  successfully");
+			boolean updateFlag = requisitionService.approveRequisition(obj);
+			if (updateFlag) {
+				st.setCode(HttpStatus.OK.value());
+				st.setType("SUCCESS");
+				st.setMessage("Requisition approved successfully");
+			} else {
+				st.setCode(HttpStatus.OK.value());
+				st.setType("Fialed");
+				st.setMessage("Requestion could not be updated");
+			}
 			return ResponseEntity.status(HttpStatus.OK).body(st);
 		} catch (Exception e) {
-			logger.error(" update of  failed");
+			logger.error("Approve requisition failed");
 			st.setCode(HttpStatus.EXPECTATION_FAILED.value());
 			st.setType("ERROR");
-			st.setMessage("Requisition to vendor update  failed");
+			st.setMessage("Approve Requisition failed");
 			return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(st);
 		}
 	}
+
 }

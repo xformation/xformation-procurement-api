@@ -22,7 +22,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.client.RestTemplate;
 
 import com.fasterxml.jackson.databind.JsonNode;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.synectiks.procurement.config.Constants;
@@ -30,6 +29,7 @@ import com.synectiks.procurement.domain.Roles;
 import com.synectiks.procurement.domain.RolesGroup;
 import com.synectiks.procurement.repository.RolesGroupRepository;
 import com.synectiks.procurement.repository.RolesRepository;
+import com.synectiks.procurement.web.rest.errors.UniqueConstraintException;
 
 @Service
 public class RolesService {
@@ -45,11 +45,25 @@ public class RolesService {
 	private RestTemplate restTemplate;
 
 	@Transactional
-	public Roles addRoles(ObjectNode obj) throws Exception {
+	public Roles addRoles(ObjectNode obj) throws UniqueConstraintException {
 		Roles roles = new Roles();
 		if (obj.get("name") != null) {
 			roles.setName(obj.get("name").asText());
 		}
+		
+		try {
+			List<Roles> roleList = rolesRepository.findAll(Example.of(roles));
+	        if(roleList.size() > 0) {
+	        	logger.error("Role already exists. Duplicate role not allowd");
+	        	UniqueConstraintException ex = new UniqueConstraintException("Duplicate role not allowd");
+	        	throw ex;
+	        }
+		}catch(Exception e) {
+			logger.error("Exception in validating duplicate role. Exception: ",e);
+        	throw e;
+		}
+        
+		
 		if (obj.get("description") != null) {
 			roles.setDescription(obj.get("description").asText());
 		}
@@ -57,9 +71,7 @@ public class RolesService {
 		if (obj.get("status") != null) {
 			roles.setStatus(obj.get("status").asText());
 		}
-		if (obj.get("securityserviceId") != null) {
-			roles.setSecurityserviceId(obj.get("securityserviceId").asLong());
-		}
+	
 		if (obj.get("user") != null) {
 			roles.setCreatedBy(obj.get("user").asText());
 			roles.setUpdatedBy(obj.get("user").asText());
@@ -101,7 +113,7 @@ public class RolesService {
 
 	}
 
-	public Roles updateRoles(ObjectNode obj) throws JSONException, URISyntaxException {
+	public Roles updateRoles(ObjectNode obj) throws JSONException, URISyntaxException, UniqueConstraintException {
 		Optional<Roles> ur = rolesRepository.findById(Long.parseLong(obj.get("id").asText()));
 		if (!ur.isPresent()) {
 			logger.error("Role not found");
@@ -109,9 +121,30 @@ public class RolesService {
 		}
 		Roles roles = ur.get();
 
+		try {
+			Roles rol = new Roles();
+			if (obj.get("name") != null) {
+				rol.setName(obj.get("name").asText());
+			}
+			List<Roles> roleList = rolesRepository.findAll(Example.of(rol));
+	        if(roleList.size() > 0) {
+	        	for(Roles rl: roleList) {
+	    			if(rl.getName().equalsIgnoreCase(obj.get("name").asText())) {
+	    				logger.error("Duplicate role not allowd");
+	    				UniqueConstraintException ex = new UniqueConstraintException("Duplicate role not allowd");
+	    				throw ex;
+	    			}
+	        	}
+	        }
+	    }catch(Exception e) {
+			logger.error("Exception in validating duplicate role. Exception: ",e);
+        	throw e;
+	    }
+		
 		if (obj.get("name") != null) {
 			roles.setName(obj.get("name").asText());
 		}
+
 		if (obj.get("description") != null) {
 			roles.setDescription(obj.get("description").asText());
 		}
@@ -121,16 +154,12 @@ public class RolesService {
 		}
 
 		if (obj.get("user") != null) {
-			roles.setCreatedBy(obj.get("user").asText());
 			roles.setUpdatedBy(obj.get("user").asText());
 		} else {
-			roles.setCreatedBy(Constants.SYSTEM_ACCOUNT);
 			roles.setUpdatedBy(Constants.SYSTEM_ACCOUNT);
 		}
 
-		Instant now = Instant.now();
-		roles.setCreatedOn(now);
-		roles.setUpdatedOn(now);
+		roles.setUpdatedOn(Instant.now());
 		roles = rolesRepository.save(roles);
 		logger.info("Role update successfully");
 		if (roles != null) {
@@ -212,4 +241,17 @@ public class RolesService {
 		}
 	}
 
+	public Roles getRolesByName(String name) {
+		logger.info("Getting role by name: " + name);
+		Roles role = new Roles();
+		role.setName(name.toUpperCase());
+		Optional<Roles> rul = rolesRepository.findOne(Example.of(role));
+		if (rul.isPresent()) {
+			role = rul.get();
+			logger.info("Role found. Role: " + role);
+			return role;
+		}
+		logger.warn("Role not found");
+		return null;
+	}
 }

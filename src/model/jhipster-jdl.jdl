@@ -330,6 +330,9 @@ relationship OneToMany {
     Contact{documentList} to Document,
     Requisition {requisition} to VendorRequisitionBucket,
     Vendor {vendor} to VendorRequisitionBucket,
+    Roles {roles} to Rules,
+   
+
 }
 
 relationship ManyToMany {

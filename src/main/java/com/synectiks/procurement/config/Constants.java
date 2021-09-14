@@ -20,11 +20,10 @@ public final class Constants {
     
     public static final String  SECURITY_SERVICE_URL ="http://localhost:8094/security/roles/create";
     
-    public static final String Status_Active = "Active";
-    public static final String Status_Inactive = "Inactive";
-    public static final String Status_Draft = "Draft";
-    public static final String Status =  Status_Inactive;
     public static final String LOCAL_REQUISITION_FILE_STORAGE_DIRECTORY = "requisition_files"; 
+    
+    public static final String RULE_APPROVE_REQUISITION = "APPROVE_REQUISITION"; 
+    
     private Constants() {
     }
 }

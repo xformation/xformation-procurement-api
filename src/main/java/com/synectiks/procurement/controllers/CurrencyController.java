@@ -24,11 +24,9 @@ import com.synectiks.procurement.business.service.CurrencyService;
 import com.synectiks.procurement.domain.Currency;
 import com.synectiks.procurement.domain.Status;
 
-import io.swagger.annotations.Api;
-
 @RestController
 @RequestMapping("/api")
-@Api(value = "/api", tags = "Currency Management")
+//@Api(value = "/api", tags = "Currency Management")
 public class CurrencyController {
 	private static final Logger logger = LoggerFactory.getLogger(CurrencyController.class);
 
@@ -118,7 +116,7 @@ public class CurrencyController {
 		}
 	}
 
-	@DeleteMapping("/currency/{id}")
+	@DeleteMapping("/deleteCurrency/{id}")
 	public ResponseEntity<Status> deleteCurrency(@PathVariable Long id) {
 		Status st = new Status();
 		try {

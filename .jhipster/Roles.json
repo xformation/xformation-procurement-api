@@ -34,7 +34,14 @@
       "fieldType": "Long"
     }
   ],
-  "relationships": [],
+  "relationships": [
+    {
+      "relationshipType": "one-to-many",
+      "otherEntityName": "rules",
+      "otherEntityRelationshipName": "roles",
+      "relationshipName": "roles"
+    }
+  ],
   "entityTableName": "roles",
   "dto": "no",
   "pagination": "no",

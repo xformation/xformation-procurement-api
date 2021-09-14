@@ -38,7 +38,14 @@
       "fieldType": "String"
     }
   ],
-  "relationships": [],
+  "relationships": [
+    {
+      "relationshipType": "many-to-one",
+      "otherEntityName": "roles",
+      "otherEntityRelationshipName": "roles",
+      "relationshipName": "roles"
+    }
+  ],
   "entityTableName": "rules",
   "dto": "no",
   "pagination": "no",

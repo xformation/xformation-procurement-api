@@ -1,5 +1,6 @@
 package com.synectiks.procurement.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.io.Serializable;
 import java.time.Instant;
 import javax.persistence.*;
@@ -19,7 +20,7 @@ public class Rules implements Serializable {
   @SequenceGenerator(name = "sequenceGenerator")
   private Long id;
 
-  @Column(name = "name",unique = true)
+  @Column(name = "name")
   private String name;
 
   @Size(max = 5000)
@@ -44,6 +45,10 @@ public class Rules implements Serializable {
 
   @Column(name = "updated_by")
   private String updatedBy;
+
+  @ManyToOne
+  @JsonIgnoreProperties(value = { "roles" }, allowSetters = true)
+  private Roles roles;
 
   // jhipster-needle-entity-add-field - JHipster will add fields here
   public Long getId() {
@@ -161,6 +166,19 @@ public class Rules implements Serializable {
 
   public void setUpdatedBy(String updatedBy) {
     this.updatedBy = updatedBy;
+  }
+
+  public Roles getRoles() {
+    return this.roles;
+  }
+
+  public Rules roles(Roles roles) {
+    this.setRoles(roles);
+    return this;
+  }
+
+  public void setRoles(Roles roles) {
+    this.roles = roles;
   }
 
   // jhipster-needle-entity-add-getters-setters - JHipster will add getters and setters here

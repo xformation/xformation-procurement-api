@@ -2,6 +2,7 @@ package com.synectiks.procurement.business.service;
 
 import java.net.URISyntaxException;
 import java.time.Instant;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -18,34 +19,52 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.synectiks.procurement.config.Constants;
+import com.synectiks.procurement.domain.Roles;
 import com.synectiks.procurement.domain.Rules;
 import com.synectiks.procurement.repository.RulesRepository;
+import com.synectiks.procurement.web.rest.errors.UniqueConstraintException;
 
 @Service
 public class RulesService {
-
+	
 	private static final Logger logger = LoggerFactory.getLogger(RulesService.class);
+	
+	@Autowired
+	private RolesService rolesService;
 
 	@Autowired
 	private RulesRepository rulesRepository;
 
-	public Rules addRules(ObjectNode obj) throws JSONException {
+	public Rules addRules(ObjectNode obj) throws JSONException, UniqueConstraintException {
 		Rules rules = new Rules();
-		
+
 		if (obj.get("name") != null) {
 			rules.setName(obj.get("name").asText().toUpperCase());
 		}
 		
-		Optional<Rules> optional = rulesRepository.findOne(Example.of(rules));
-		
-		if (optional.isPresent()) {
-			return null;
+		if (obj.get("roleId") != null && obj.get("name") != null) {
+			Roles rol = rolesService.getRoles(obj.get("roleId").asLong());
+			if (rol != null) {
+				
+				rules.setRoles(rol);
+				try {
+					logger.debug("Checking for duplicate rule for given role : "+rol.getName());
+					List<Rules> ruleList = rulesRepository.findAll(Example.of(rules));
+					if (ruleList.size() > 0) {
+						logger.error("Rule already exists. Duplicate rule not allowed for role:" +rol.getName());
+						UniqueConstraintException ex = new UniqueConstraintException("Rule already exists. Duplicate rule not allowed for role:" +rol.getName());
+						throw ex;
+					}
+				} catch (Exception e) {
+					logger.error("Exception in validating duplicate rule. Exception: ", e);
+					throw e;
+				}
+			}
 		}
-
+		
 		if (obj.get("description") != null) {
 			rules.setDescription(obj.get("description").asText());
 		}
-
 		if (obj.get("status") != null) {
 			rules.setStatus(obj.get("status").asText());
 		}
@@ -59,28 +78,53 @@ public class RulesService {
 		} else {
 			rules.setCreatedBy(Constants.SYSTEM_ACCOUNT);
 			rules.setUpdatedBy(Constants.SYSTEM_ACCOUNT);
-
-			Instant now = Instant.now();
-			rules.setCreatedOn(now);
-			rules.setUpdatedOn(now);
-			rules = rulesRepository.save(rules);
-			logger.info("Adding rule completed" + rules.toString());
-
 		}
+		
+		Instant now = Instant.now();
+		rules.setCreatedOn(now);
+		rules.setUpdatedOn(now);
+		
+		rules = rulesRepository.save(rules);
+		logger.info("Adding rule completed successfully. Rule: " + rules.toString());
 		return rules;
 	}
 
-	public Rules updateRules(ObjectNode obj) throws JSONException, URISyntaxException {
-		Optional<Rules> ur = rulesRepository.findById(Long.parseLong(obj.get("id").asText()));
-		if (!ur.isPresent()) {
+	public Rules updateRules(ObjectNode obj) throws JSONException, URISyntaxException, UniqueConstraintException {
+		
+		Optional<Rules> oRule = rulesRepository.findById(Long.parseLong(obj.get("ruleId").asText()));
+		if (!oRule.isPresent()) {
 			logger.error("Rule not found");
 			return null;
 		}
-		Rules rules = ur.get();
+		
+		Rules rules = oRule.get();
+		
+		try {
+			if (obj.get("roleName") != null && (!rules.getRoles().getName().equalsIgnoreCase(obj.get("roleName").asText()))) {
+				Map<String, String> requestObj = new HashMap<>();
+				requestObj.put("name", obj.get("roleName").asText());
+				List<Roles> roleList = rolesService.searchRoles(requestObj);
+				if(roleList.size() > 0) {
+					for(Roles rl: roleList) {
+						if(rl.getName().equalsIgnoreCase((rules.getName()))) {
+							logger.error("Rule already exists. Duplicate rule not allowed for role:" +rl.getName());
+							UniqueConstraintException ex = new UniqueConstraintException("Rule already exists. Duplicate rule not allowed for role:" +rl.getName());
+							throw ex;
+						}
+					}
+				}
+				
+			}
+
+		} catch (Exception e) {
+			logger.error("Exception in validating duplicate rule. Exception: ", e);
+			throw e;
+		}
 
 		if (obj.get("name") != null) {
 			rules.setName(obj.get("name").asText().toUpperCase());
 		}
+		
 		Optional<Rules> optional = rulesRepository.findOne(Example.of(rules));
 		if (optional.isPresent()) {
 			return null;
@@ -97,19 +141,15 @@ public class RulesService {
 		}
 
 		if (obj.get("user") != null) {
-			rules.setCreatedBy(obj.get("user").asText());
 			rules.setUpdatedBy(obj.get("user").asText());
 		} else {
-			rules.setCreatedBy(Constants.SYSTEM_ACCOUNT);
 			rules.setUpdatedBy(Constants.SYSTEM_ACCOUNT);
-
-			Instant now = Instant.now();
-			rules.setCreatedOn(now);
-			rules.setUpdatedOn(now);
-			rules = rulesRepository.save(rules);
-			logger.info("Updateing rule completed" + rules.toString());
-
 		}
+		
+		rules.setUpdatedOn(Instant.now());
+		rules = rulesRepository.save(rules);
+		logger.info("Updateing rule completed successfully. Rule: " + rules.toString());
+		
 		return rules;
 	}
 
@@ -170,6 +210,21 @@ public class RulesService {
 		return null;
 	}
 
+	public List<Rules> getRulesByRole(Roles role) {
+		logger.info("Getting rules by role: " + role.getName());
+		Rules rules = new Rules();
+		rules.setRoles(role);
+		return rulesRepository.findAll(Example.of(rules));
+	}
+	
+	public Rules getRulesByRoleAndRuleName(Roles role, String ruleName) {
+		logger.info("Getting rules by role: " + role.getName()+" and rule name : "+ruleName);
+		Rules rules = new Rules();
+		rules.setRule(ruleName);
+		rules.setRoles(role);
+		return rulesRepository.findOne(Example.of(rules)).orElse(null);
+	}
+	
 	public void deleteRules(Long id) {
 		rulesRepository.deleteById(id);
 		logger.info("Rule deleted successfully");

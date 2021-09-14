@@ -28,8 +28,7 @@ import io.swagger.annotations.Api;
 
 @RestController
 @RequestMapping("/api")
-
-@Api(value = "/api", tags = "Department Management")
+//@Api(value = "/api", tags = "Department Management")
 public class DepartmentController {
 	private static final Logger logger = LoggerFactory.getLogger(DepartmentController.class);
 
@@ -119,7 +118,7 @@ public class DepartmentController {
 		}
 	}
 
-	@DeleteMapping("/department/{id}")
+	@DeleteMapping("/deleteDepartment/{id}")
 	public ResponseEntity<Status> deleteDepartment(@PathVariable Long id) {
 		Status st = new Status();
 		try {
@@ -136,32 +135,32 @@ public class DepartmentController {
 		}
 	}
 
-	@GetMapping("/getAllDepartment")
-	private ResponseEntity<Status> getAllDepartment() {
-		logger.info("Request to get all Department");
-		Status st = new Status();
-		try {
-			List<Department> list = departmentService.getAllDepartment();
-			if (list == null) {
-				logger.error("Search all department failed");
-				st.setCode(HttpStatus.EXPECTATION_FAILED.value());
-				st.setType("ERROR");
-				st.setMessage("Search all department failed");
-				return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(st);
-			}
-			st.setCode(HttpStatus.OK.value());
-			st.setType("SUCCESS");
-			st.setMessage("Search all department successful");
-			st.setObject(list);
-			return ResponseEntity.status(HttpStatus.OK).body(st);
-		} catch (Exception e) {
-			logger.error("Search all department failed. Exception: ", e);
-			st.setCode(HttpStatus.EXPECTATION_FAILED.value());
-			st.setType("ERROR");
-			st.setMessage("Search all department failed");
-			return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(st);
-		}
-	}
+//	@GetMapping("/getAllDepartment")
+//	private ResponseEntity<Status> getAllDepartment() {
+//		logger.info("Request to get all Department");
+//		Status st = new Status();
+//		try {
+//			List<Department> list = departmentService.getAllDepartment();
+//			if (list == null) {
+//				logger.error("Search all department failed");
+//				st.setCode(HttpStatus.EXPECTATION_FAILED.value());
+//				st.setType("ERROR");
+//				st.setMessage("Search all department failed");
+//				return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(st);
+//			}
+//			st.setCode(HttpStatus.OK.value());
+//			st.setType("SUCCESS");
+//			st.setMessage("Search all department successful");
+//			st.setObject(list);
+//			return ResponseEntity.status(HttpStatus.OK).body(st);
+//		} catch (Exception e) {
+//			logger.error("Search all department failed. Exception: ", e);
+//			st.setCode(HttpStatus.EXPECTATION_FAILED.value());
+//			st.setType("ERROR");
+//			st.setMessage("Search all department failed");
+//			return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(st);
+//		}
+//	}
 
 	@GetMapping("/getDepartment/{id}")
 	public ResponseEntity<Status> getDepartment(@PathVariable Long id) {
