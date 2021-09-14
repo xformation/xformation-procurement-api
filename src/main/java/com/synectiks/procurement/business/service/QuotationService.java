@@ -186,8 +186,7 @@ public class QuotationService {
 			quotation.setUpdatedBy(Constants.SYSTEM_ACCOUNT);
 		}
 
-		Instant now = Instant.now();
-		quotation.setUpdatedOn(now);
+		quotation.setUpdatedOn(Instant.now());
 		quotation = quotationRepository.save(quotation);
 		logger.info("Quotation updated");
 		if (quotation != null) {

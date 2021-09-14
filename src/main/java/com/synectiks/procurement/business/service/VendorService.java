@@ -120,9 +120,7 @@ public class VendorService {
 		} else {
 			vendor.setUpdatedBy(Constants.SYSTEM_ACCOUNT);
 		}
-
-		Instant now = Instant.now();
-		vendor.setUpdatedOn(now);
+		vendor.setUpdatedOn(Instant.now());
 		vendor = vendorRepository.save(vendor);
 		logger.info("Updating vendor completed" + vendor.toString());
 		return vendor;

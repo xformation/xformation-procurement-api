@@ -15,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.configurationprocessor.json.JSONException;
+import org.springframework.boot.configurationprocessor.json.JSONObject;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
@@ -25,6 +26,8 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.synectiks.procurement.config.Constants;
 import com.synectiks.procurement.domain.PurchaseOrder;
 import com.synectiks.procurement.domain.Requisition;
+import com.synectiks.procurement.domain.Roles;
+import com.synectiks.procurement.domain.Rules;
 import com.synectiks.procurement.repository.PurchaseOrderRepository;
 import com.synectiks.procurement.repository.RequisitionRepository;
 
@@ -37,6 +40,12 @@ public class PurchaseOrderService {
 
 	@Autowired
 	private PurchaseOrderRepository purchaseOrderRepository;
+
+	@Autowired
+	private RolesService rolesService;
+
+	@Autowired
+	private RulesService rulesService;
 
 	public PurchaseOrder getPurchaseOrder(Long id) {
 		logger.info("Getting purchase order by id: " + id);
@@ -132,9 +141,7 @@ public class PurchaseOrderService {
 		} else {
 			purchaseOrder.setUpdatedBy(Constants.SYSTEM_ACCOUNT);
 		}
-
-		Instant now = Instant.now();
-		purchaseOrder.setUpdatedOn(now);
+		purchaseOrder.setUpdatedOn(Instant.now());
 		purchaseOrder = purchaseOrderRepository.save(purchaseOrder);
 		logger.info("Updating purchase order completed successfully: " + purchaseOrder.toString());
 		return purchaseOrder;
@@ -174,6 +181,83 @@ public class PurchaseOrderService {
 
 	public void deletePurchaseOrder(Long id) {
 		purchaseOrderRepository.deleteById(id);
+	}
+
+	public boolean approvePurchaseOrder(ObjectNode obj) throws JSONException {
+		logger.info("Getting purchase order by id: " + obj);
+
+		try {
+			if (obj.get("requisitionId") == null) {
+				logger.error("Requision id not found. Cannot approve .purchase order");
+				return false;
+			}
+
+			if (obj.get("roleName") == null) {
+				logger.error("Role not found. Cannot approve purchase order");
+				return false;
+			}
+
+			Optional<Requisition> req = requisitionRepository.findById(obj.get("requisitionId").asLong());
+			if (!req.isPresent()) {
+				logger.error("Requision not found. Cannot approve requisition.");
+				return false;
+			}
+
+			Roles role = rolesService.getRolesByName(obj.get("roleName").asText());
+			if (role == null) {
+				logger.error(
+						"Given role " + obj.get("roleName").asText() + " not found. Cannot approve purchase order .");
+				return false;
+			}
+
+			Requisition requisition = req.get();
+			Rules rule = rulesService.getRulesByRoleAndRuleName(role, Constants.RULE_APPROVE_REQUISITION);
+			if (rule == null) {
+				logger.error("Approval rule not found. Cannot approve purchase order .");
+				return false;
+			}
+
+			JSONObject jsonObject = new JSONObject(rule.getRule());
+
+			int price = 0;
+			if (requisition.getTotalPrice() != null) {
+				price = requisition.getTotalPrice().intValue();
+			}
+
+			int minRulePrice = 0;
+			int maxRulePrice = 0;
+
+			try {
+				minRulePrice = jsonObject.getInt("min");
+			} catch (Exception e) {
+				logger.error("Minimum price rule not found. Cannot approve purchase order . Exception: ", e);
+				return false;
+			}
+
+			if (jsonObject.get("max") != null) {
+				try {
+					maxRulePrice = jsonObject.getInt("max");
+				} catch (Exception e) {
+					logger.error("Incorrect maximum price rule. Cannot approve purchase order . Exception: ", e);
+					return false;
+				}
+			}
+
+			if (price >= minRulePrice && jsonObject.get("max") == null) {
+				requisition.setStatus(Constants.PROGRESS_STAGE_APPROVED);
+			}
+
+			if (price >= minRulePrice && jsonObject.get("max") != null && price <= maxRulePrice) {
+				requisition.setStatus(Constants.PROGRESS_STAGE_APPROVED);
+			}
+
+			requisition = requisitionRepository.save(requisition);
+			return true;
+		} catch (Exception e) {
+			logger.error("Approve purchase order failed. Exception: ", e);
+			return false;
+		}
+
 	}
 
 }

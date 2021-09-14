@@ -31,7 +31,7 @@ public class PurchaseOrderController {
 
 	@Autowired
 	private PurchaseOrderService purchaseOrderService;
-
+	
 	@PostMapping("/addPurchaseOrder")
 	public ResponseEntity<Status> addPurchaseOrder(@RequestBody ObjectNode obj) throws JSONException {
 		logger.info("Request to add purchase order");
@@ -155,6 +155,33 @@ public class PurchaseOrderController {
 			st.setCode(HttpStatus.EXPECTATION_FAILED.value());
 			st.setType("ERROR");
 			st.setMessage("Purchase order not found");
+			return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(st);
+		}
+	}
+	
+	@PostMapping("/approvePurchaseOrder")
+	public ResponseEntity<Status> approvePurchaseOrder(@RequestBody ObjectNode obj)
+			throws JSONException {
+		logger.info("Request to approve a purchase order");
+		
+		Status st = new Status();
+		try {
+			boolean updateFlag = purchaseOrderService.approvePurchaseOrder(obj);
+			if (updateFlag) {
+				st.setCode(HttpStatus.OK.value());
+				st.setType("SUCCESS");
+				st.setMessage("purchase order approved successfully");
+			} else {
+				st.setCode(HttpStatus.OK.value());
+				st.setType("Fialed");
+				st.setMessage("purchase order could not be updated");
+			}
+			return ResponseEntity.status(HttpStatus.OK).body(st);
+		} catch (Exception e) {
+			logger.error("Approve purchase order failed");
+			st.setCode(HttpStatus.EXPECTATION_FAILED.value());
+			st.setType("ERROR");
+			st.setMessage("Approve purchase order failed");
 			return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(st);
 		}
 	}

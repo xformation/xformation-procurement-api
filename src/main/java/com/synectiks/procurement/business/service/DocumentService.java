@@ -145,9 +145,7 @@ public class DocumentService {
 		} else {
 			document.setUpdatedBy(Constants.SYSTEM_ACCOUNT);
 		}
-
-		Instant now = Instant.now();
-		document.setUpdatedOn(now);
+		document.setUpdatedOn(Instant.now());
 		document = documentRepository.save(document);
 		logger.info("Updating document completed");
 		return document;

@@ -10,6 +10,8 @@ public final class Constants {
     public static final String PROGRESS_STAGE_NEW = "NEW";
     public static final String PROGRESS_STAGE_PENDING_FOR_APPROVAL = "PENDING_FOR_APPROVAL";
     public static final String PROGRESS_STAGE_APPROVED = "APPROVED";
+
+    
     public static final String PROGRESS_STAGE_REJECTED = "REJECTED";
     
     public static final String DATE_FORMAT_YYYY_MM_DD = "YYYY-MM-DD";

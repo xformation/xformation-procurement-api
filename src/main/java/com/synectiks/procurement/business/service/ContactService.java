@@ -139,9 +139,7 @@ public class ContactService {
 			contact.setCreatedBy(Constants.SYSTEM_ACCOUNT);
 			contact.setUpdatedBy(Constants.SYSTEM_ACCOUNT);
 		}
-
-		Instant now = Instant.now();
-		contact.setUpdatedOn(now);
+		contact.setUpdatedOn(Instant.now());
 		contact = contactRepository.save(contact);
 		if (contact != null) {
 			ContactActivity contactActivity = new ContactActivity();

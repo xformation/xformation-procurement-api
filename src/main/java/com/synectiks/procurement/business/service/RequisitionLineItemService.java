@@ -188,17 +188,13 @@ public class RequisitionLineItemService {
 		}
 
 		if (obj.get("user") != null) {
-			requisitionLineItem.setCreatedBy(obj.get("user").asText());
 			requisitionLineItem.setUpdatedBy(obj.get("user").asText());
 		} else {
-			requisitionLineItem.setCreatedBy(Constants.SYSTEM_ACCOUNT);
 			requisitionLineItem.setUpdatedBy(Constants.SYSTEM_ACCOUNT);
 
 		}
 
-		Instant now = Instant.now();
-		requisitionLineItem.setCreatedOn(now);
-		requisitionLineItem.setUpdatedOn(now);
+		requisitionLineItem.setUpdatedOn(Instant.now());
 		logger.debug("RequisitionLineItem object: " + requisitionLineItem.toString());
 		requisitionLineItem = requisitionLineItemRepository.save(requisitionLineItem);
 		logger.info("Requisition line item added successfully");

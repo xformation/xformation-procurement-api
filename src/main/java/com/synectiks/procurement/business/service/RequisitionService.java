@@ -43,7 +43,6 @@ import com.synectiks.procurement.domain.Vendor;
 import com.synectiks.procurement.domain.VendorRequisitionBucket;
 import com.synectiks.procurement.repository.RequisitionActivityRepository;
 import com.synectiks.procurement.repository.RequisitionRepository;
-import com.synectiks.procurement.repository.RulesRepository;
 import com.synectiks.procurement.repository.VendorRequisitionBucketRepository;
 
 @Service
@@ -76,12 +75,9 @@ public class RequisitionService {
 
 	@Autowired
 	private RolesService rolesService;
-	
+
 	@Autowired
 	private RulesService rulesService;
-	
-	@Autowired
-	private RulesRepository rulesRepository;
 
 	public Requisition getRequisition(Long id) {
 		logger.info("Getting requisition by id: " + id);
@@ -108,7 +104,8 @@ public class RequisitionService {
 			if (!localStorage.exists()) {
 				localStorage.mkdirs();
 			}
-			Path path = Paths.get(Constants.LOCAL_REQUISITION_FILE_STORAGE_DIRECTORY + File.pathSeparatorChar + filename);
+			Path path = Paths
+					.get(Constants.LOCAL_REQUISITION_FILE_STORAGE_DIRECTORY + File.pathSeparatorChar + filename);
 			Files.write(path, bytes);
 		}
 		ObjectMapper mapper = new ObjectMapper();
@@ -276,9 +273,7 @@ public class RequisitionService {
 		} else {
 			requisition.setUpdatedBy(Constants.SYSTEM_ACCOUNT);
 		}
-
-		Instant now = Instant.now();
-		requisition.setUpdatedOn(now);
+		requisition.setUpdatedOn(Instant.now());
 		requisition = requisitionRepository.save(requisition);
 		logger.info("Requisition updated successfully");
 
@@ -468,80 +463,78 @@ public class RequisitionService {
 
 	public boolean approveRequisition(ObjectNode obj) throws JSONException {
 		logger.info("Getting requisition by id: " + obj);
-		
+
 		try {
-			if(obj.get("requisitionId") == null) {
+			if (obj.get("requisitionId") == null) {
 				logger.error("Requision id not found. Cannot approve requisition.");
 				return false;
 			}
-			
-			if(obj.get("roleName") == null) {
+
+			if (obj.get("roleName") == null) {
 				logger.error("Role not found. Cannot approve requisition.");
 				return false;
 			}
-			
+
 			Optional<Requisition> req = requisitionRepository.findById(obj.get("requisitionId").asLong());
 			if (!req.isPresent()) {
 				logger.error("Requision not found. Cannot approve requisition.");
 				return false;
 			}
-			
+
 			Roles role = rolesService.getRolesByName(obj.get("roleName").asText());
 			if (role == null) {
-				logger.error("Given role "+obj.get("roleName").asText()+" not found. Cannot approve requisition.");
+				logger.error("Given role " + obj.get("roleName").asText() + " not found. Cannot approve requisition.");
 				return false;
 			}
-			
+
 			Requisition requisition = req.get();
 			Rules rule = rulesService.getRulesByRoleAndRuleName(role, Constants.RULE_APPROVE_REQUISITION);
-			if(rule == null) {
+			if (rule == null) {
 				logger.error("Approval rule not found. Cannot approve requisition.");
 				return false;
 			}
-			
+
 			JSONObject jsonObject = new JSONObject(rule.getRule());
-			
+
 			int price = 0;
-			if(requisition.getTotalPrice() != null) {
+			if (requisition.getTotalPrice() != null) {
 				price = requisition.getTotalPrice().intValue();
 			}
-			
+
 			int minRulePrice = 0;
 			int maxRulePrice = 0;
-			
+
 			try {
 				minRulePrice = jsonObject.getInt("min");
-			}catch(Exception e) {
-				logger.error("Minimum price rule not found. Cannot approve requisiont. Exception: ",e);
+			} catch (Exception e) {
+				logger.error("Minimum price rule not found. Cannot approve requisiont. Exception: ", e);
 				return false;
 			}
-			
-			if(jsonObject.get("max") != null) {
+
+			if (jsonObject.get("max") != null) {
 				try {
 					maxRulePrice = jsonObject.getInt("max");
-				}catch(Exception e) {
-					logger.error("Incorrect maximum price rule. Cannot approve requisiont. Exception: ",e);
+				} catch (Exception e) {
+					logger.error("Incorrect maximum price rule. Cannot approve requisiont. Exception: ", e);
 					return false;
 				}
 			}
-			
-			if(price >= minRulePrice && jsonObject.get("max") == null) {
+
+			if (price >= minRulePrice && jsonObject.get("max") == null) {
 				requisition.setStatus(Constants.PROGRESS_STAGE_APPROVED);
 			}
-			
-			if(price >= minRulePrice && jsonObject.get("max") != null && price <= maxRulePrice) {
+
+			if (price >= minRulePrice && jsonObject.get("max") != null && price <= maxRulePrice) {
 				requisition.setStatus(Constants.PROGRESS_STAGE_APPROVED);
 			}
 
 			requisition = requisitionRepository.save(requisition);
 			return true;
-		}catch(Exception e) {
+		} catch (Exception e) {
 			logger.error("Approve requisition failed. Exception: ", e);
 			return false;
 		}
-		
-		
-		
+
 	}
 
 }

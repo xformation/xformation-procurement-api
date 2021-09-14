@@ -118,8 +118,7 @@ public class CommitteeService {
 			committee.setUpdatedBy(Constants.SYSTEM_ACCOUNT);
 		}
 
-		Instant now = Instant.now();
-		committee.setUpdatedOn(now);
+		committee.setUpdatedOn(Instant.now());
 		committee = committeeRepository.save(committee);
 		logger.info("Updating committee completed : " + committee);
 		if (committee != null) {
