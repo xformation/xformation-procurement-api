@@ -177,14 +177,7 @@ public class RequisitionService {
 
 		requisition = requisitionRepository.save(requisition);
 		logger.debug("Requisition saved");
-		if (requisition != null) {
-			logger.info("Adding requisition activity");
-			RequisitionActivity requisitionActivity = new RequisitionActivity();
-			BeanUtils.copyProperties(requisition, requisitionActivity);
-			requisitionActivity.setRequisitionId(requisition.getId());
-			requisitionActivity = requisitionActivityService.addRequisitionActivity(requisitionActivity);
-			logger.info("Requisition activity added successfully");
-		}
+		saveRequisitionActivity(requisition);
 
 		JSONObject jsonObj = new JSONObject(obj);
 		JSONArray reqLineItemArray = jsonObj.getJSONArray("requisitionLineItemLists");
@@ -277,16 +270,22 @@ public class RequisitionService {
 		requisition = requisitionRepository.save(requisition);
 		logger.info("Requisition updated successfully");
 
+		saveRequisitionActivity(requisition);
+
+		return requisition;
+	}
+
+	private RequisitionActivity saveRequisitionActivity(Requisition requisition) {
+		RequisitionActivity requisitionActivity = null;
 		if (requisition != null) {
 			logger.info("Adding requisition activity");
-			RequisitionActivity requisitionActivity = new RequisitionActivity();
+			requisitionActivity = new RequisitionActivity();
 			BeanUtils.copyProperties(requisition, requisitionActivity);
 			requisitionActivity.setRequisitionId(requisition.getId());
 			requisitionActivity = requisitionActivityService.addRequisitionActivity(requisitionActivity);
 			logger.info("Requisition activity added successfully");
 		}
-
-		return requisition;
+		return requisitionActivity;
 	}
 
 	public List<Requisition> searchRequisition(Map<String, String> requestObj) {
@@ -529,6 +528,7 @@ public class RequisitionService {
 			}
 
 			requisition = requisitionRepository.save(requisition);
+			saveRequisitionActivity(requisition);
 			return true;
 		} catch (Exception e) {
 			logger.error("Approve requisition failed. Exception: ", e);
