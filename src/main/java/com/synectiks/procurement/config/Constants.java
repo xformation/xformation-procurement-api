@@ -25,6 +25,8 @@ public final class Constants {
     public static final String LOCAL_REQUISITION_FILE_STORAGE_DIRECTORY = "requisition_files"; 
     
     public static final String RULE_APPROVE_REQUISITION = "APPROVE_REQUISITION"; 
+    public static final String RULE_APPROVE_PURCHASEORDER = "APPROVE_PURCHASEORDER"; 
+    public static final String RULE_APPROVE_INVOICE = "APPROVE_INVOICE"; 
     
     private Constants() {
     }

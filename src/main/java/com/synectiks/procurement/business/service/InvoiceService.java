@@ -284,8 +284,8 @@ public class InvoiceService {
 		logger.info("Getting requisition by id: " + obj);
 
 		try {
-			if (obj.get("requisitionId") == null) {
-				logger.error("Requision id not found. Cannot approve invoice");
+			if (obj.get("invoiceId") == null) {
+				logger.error("invoice id not found. Cannot approve invoice");
 				return false;
 			}
 
@@ -294,9 +294,9 @@ public class InvoiceService {
 				return false;
 			}
 
-			Optional<Requisition> req = requisitionRepository.findById(obj.get("requisitionId").asLong());
+			Optional<Invoice> req = invoiceRepository.findById(obj.get("invoiceId").asLong());
 			if (!req.isPresent()) {
-				logger.error("Requision not found. Cannot approve invoice");
+				logger.error("invoice not found. Cannot approve invoice");
 				return false;
 			}
 
@@ -305,9 +305,15 @@ public class InvoiceService {
 				logger.error("Given role " + obj.get("roleName").asText() + " not found. Cannot approve invoice ");
 				return false;
 			}
-
-			Requisition requisition = req.get();
-			Rules rule = rulesService.getRulesByRoleAndRuleName(role, Constants.RULE_APPROVE_REQUISITION);
+			
+			Optional<Requisition> requ = requisitionRepository.findById(obj.get("requisitionId").asLong());
+            if (!requ.isPresent()) {
+				logger.error("Requision not found. Cannot approve requisition.");
+				return false;
+			}
+            
+			Requisition requisition = requ.get();
+			Rules rule = rulesService.getRulesByRoleAndRuleName(role, Constants.RULE_APPROVE_INVOICE);
 			if (rule == null) {
 				logger.error("Approval rule not found. Cannot approve invoice");
 				return false;

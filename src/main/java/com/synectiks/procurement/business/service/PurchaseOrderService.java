@@ -187,8 +187,8 @@ public class PurchaseOrderService {
 		logger.info("Getting purchase order by id: " + obj);
 
 		try {
-			if (obj.get("requisitionId") == null) {
-				logger.error("Requision id not found. Cannot approve .purchase order");
+			if (obj.get("purchaseOrderId") == null) {
+				logger.error("purchase order id not found. Cannot approve .purchase order");
 				return false;
 			}
 
@@ -197,9 +197,9 @@ public class PurchaseOrderService {
 				return false;
 			}
 
-			Optional<Requisition> req = requisitionRepository.findById(obj.get("requisitionId").asLong());
-			if (!req.isPresent()) {
-				logger.error("Requision not found. Cannot approve requisition.");
+			Optional<PurchaseOrder> pur = purchaseOrderRepository.findById(obj.get("purchaseOrderId").asLong());
+			if (!pur.isPresent()) {
+				logger.error("Purchase order not found. Cannot approve .purchase order");
 				return false;
 			}
 
@@ -209,9 +209,16 @@ public class PurchaseOrderService {
 						"Given role " + obj.get("roleName").asText() + " not found. Cannot approve purchase order .");
 				return false;
 			}
-
-			Requisition requisition = req.get();
-			Rules rule = rulesService.getRulesByRoleAndRuleName(role, Constants.RULE_APPROVE_REQUISITION);
+           
+			Optional<Requisition> req = requisitionRepository.findById(obj.get("requisitionId").asLong());
+            if (!req.isPresent()) {
+				logger.error("Requision not found. Cannot approve requisition.");
+				return false;
+			}
+            
+            Requisition requisition = req.get();
+			
+            Rules rule = rulesService.getRulesByRoleAndRuleName(role, Constants.RULE_APPROVE_PURCHASEORDER);
 			if (rule == null) {
 				logger.error("Approval rule not found. Cannot approve purchase order .");
 				return false;
