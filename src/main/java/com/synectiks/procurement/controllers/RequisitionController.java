@@ -249,9 +249,9 @@ public class RequisitionController {
 				st.setType("SUCCESS");
 				st.setMessage("Requisition approved successfully");
 			} else {
-				st.setCode(HttpStatus.OK.value());
-				st.setType("Fialed");
-				st.setMessage("Requestion could not be updated");
+				st.setCode(HttpStatus.EXPECTATION_FAILED.value());
+				st.setType("ERROR");
+				st.setMessage("Requestion could not be approved");
 			}
 			return ResponseEntity.status(HttpStatus.OK).body(st);
 		} catch (Exception e) {

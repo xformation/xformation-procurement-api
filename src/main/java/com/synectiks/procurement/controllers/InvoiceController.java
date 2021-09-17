@@ -164,7 +164,7 @@ public class InvoiceController {
 
 		Status st = new Status();
 		try {
-			boolean updateFlag = invoiceService.approveInvoice(obj);
+//			boolean updateFlag = invoiceService.approveInvoice(obj);
 			if (updateFlag) {
 				st.setCode(HttpStatus.OK.value());
 				st.setType("SUCCESS");

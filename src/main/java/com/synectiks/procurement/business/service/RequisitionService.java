@@ -546,17 +546,26 @@ public class RequisitionService {
 				}
 			}
 
+			boolean isRuleApplied = false;
 			if (price >= minRulePrice && jsonObject.get("max") == null) {
 				requisition.setStatus(Constants.PROGRESS_STAGE_APPROVED);
+				isRuleApplied = true;
 			}
 
 			if (price >= minRulePrice && jsonObject.get("max") != null && price <= maxRulePrice) {
 				requisition.setStatus(Constants.PROGRESS_STAGE_APPROVED);
+				isRuleApplied = true;
 			}
-
-			requisition = requisitionRepository.save(requisition);
-			saveRequisitionActivity(requisition);
-			return true;
+			
+			if(isRuleApplied) {
+				requisition = requisitionRepository.save(requisition);
+				saveRequisitionActivity(requisition);
+				return true;
+			}else {
+				logger.warn("Approve requisition failed. No rule applied");
+				return false;
+			}
+			
 		} catch (Exception e) {
 			logger.error("Approve requisition failed. Exception: ", e);
 			return false;
