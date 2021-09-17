@@ -61,7 +61,7 @@ public class PurchaseOrderService {
 	public PurchaseOrder addPurchaseOrder(ObjectNode obj) throws JSONException {
 		PurchaseOrder purchaseOrder = new PurchaseOrder();
 
-		Optional<Requisition> oc = requisitionRepository.findById(Long.parseLong(obj.get("id").asText()));
+		Optional<Requisition> oc = requisitionRepository.findById(Long.parseLong(obj.get("requisitionId").asText()));
 		if (oc.isPresent()) {
 			purchaseOrder.setRequisition(oc.get());
 		}
@@ -197,26 +197,20 @@ public class PurchaseOrderService {
 				return false;
 			}
 
-			Optional<PurchaseOrder> pur = purchaseOrderRepository.findById(obj.get("purchaseOrderId").asLong());
-			if (!pur.isPresent()) {
+			Optional<PurchaseOrder> oPodr = purchaseOrderRepository.findById(obj.get("purchaseOrderId").asLong());
+			if (!oPodr.isPresent()) {
 				logger.error("Purchase order not found. Cannot approve .purchase order");
 				return false;
 			}
 
 			Roles role = rolesService.getRolesByName(obj.get("roleName").asText());
 			if (role == null) {
-				logger.error(
-						"Given role " + obj.get("roleName").asText() + " not found. Cannot approve purchase order .");
+				logger.error("Given role " + obj.get("roleName").asText() + " not found. Cannot approve purchase order .");
 				return false;
 			}
            
-			Optional<Requisition> req = requisitionRepository.findById(obj.get("requisitionId").asLong());
-            if (!req.isPresent()) {
-				logger.error("Requision not found. Cannot approve requisition.");
-				return false;
-			}
-            
-            Requisition requisition = req.get();
+			PurchaseOrder purchaseOrder = oPodr.get();
+            Requisition requisition = oPodr.get().getRequisition();
 			
             Rules rule = rulesService.getRulesByRoleAndRuleName(role, Constants.RULE_APPROVE_PURCHASEORDER);
 			if (rule == null) {
@@ -224,7 +218,7 @@ public class PurchaseOrderService {
 				return false;
 			}
 
-			JSONObject jsonObject = new JSONObject(rule.getRule());
+			JSONObject  jsonObject = new JSONObject(rule.getRule());
 
 			int price = 0;
 			if (requisition.getTotalPrice() != null) {
@@ -251,20 +245,19 @@ public class PurchaseOrderService {
 			}
 
 			if (price >= minRulePrice && jsonObject.get("max") == null) {
-				requisition.setStatus(Constants.PROGRESS_STAGE_APPROVED);
+				purchaseOrder.setStatus(Constants.PROGRESS_STAGE_APPROVED);
 			}
 
 			if (price >= minRulePrice && jsonObject.get("max") != null && price <= maxRulePrice) {
-				requisition.setStatus(Constants.PROGRESS_STAGE_APPROVED);
+				purchaseOrder.setStatus(Constants.PROGRESS_STAGE_APPROVED);
 			}
 
-			requisition = requisitionRepository.save(requisition);
+			purchaseOrder = purchaseOrderRepository.save(purchaseOrder);
 			return true;
 		} catch (Exception e) {
 			logger.error("Approve purchase order failed. Exception: ", e);
 			return false;
 		}
-
 	}
 
 }

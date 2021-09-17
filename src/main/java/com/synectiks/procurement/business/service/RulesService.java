@@ -44,8 +44,7 @@ public class RulesService {
 		
 		if (obj.get("roleId") != null && obj.get("name") != null) {
 			Roles rol = rolesService.getRoles(obj.get("roleId").asLong());
-			if (rol != null) {
-				
+			if (rol != null) {	
 				rules.setRoles(rol);
 				try {
 					logger.debug("Checking for duplicate rule for given role : "+rol.getName());
@@ -69,7 +68,7 @@ public class RulesService {
 			rules.setStatus(obj.get("status").asText());
 		}
 		if (obj.get("rule") != null) {
-			rules.setRule(obj.get("rule").asText());
+			rules.setRule(obj.get("rule").toString());
 		}
 
 		if (obj.get("user") != null) {

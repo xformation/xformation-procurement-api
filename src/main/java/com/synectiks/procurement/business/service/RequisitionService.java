@@ -137,9 +137,24 @@ public class RequisitionService {
 		if (json.get("financialYear") != null) {
 			requisition.setFinancialYear(json.get("financialYear").asInt());
 		}
-		if (json.get("type") != null) {
-			requisition.setType(json.get("type").asText());
-		}
+		
+//		if (json.get("type") != null) {
+//			requisition.setType(json.get("type").asText());
+			Rules rule = rulesService.getRulesByName(Constants.RULE_REQUISITION_TYPE);
+			JSONObject jsonObject = new JSONObject(rule.getRule());
+//       	JSONObject standardRule = jsonObject.getJSONObject(Constants.REQUISITION_TYPE_STANDARD);
+			JSONObject nonStandardRule = jsonObject.getJSONObject(Constants.REQUISITION_TYPE_NON_STANDARD);
+			if (json.get("totalPrice") != null) {
+				int price = json.get("totalPrice").asInt();
+				if (price >= nonStandardRule.getInt("min") && price <= nonStandardRule.getInt("max")) {
+					requisition.setType(Constants.REQUISITION_TYPE_NON_STANDARD);
+				} else {
+					requisition.setType(Constants.REQUISITION_TYPE_STANDARD);
+				}
+			}else {
+				requisition.setType(Constants.REQUISITION_TYPE_NON_STANDARD);
+			}
+//		}
 
 		if (json.get("totalPrice") != null) {
 			requisition.setTotalPrice(json.get("totalPrice").asInt());
@@ -241,9 +256,21 @@ public class RequisitionService {
 			requisition.setFinancialYear(obj.get("financialYear").asInt());
 		}
 
-		if (obj.get("type") != null) {
-			requisition.setType(obj.get("type").asText());
-		}
+//		if (obj.get("type") != null) {
+//			requisition.setType(json.get("type").asText());
+			Rules rule = rulesService.getRulesByName(Constants.RULE_REQUISITION_TYPE);
+			JSONObject jsonObject = new JSONObject(rule.getRule());
+//       		JSONObject standardRule = jsonObject.getJSONObject(Constants.REQUISITION_TYPE_STANDARD);
+			JSONObject nonStandardRule = jsonObject.getJSONObject(Constants.REQUISITION_TYPE_NON_STANDARD);
+			if (obj.get("totalPrice") != null) {
+				int price = obj.get("totalPrice").asInt();
+				if (price >= nonStandardRule.getInt("min") && price <= nonStandardRule.getInt("max")) {
+					requisition.setType(Constants.REQUISITION_TYPE_NON_STANDARD);
+				} else {
+					requisition.setType(Constants.REQUISITION_TYPE_STANDARD);
+				}
+			}
+//		}
 
 		if (obj.get("totalPrice") != null) {
 			requisition.setTotalPrice(obj.get("totalPrice").asInt());

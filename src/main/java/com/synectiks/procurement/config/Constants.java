@@ -27,6 +27,9 @@ public final class Constants {
     public static final String RULE_APPROVE_REQUISITION = "APPROVE_REQUISITION"; 
     public static final String RULE_APPROVE_PURCHASEORDER = "APPROVE_PURCHASEORDER"; 
     public static final String RULE_APPROVE_INVOICE = "APPROVE_INVOICE"; 
+    public static final String RULE_REQUISITION_TYPE = "REQUISITION_TYPE"; 
+    public static final String REQUISITION_TYPE_STANDARD = "standard"; 
+    public static final String REQUISITION_TYPE_NON_STANDARD = "nonstandard"; 
     
     private Constants() {
     }
