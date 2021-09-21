@@ -126,22 +126,22 @@ public class RequisitionController {
 
 	}
 
-	@DeleteMapping("/deleteRequisition/{id}")
-	public ResponseEntity<Status> deleteRequisition(@PathVariable Long id) {
-		Status st = new Status();
-		try {
-			requisitionService.deleteRequisition(id);
-			st.setCode(HttpStatus.OK.value());
-			st.setType("SUCCESS");
-			st.setMessage("Requisition deleted successfully");
-			return ResponseEntity.status(HttpStatus.OK).body(st);
-		} catch (Throwable th) {
-			st.setCode(HttpStatus.OK.value());
-			st.setType("ERROR");
-			st.setMessage("Delete Requisition failed");
-			return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(st);
-		}
-	}
+//	@DeleteMapping("/deleteRequisition/{id}")
+//	public ResponseEntity<Status> deleteRequisition(@PathVariable Long id) {
+//		Status st = new Status();
+//		try {
+//			requisitionService.deleteRequisition(id);
+//			st.setCode(HttpStatus.OK.value());
+//			st.setType("SUCCESS");
+//			st.setMessage("Requisition deleted successfully");
+//			return ResponseEntity.status(HttpStatus.OK).body(st);
+//		} catch (Throwable th) {
+//			st.setCode(HttpStatus.OK.value());
+//			st.setType("ERROR");
+//			st.setMessage("Delete Requisition failed");
+//			return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(st);
+//		}
+//	}
 
 //	@GetMapping("/getAllRequisitions")
 //	private ResponseEntity<Status> getAllRequisitions() {

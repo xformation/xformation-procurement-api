@@ -194,20 +194,29 @@ public class RulesService {
 		logger.warn("Rules not found");
 		return null;
 	}
-
-	public Rules getRulesByName(String name) {
+	
+	public List<Rules> getRulesByName(String name) {
 		logger.info("Getting rules by name: " + name);
-		Rules rules = new Rules();
-		rules.setName(name.toUpperCase());
-		Optional<Rules> rul = rulesRepository.findOne(Example.of(rules));
-		if (rul.isPresent()) {
-			rules = rul.get();
-			logger.info("Rules: " + rules);
-			return rules;
-		}
-		logger.warn("Name not found");
-		return null;
+		Map<String, String> map = new HashMap<>();
+		map.put("name", name);
+		List<Rules> rules = searchRules(map);
+		return rules;
 	}
+
+
+//	public Rules getRulesByName(String name) {
+//		logger.info("Getting rules by name: " + name);
+//		Rules rules = new Rules();
+//		rules.setName(name.toUpperCase());
+//		Optional<Rules> rul = rulesRepository.findOne(Example.of(rules));
+//		if (rul.isPresent()) {
+//			rules = rul.get();
+//			logger.info("Rules: " + rules);
+//			return rules;
+//		}
+//		logger.warn("Name not found");
+//		return null;
+//	}
 
 	public List<Rules> getRulesByRole(Roles role) {
 		logger.info("Getting rules by role: " + role.getName());
@@ -219,11 +228,12 @@ public class RulesService {
 	public Rules getRulesByRoleAndRuleName(Roles role, String ruleName) {
 		logger.info("Getting rules by role: " + role.getName()+" and rule name : "+ruleName);
 		Rules rules = new Rules();
-		rules.setRule(ruleName);
+		rules.setName(ruleName);
 		rules.setRoles(role);
 		return rulesRepository.findOne(Example.of(rules)).orElse(null);
 	}
-	
+
+//	
 	public void deleteRules(Long id) {
 		rulesRepository.deleteById(id);
 		logger.info("Rule deleted successfully");

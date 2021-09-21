@@ -1,6 +1,5 @@
 package com.synectiks.procurement.domain;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.io.Serializable;
 import java.time.Instant;
 import javax.persistence.*;
@@ -47,7 +46,6 @@ public class Rules implements Serializable {
   private String updatedBy;
 
   @ManyToOne
-  @JsonIgnoreProperties(value = { "roles" }, allowSetters = true)
   private Roles roles;
 
   // jhipster-needle-entity-add-field - JHipster will add fields here

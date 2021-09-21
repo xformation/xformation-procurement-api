@@ -137,23 +137,26 @@ public class RequisitionService {
 		if (json.get("financialYear") != null) {
 			requisition.setFinancialYear(json.get("financialYear").asInt());
 		}
-		
-//		if (json.get("type") != null) {
-//			requisition.setType(json.get("type").asText());
-			Rules rule = rulesService.getRulesByName(Constants.RULE_REQUISITION_TYPE);
-			JSONObject jsonObject = new JSONObject(rule.getRule());
-//       	JSONObject standardRule = jsonObject.getJSONObject(Constants.REQUISITION_TYPE_STANDARD);
-			JSONObject nonStandardRule = jsonObject.getJSONObject(Constants.REQUISITION_TYPE_NON_STANDARD);
-			if (json.get("totalPrice") != null) {
-				int price = json.get("totalPrice").asInt();
-				if (price >= nonStandardRule.getInt("min") && price <= nonStandardRule.getInt("max")) {
-					requisition.setType(Constants.REQUISITION_TYPE_NON_STANDARD);
-				} else {
-					requisition.setType(Constants.REQUISITION_TYPE_STANDARD);
-				}
-			}else {
+		Rules rule = null; 
+		if (json.get("roleName").asText() != null) {
+			Roles role = rolesService.getRolesByName(json.get("roleName").asText());
+			rule = rulesService.getRulesByRoleAndRuleName(role, Constants.RULE_REQUISITION_TYPE);
+		} else {
+			logger.error("Requistion could not be added. User's role missing");
+			return null;
+		}
+		JSONObject jsonObject = new JSONObject(rule.getRule());
+		JSONObject nonStandardRule = jsonObject.getJSONObject(Constants.REQUISITION_TYPE_NON_STANDARD);
+		if (json.get("totalPrice") != null) {
+			int price = json.get("totalPrice").asInt();
+			if (price >= nonStandardRule.getInt("min") && price <= nonStandardRule.getInt("max")) {
 				requisition.setType(Constants.REQUISITION_TYPE_NON_STANDARD);
+			} else {
+				requisition.setType(Constants.REQUISITION_TYPE_STANDARD);
 			}
+		} else {
+			requisition.setType(Constants.REQUISITION_TYPE_NON_STANDARD);
+		}
 //		}
 
 		if (json.get("totalPrice") != null) {
@@ -218,7 +221,7 @@ public class RequisitionService {
 	public Requisition updateRequisition(ObjectNode obj) throws JSONException {
 		logger.info("Update requisition");
 
-		Optional<Requisition> orq = requisitionRepository.findById(Long.parseLong(obj.get("id").asText()));
+		Optional<Requisition> orq = requisitionRepository.findById(Long.parseLong(obj.get("RequisitionId").asText()));
 		if (!orq.isPresent()) {
 			logger.error("Requisition could not be updated. Requisition not found");
 			return null;
@@ -255,21 +258,25 @@ public class RequisitionService {
 		if (obj.get("financialYear") != null) {
 			requisition.setFinancialYear(obj.get("financialYear").asInt());
 		}
-
-//		if (obj.get("type") != null) {
-//			requisition.setType(json.get("type").asText());
-			Rules rule = rulesService.getRulesByName(Constants.RULE_REQUISITION_TYPE);
-			JSONObject jsonObject = new JSONObject(rule.getRule());
+		Rules rule = null; 
+		if (obj.get("roleName").asText() != null) {
+			Roles role = rolesService.getRolesByName(obj.get("roleName").asText());
+			rule = rulesService.getRulesByRoleAndRuleName(role, Constants.RULE_REQUISITION_TYPE);
+		} else {
+			logger.error("Requistion could not be added. User's role missing");
+			return null;
+		}
+		JSONObject jsonObject = new JSONObject(rule.getRule());
 //       		JSONObject standardRule = jsonObject.getJSONObject(Constants.REQUISITION_TYPE_STANDARD);
-			JSONObject nonStandardRule = jsonObject.getJSONObject(Constants.REQUISITION_TYPE_NON_STANDARD);
-			if (obj.get("totalPrice") != null) {
-				int price = obj.get("totalPrice").asInt();
-				if (price >= nonStandardRule.getInt("min") && price <= nonStandardRule.getInt("max")) {
-					requisition.setType(Constants.REQUISITION_TYPE_NON_STANDARD);
-				} else {
-					requisition.setType(Constants.REQUISITION_TYPE_STANDARD);
-				}
+		JSONObject nonStandardRule = jsonObject.getJSONObject(Constants.REQUISITION_TYPE_NON_STANDARD);
+		if (obj.get("totalPrice") != null) {
+			int price = obj.get("totalPrice").asInt();
+			if (price >= nonStandardRule.getInt("min") && price <= nonStandardRule.getInt("max")) {
+				requisition.setType(Constants.REQUISITION_TYPE_NON_STANDARD);
+			} else {
+				requisition.setType(Constants.REQUISITION_TYPE_STANDARD);
 			}
+		}
 //		}
 
 		if (obj.get("totalPrice") != null) {
@@ -398,10 +405,10 @@ public class RequisitionService {
 
 	}
 
-	public void deleteRequisition(Long id) {
-		requisitionRepository.deleteById(id);
-		logger.info("Requisition deleted successfully");
-	}
+//	public void deleteRequisition(Long id) {
+//		requisitionRepository.deleteById(id);
+//		logger.info("Requisition deleted successfully");
+//	}
 
 	public List<Requisition> getAllRequisitions() {
 		List<Requisition> list = requisitionRepository.findAll(Sort.by(Direction.ASC, "id"));
@@ -506,19 +513,29 @@ public class RequisitionService {
 				logger.error("Requision not found. Cannot approve requisition.");
 				return false;
 			}
-
-			Roles role = rolesService.getRolesByName(obj.get("roleName").asText());
-			if (role == null) {
-				logger.error("Given role " + obj.get("roleName").asText() + " not found. Cannot approve requisition.");
-				return false;
-			}
+//			Roles role = rolesService.getRolesByName(json.get("roleName").asText());
+//			Roles role = rolesService.getRolesByName(obj.get("roleName").asText());
+//			if (role == null) {
+//				logger.error("Given role " + obj.get("roleName").asText() + "Role not found. Cannot approve requisition.");
+//				return false;
+//			}
 
 			Requisition requisition = req.get();
-			Rules rule = rulesService.getRulesByRoleAndRuleName(role, Constants.RULE_APPROVE_REQUISITION);
-			if (rule == null) {
-				logger.error("Approval rule not found. Cannot approve requisition.");
+			
+			Rules rule = null; 
+			if (obj.get("roleName").asText() != null) {
+				Roles role = rolesService.getRolesByName(obj.get("roleName").asText());
+				rule = rulesService.getRulesByRoleAndRuleName(role, Constants.RULE_REQUISITION_TYPE);
+			} else {
+				logger.error("Requistion could not be added. User's role missing");
 				return false;
 			}
+			
+//			Rules rule = rulesService.getRulesByRoleAndRuleName(role, Constants.RULE_APPROVE_REQUISITION);
+//			if (rule == null) {
+//				logger.error("Approval rule not found. Cannot approve requisition.");
+//				return false;
+//			}
 
 			JSONObject jsonObject = new JSONObject(rule.getRule());
 
@@ -556,21 +573,22 @@ public class RequisitionService {
 				requisition.setStatus(Constants.PROGRESS_STAGE_APPROVED);
 				isRuleApplied = true;
 			}
-			
-			if(isRuleApplied) {
+
+			if (isRuleApplied) {
 				requisition = requisitionRepository.save(requisition);
 				saveRequisitionActivity(requisition);
 				return true;
-			}else {
+			} else {
 				logger.warn("Approve requisition failed. No rule applied");
 				return false;
 			}
-			
+
 		} catch (Exception e) {
 			logger.error("Approve requisition failed. Exception: ", e);
 			return false;
 		}
 
 	}
+	
 
 }

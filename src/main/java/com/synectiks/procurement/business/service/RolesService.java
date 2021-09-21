@@ -244,7 +244,7 @@ public class RolesService {
 	public Roles getRolesByName(String name) {
 		logger.info("Getting role by name: " + name);
 		Roles role = new Roles();
-		role.setName(name.toUpperCase());
+		role.setName(name.trim());
 		Optional<Roles> rul = rolesRepository.findOne(Example.of(role));
 		if (rul.isPresent()) {
 			role = rul.get();

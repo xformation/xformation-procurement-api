@@ -158,30 +158,30 @@ public class InvoiceController {
 		}
 	}
 
-	@PostMapping("/approveInvoice")
-	public ResponseEntity<Status> approveInvoice(@RequestBody ObjectNode obj) throws JSONException {
-		logger.info("Request to approve a invoice");
-
-		Status st = new Status();
-		try {
-//			boolean updateFlag = invoiceService.approveInvoice(obj);
-			if (updateFlag) {
-				st.setCode(HttpStatus.OK.value());
-				st.setType("SUCCESS");
-				st.setMessage("Invoice  approved successfully");
-			} else {
-				st.setCode(HttpStatus.OK.value());
-				st.setType("Fialed");
-				st.setMessage("Invoice could not be updated");
-			}
-			return ResponseEntity.status(HttpStatus.OK).body(st);
-		} catch (Exception e) {
-			logger.error("Approve invoice failed");
-			st.setCode(HttpStatus.EXPECTATION_FAILED.value());
-			st.setType("ERROR");
-			st.setMessage("Approve invoice failed");
-			return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(st);
-		}
-	}
+//	@PostMapping("/approveInvoice")
+//	public ResponseEntity<Status> approveInvoice(@RequestBody ObjectNode obj) throws JSONException {
+//		logger.info("Request to approve a invoice");
+//
+//		Status st = new Status();
+//		try {
+////			boolean updateFlag = invoiceService.approveInvoice(obj);
+//			if (updateFlag) {
+//				st.setCode(HttpStatus.OK.value());
+//				st.setType("SUCCESS");
+//				st.setMessage("Invoice  approved successfully");
+//			} else {
+//				st.setCode(HttpStatus.OK.value());
+//				st.setType("Fialed");
+//				st.setMessage("Invoice could not be updated");
+//			}
+//			return ResponseEntity.status(HttpStatus.OK).body(st);
+//		} catch (Exception e) {
+//			logger.error("Approve invoice failed");
+//			st.setCode(HttpStatus.EXPECTATION_FAILED.value());
+//			st.setType("ERROR");
+//			st.setMessage("Approve invoice failed");
+//			return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(st);
+//		}
+//	}
 
 }

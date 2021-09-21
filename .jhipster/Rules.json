@@ -42,7 +42,7 @@
     {
       "relationshipType": "many-to-one",
       "otherEntityName": "roles",
-      "otherEntityRelationshipName": "roles",
+      "otherEntityRelationshipName": "rules",
       "relationshipName": "roles"
     }
   ],
