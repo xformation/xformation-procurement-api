@@ -525,12 +525,12 @@ public class RequisitionService {
 			Rules rule = null; 
 			if (obj.get("roleName").asText() != null) {
 				Roles role = rolesService.getRolesByName(obj.get("roleName").asText());
-				rule = rulesService.getRulesByRoleAndRuleName(role, Constants.RULE_REQUISITION_TYPE);
+				rule = rulesService.getRulesByRoleAndRuleName(role, Constants.RULE_APPROVE_REQUISITION);
 			} else {
 				logger.error("Requistion could not be added. User's role missing");
 				return false;
 			}
-			
+//			
 //			Rules rule = rulesService.getRulesByRoleAndRuleName(role, Constants.RULE_APPROVE_REQUISITION);
 //			if (rule == null) {
 //				logger.error("Approval rule not found. Cannot approve requisition.");

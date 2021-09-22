@@ -203,16 +203,26 @@ public class PurchaseOrderService {
 				return false;
 			}
 
-			Roles role = rolesService.getRolesByName(obj.get("roleName").asText());
-			if (role == null) {
-				logger.error("Given role " + obj.get("roleName").asText() + " not found. Cannot approve purchase order .");
-				return false;
-			}
+//			Roles role = rolesService.getRolesByName(obj.get("roleName").asText());
+//			if (role == null) {
+//				logger.error("Given role " + obj.get("roleName").asText() + " not found. Cannot approve purchase order .");
+//				return false;
+//			}
            
 			PurchaseOrder purchaseOrder = oPodr.get();
             Requisition requisition = oPodr.get().getRequisition();
+            
+        	Rules rule = null; 
+			if (obj.get("roleName").asText() != null) {
+				Roles role = rolesService.getRolesByName(obj.get("roleName").asText());
+				rule = rulesService.getRulesByRoleAndRuleName(role, Constants.RULE_REQUISITION_TYPE);
+			} else {
+				logger.error("Requistion could not be added. User's role missing");
+				return false;
+			}
 			
-            Rules rule = rulesService.getRulesByRoleAndRuleName(role, Constants.RULE_APPROVE_PURCHASEORDER);
+			
+//            Rules rule = rulesService.getRulesByRoleAndRuleName(role, Constants.RULE_APPROVE_PURCHASEORDER);
 			if (rule == null) {
 				logger.error("Approval rule not found. Cannot approve purchase order .");
 				return false;

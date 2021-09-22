@@ -310,6 +310,20 @@ entity Rules{
     updatedOn Instant
     updatedBy String
 }
+entity Buyer {
+	firstName String
+    middleName String
+    lastName String
+    phoneNumber String
+    email String
+    address String
+    zipCode String
+    status String
+    createdOn Instant
+    createdBy String
+    updatedOn Instant
+    updatedBy String
+}
 
 relationship OneToOne {
 	Requisition{department} to Department,
