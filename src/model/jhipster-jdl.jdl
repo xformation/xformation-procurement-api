@@ -295,6 +295,24 @@ entity Roles {
    securityserviceId Long
    
 }
+entity CommitteeMembers {
+	name String
+    company String
+    department String
+    phoneNumber String
+    email String
+    degradation String
+    status String
+    createdOn Instant
+    createdBy String
+    updatedOn Instant
+    updatedBy String
+	profileImage String
+}
+
+entity CommitteeMembersStatus{
+	status String 
+}
 
 entity RolesGroup {		 
   group Boolean
@@ -325,6 +343,8 @@ entity Buyer {
     updatedBy String
 }
 
+
+
 relationship OneToOne {
 	Requisition{department} to Department,
     Requisition{currency} to Currency,
@@ -347,7 +367,10 @@ relationship OneToMany {
 }
 
 relationship ManyToOne {
-	Rules{roles} to Roles
+	Rules{roles} to Roles,
+	CommitteeMembers{committee} to Committee,
+	CommitteeMembersStatus{committee} to Committee,
+	CommitteeMembersStatus{committeeMembers} to CommitteeMembers,
 }
 
 relationship ManyToMany {
