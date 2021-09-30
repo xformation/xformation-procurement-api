@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.synectiks.procurement.business.service.CommitteeMembersService;
-import com.synectiks.procurement.domain.CommitteeMembers;
+import com.synectiks.procurement.domain.CommitteeMember;
 import com.synectiks.procurement.domain.Status;
 
 @RestController
@@ -37,7 +37,7 @@ public class CommitteeMembersController {
 		logger.info("Request to add New committee member");
 		Status st = new Status();
 		try {
-			CommitteeMembers committeeMembers = committeeMembersService.addCommitteeMember(obj, file);
+			CommitteeMember committeeMembers = committeeMembersService.addCommitteeMember(obj, file);
 			if (committeeMembers == null) {
 				logger.error("Committee member could not be added.");
 				st.setCode(HttpStatus.EXPECTATION_FAILED.value());
@@ -66,7 +66,7 @@ public class CommitteeMembersController {
 		logger.info("Request to upde committee members");
 		Status st = new Status();
 		try {
-			CommitteeMembers committeeMembers = committeeMembersService.updateCommitteeMembers(obj, file);
+			CommitteeMember committeeMembers = committeeMembersService.updateCommitteeMembers(obj, file);
 			if (committeeMembers == null) {
 				logger.error("Committee members could not be updated.");
 				st.setCode(HttpStatus.EXPECTATION_FAILED.value());
@@ -93,7 +93,7 @@ public class CommitteeMembersController {
 		logger.info("Request to get list of committee on given filter criteria");
 		Status st = new Status();
 		try {
-			List<CommitteeMembers> list = committeeMembersService.searchCommitteeMembers(requestObj);
+			List<CommitteeMember> list = committeeMembersService.searchCommitteeMembers(requestObj);
 			if (list == null) {
 				logger.error("Search committee members failed");
 				st.setCode(HttpStatus.EXPECTATION_FAILED.value());
@@ -120,7 +120,7 @@ public class CommitteeMembersController {
 		logger.info("Getting committee members by id: " + id);
 		Status st = new Status();
 		try {
-			CommitteeMembers committeeMembers = committeeMembersService.getCommitteeMember(id);
+			CommitteeMember committeeMembers = committeeMembersService.getCommitteeMember(id);
 			if (committeeMembers == null) {
 				logger.warn("Committee members not found.");
 				st.setCode(HttpStatus.EXPECTATION_FAILED.value());

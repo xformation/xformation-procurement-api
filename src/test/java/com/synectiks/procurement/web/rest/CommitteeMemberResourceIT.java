@@ -79,17 +79,7 @@ public class CommitteeMemberResourceIT {
      * if they test an entity which requires the current entity.
      */
     public static CommitteeMember createEntity(EntityManager em) {
-        CommitteeMember committeeMember = new CommitteeMember()
-            .name(DEFAULT_NAME)
-            .company(DEFAULT_COMPANY)
-            .department(DEFAULT_DEPARTMENT)
-            .phoneNumber(DEFAULT_PHONE_NUMBER)
-            .email(DEFAULT_EMAIL)
-            .designation(DEFAULT_DESIGNATION)
-            .createdOn(DEFAULT_CREATED_ON)
-            .createdBy(DEFAULT_CREATED_BY)
-            .updatedOn(DEFAULT_UPDATED_ON)
-            .updatedBy(DEFAULT_UPDATED_BY);
+        CommitteeMember committeeMember = new CommitteeMember();
         return committeeMember;
     }
     /**
@@ -99,17 +89,7 @@ public class CommitteeMemberResourceIT {
      * if they test an entity which requires the current entity.
      */
     public static CommitteeMember createUpdatedEntity(EntityManager em) {
-        CommitteeMember committeeMember = new CommitteeMember()
-            .name(UPDATED_NAME)
-            .company(UPDATED_COMPANY)
-            .department(UPDATED_DEPARTMENT)
-            .phoneNumber(UPDATED_PHONE_NUMBER)
-            .email(UPDATED_EMAIL)
-            .designation(UPDATED_DESIGNATION)
-            .createdOn(UPDATED_CREATED_ON)
-            .createdBy(UPDATED_CREATED_BY)
-            .updatedOn(UPDATED_UPDATED_ON)
-            .updatedBy(UPDATED_UPDATED_BY);
+        CommitteeMember committeeMember = new CommitteeMember();
         return committeeMember;
     }
 
@@ -229,17 +209,7 @@ public class CommitteeMemberResourceIT {
         CommitteeMember updatedCommitteeMember = committeeMemberRepository.findById(committeeMember.getId()).get();
         // Disconnect from session so that the updates on updatedCommitteeMember are not directly saved in db
         em.detach(updatedCommitteeMember);
-        updatedCommitteeMember
-            .name(UPDATED_NAME)
-            .company(UPDATED_COMPANY)
-            .department(UPDATED_DEPARTMENT)
-            .phoneNumber(UPDATED_PHONE_NUMBER)
-            .email(UPDATED_EMAIL)
-            .designation(UPDATED_DESIGNATION)
-            .createdOn(UPDATED_CREATED_ON)
-            .createdBy(UPDATED_CREATED_BY)
-            .updatedOn(UPDATED_UPDATED_ON)
-            .updatedBy(UPDATED_UPDATED_BY);
+       
 
         restCommitteeMemberMockMvc.perform(put("/api/committee-members")
             .contentType(MediaType.APPLICATION_JSON)

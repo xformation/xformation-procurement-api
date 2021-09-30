@@ -50,8 +50,8 @@ public class CommitteeAndMemberLinkResourceIT {
      * if they test an entity which requires the current entity.
      */
     public static CommitteeAndMemberLink createEntity(EntityManager em) {
-        CommitteeAndMemberLink committeeAndMemberLink = new CommitteeAndMemberLink()
-            .status(DEFAULT_STATUS);
+        CommitteeAndMemberLink committeeAndMemberLink = new CommitteeAndMemberLink();
+        committeeAndMemberLink.setStatus(DEFAULT_STATUS);
         return committeeAndMemberLink;
     }
     /**
@@ -61,8 +61,8 @@ public class CommitteeAndMemberLinkResourceIT {
      * if they test an entity which requires the current entity.
      */
     public static CommitteeAndMemberLink createUpdatedEntity(EntityManager em) {
-        CommitteeAndMemberLink committeeAndMemberLink = new CommitteeAndMemberLink()
-            .status(UPDATED_STATUS);
+        CommitteeAndMemberLink committeeAndMemberLink = new CommitteeAndMemberLink();
+        committeeAndMemberLink.setStatus(UPDATED_STATUS);
         return committeeAndMemberLink;
     }
 
@@ -156,7 +156,7 @@ public class CommitteeAndMemberLinkResourceIT {
         // Disconnect from session so that the updates on updatedCommitteeAndMemberLink are not directly saved in db
         em.detach(updatedCommitteeAndMemberLink);
         updatedCommitteeAndMemberLink
-            .status(UPDATED_STATUS);
+            .setStatus(UPDATED_STATUS);
 
         restCommitteeAndMemberLinkMockMvc.perform(put("/api/committee-and-member-links")
             .contentType(MediaType.APPLICATION_JSON)
