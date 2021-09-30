@@ -56,7 +56,7 @@
     <include file="config/liquibase/changelog/20210722053555_added_entity_constraints_InvoiceActivity.xml" relativeToChangelogFile="false"/>
     <include file="config/liquibase/changelog/20210722053755_added_entity_constraints_Contact.xml" relativeToChangelogFile="false"/>
     <include file="config/liquibase/changelog/20210722053855_added_entity_constraints_ContactActivity.xml" relativeToChangelogFile="false"/>
-    <include file="config/liquibase/changelog/20210722053955_added_entity_constraints_Committee.xml" relativeToChangelogFile="false"/>
+    
     <include file="config/liquibase/changelog/20210722054055_added_entity_constraints_CommitteeActivity.xml" relativeToChangelogFile="false"/>
     <include file="config/liquibase/changelog/20210901100449_added_entity_constraints_VendorRequisitionBucket.xml" relativeToChangelogFile="false"/>
 	<include file="config/liquibase/changelog/20210929105434_added_entity_constraints_CommitteeAndMemberLink.xml" relativeToChangelogFile="false"/>
