@@ -45,22 +45,6 @@
         <dropDefaultValue tableName="committee" columnName="updated_on" columnDataType="datetime"/>
     </changeSet>
 
-    <changeSet id="20210722053955-1-relations" author="jhipster">
-
-        <createTable tableName="committee_contact">
-            <column name="contact_id" type="bigint">
-                <constraints nullable="false"/>
-            </column>
-            <column name="committee_id" type="bigint">
-                <constraints nullable="false"/>
-            </column>
-        </createTable>
-
-        <addPrimaryKey columnNames="committee_id, contact_id" tableName="committee_contact"/>
-        
-    </changeSet>
-    <!-- jhipster-needle-liquibase-add-changeset - JHipster will add changesets here -->
-
     
 
 </databaseChangeLog>

@@ -8,10 +8,10 @@
 
     
     <!--
-        Added the entity CommitteeMembersStatus.
+        Added the entity CommitteeAndMemberLink.
     -->
-    <changeSet id="20210928101929-1" author="jhipster">
-        <createTable tableName="committee_members_status">
+    <changeSet id="20210929105434-1" author="jhipster">
+        <createTable tableName="committee_and_member_link">
             <column name="id" type="bigint">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
@@ -21,13 +21,13 @@
             <column name="committee_id" type="bigint">
                 <constraints nullable="true" />
             </column>
-            <column name="committee_members_id" type="bigint">
+            <column name="committee_member_id" type="bigint">
                 <constraints nullable="true" />
             </column>
             <!-- jhipster-needle-liquibase-add-column - JHipster will add columns here -->
         </createTable>
     </changeSet>
 
-
+    
 
 </databaseChangeLog>

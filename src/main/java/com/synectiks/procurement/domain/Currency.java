@@ -28,9 +28,6 @@ public class Currency implements Serializable {
     @Column(name = "country_code")
     private String countryCode;
 
-    @Column(name = "symbol_file_path")
-    private String symbolFilePath;
-
     // jhipster-needle-entity-add-field - JHipster will add fields here
     public Long getId() {
         return id;
@@ -78,19 +75,6 @@ public class Currency implements Serializable {
     public void setCountryCode(String countryCode) {
         this.countryCode = countryCode;
     }
-
-    public String getSymbolFilePath() {
-        return symbolFilePath;
-    }
-
-    public Currency symbolFilePath(String symbolFilePath) {
-        this.symbolFilePath = symbolFilePath;
-        return this;
-    }
-
-    public void setSymbolFilePath(String symbolFilePath) {
-        this.symbolFilePath = symbolFilePath;
-    }
     // jhipster-needle-entity-add-getters-setters - JHipster will add getters and setters here
 
     @Override
@@ -117,7 +101,6 @@ public class Currency implements Serializable {
             ", code='" + getCode() + "'" +
             ", countryName='" + getCountryName() + "'" +
             ", countryCode='" + getCountryCode() + "'" +
-            ", symbolFilePath='" + getSymbolFilePath() + "'" +
             "}";
     }
 }

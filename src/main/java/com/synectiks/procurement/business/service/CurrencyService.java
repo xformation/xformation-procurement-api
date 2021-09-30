@@ -48,9 +48,9 @@ public class CurrencyService {
 		if (obj.get("countryCode") != null) {
 			currency.setCountryCode(obj.get("countryCode").asText());
 		}
-		if (obj.get("symbolFilePath") != null) {
-			currency.setSymbolFilePath(obj.get("symbolFilePath").asText());
-		}
+//		if (obj.get("symbolFilePath") != null) {
+//			currency.setSymbolFilePath(obj.get("symbolFilePath").asText());
+//		}
 
 		currency = currencyRepository.save(currency);
 		logger.info("Currency added successfully. " + currency.toString());
@@ -74,9 +74,9 @@ public class CurrencyService {
 		if (obj.get("countryCode") != null) {
 			currency.setCountryCode(obj.get("countryCode").asText());
 		}
-		if (obj.get("symbolFilePath") != null) {
-			currency.setSymbolFilePath(obj.get("symbolFilePath").asText());
-		}
+//		if (obj.get("symbolFilePath") != null) {
+//			currency.setSymbolFilePath(obj.get("symbolFilePath").asText());
+//		}
 		currency = currencyRepository.save(currency);
 		logger.info("Updating currency completed" + currency.toString());
 		return currency;
@@ -106,10 +106,10 @@ public class CurrencyService {
 			currency.setCountryCode(requestObj.get("countryCode"));
 			isFilter = true;
 		}
-		if (requestObj.get("symbolFilePath") != null) {
-			currency.setSymbolFilePath(requestObj.get("symbolFilePath"));
-			isFilter = true;
-		}
+//		if (requestObj.get("symbolFilePath") != null) {
+//			currency.setSymbolFilePath(requestObj.get("symbolFilePath"));
+//			isFilter = true;
+//		}
 		List<Currency> list = null;
 		if (isFilter) {
 			list = this.currencyRepository.findAll(Example.of(currency), Sort.by(Direction.DESC, "id"));

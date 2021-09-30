@@ -8,23 +8,29 @@
 
     
     <!--
-        Added the entity Rules.
+        Added the entity CommitteeMember.
     -->
-    <changeSet id="20210908102544-1" author="jhipster">
-        <createTable tableName="rules">
+    <changeSet id="20210929105334-1" author="jhipster">
+        <createTable tableName="committee_member">
             <column name="id" type="bigint">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
             <column name="name" type="varchar(255)">
                 <constraints nullable="true" />
             </column>
-            <column name="description" type="varchar(5000)">
+            <column name="company" type="varchar(255)">
                 <constraints nullable="true" />
             </column>
-            <column name="status" type="varchar(255)">
+            <column name="department" type="varchar(255)">
                 <constraints nullable="true" />
             </column>
-            <column name="rule" type="varchar(10000)">
+            <column name="phone_number" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+            <column name="email" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+            <column name="designation" type="varchar(255)">
                 <constraints nullable="true" />
             </column>
             <column name="created_on" type="datetime">
@@ -39,13 +45,12 @@
             <column name="updated_by" type="varchar(255)">
                 <constraints nullable="true" />
             </column>
-            <column name="roles_id" type="bigint">
-                <constraints nullable="true" />
-            </column>
             <!-- jhipster-needle-liquibase-add-column - JHipster will add columns here -->
         </createTable>
-        <dropDefaultValue tableName="rules" columnName="created_on" columnDataType="datetime"/>
-        <dropDefaultValue tableName="rules" columnName="updated_on" columnDataType="datetime"/>
+        <dropDefaultValue tableName="committee_member" columnName="created_on" columnDataType="datetime"/>
+        <dropDefaultValue tableName="committee_member" columnName="updated_on" columnDataType="datetime"/>
     </changeSet>
+
+    
 
 </databaseChangeLog>

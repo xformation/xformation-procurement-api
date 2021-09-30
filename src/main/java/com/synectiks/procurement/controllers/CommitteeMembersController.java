@@ -37,7 +37,7 @@ public class CommitteeMembersController {
 		logger.info("Request to add New committee member");
 		Status st = new Status();
 		try {
-			CommitteeMembers committeeMembers = committeeMembersService.addCommitteeMembers(obj, file);
+			CommitteeMembers committeeMembers = committeeMembersService.addCommitteeMember(obj, file);
 			if (committeeMembers == null) {
 				logger.error("Committee member could not be added.");
 				st.setCode(HttpStatus.EXPECTATION_FAILED.value());
@@ -120,7 +120,7 @@ public class CommitteeMembersController {
 		logger.info("Getting committee members by id: " + id);
 		Status st = new Status();
 		try {
-			CommitteeMembers committeeMembers = committeeMembersService.getCommitteeMembers(id);
+			CommitteeMembers committeeMembers = committeeMembersService.getCommitteeMember(id);
 			if (committeeMembers == null) {
 				logger.warn("Committee members not found.");
 				st.setCode(HttpStatus.EXPECTATION_FAILED.value());

@@ -91,7 +91,7 @@ public class DocumentController {
 		logger.info("Request to get document on given filter criteria");
 		Status st = new Status();
 		try {
-			List<Document> list = documentService.searchdocument(requestObj);
+			List<Document> list = documentService.searchDocument(requestObj);
 			if (list == null) {
 				logger.error("Search document failed");
 				st.setCode(HttpStatus.EXPECTATION_FAILED.value());

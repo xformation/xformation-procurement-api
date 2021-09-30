@@ -1,10 +1,16 @@
 entity Document {
 	fileName String
     fileType String
-    fileSize Long
-    localFilePath String
-    s3Bucket String
+    fileExt String
+	fileSize Long
+    storageLocation String /** LOCAL or S3 or AZURE */
+	localFilePath String
+    s3Bucket String /** S3 bucket name. image file stored on aws s3 bucket */
+    s3Url String /** S3 url of image file */
+	azureUrl String /** AZURE url of image file */
     sourceOfOrigin String
+    sourceId Long /** DB id of an object like invoice, committee member id etc.. */
+    identifier String /** PROFILE_IMAGE, DEGREE, CURRENCY_SYMBOL etc.. */
     createdOn Instant
     createdBy String
     updatedOn Instant
@@ -19,7 +25,6 @@ entity Currency {
 	code String
     countryName String
     countryCode String
-    symbolFilePath String
 }
 
 entity Requisition {
@@ -251,6 +256,29 @@ entity ContactActivity {
 	contactId Long
 }
 
+
+
+entity VendorRequisitionBucket{
+	status String
+	stages String
+    createdOn Instant
+    createdBy String
+    updatedOn Instant
+    updatedBy String
+    notes String maxlength(5000)
+}
+
+entity Roles {
+	name String
+    description String
+    status String
+    createdOn Instant
+    createdBy String
+    updatedOn Instant
+    updatedBy String
+    securityserviceId Long
+}
+
 entity Committee {
 	name String
     type String
@@ -274,42 +302,20 @@ entity CommitteeActivity {
 	committeeId Long
 }
 
-entity VendorRequisitionBucket{
-	status String
-	stages String
-    createdOn Instant
-    createdBy String
-    updatedOn Instant
-    updatedBy String
-    notes String maxlength(5000)
-}
-
-entity Roles {
-	name String
-    description String
-    status String
-    createdOn Instant
-    createdBy String
-    updatedOn Instant
-    updatedBy String
-   securityserviceId Long
-   
-}
-entity CommitteeMembers {
+entity CommitteeMember {
 	name String
     company String
     department String
     phoneNumber String
     email String
-    degradation String
+    designation String
     createdOn Instant
     createdBy String
     updatedOn Instant
     updatedBy String
-	profileImage String
 }
 
-entity CommitteeMembersStatus{
+entity CommitteeAndMemberLink{
 	status String 
 }
 
@@ -327,6 +333,7 @@ entity Rules{
     updatedOn Instant
     updatedBy String
 }
+
 entity Buyer {
 	firstName String
     middleName String
@@ -341,8 +348,6 @@ entity Buyer {
     updatedOn Instant
     updatedBy String
 }
-
-
 
 relationship OneToOne {
 	Requisition{department} to Department,
@@ -367,14 +372,14 @@ relationship OneToMany {
 
 relationship ManyToOne {
 	Rules{roles} to Roles,
-	CommitteeMembers{committee} to Committee,
-	CommitteeMembersStatus{committee} to Committee,
-	CommitteeMembersStatus{committeeMembers} to CommitteeMembers,
+//	CommitteeMembers{committee} to Committee,
+	CommitteeAndMemberLink{committee} to Committee,
+	CommitteeAndMemberLink{committeeMember} to CommitteeMember,
 }
 
-relationship ManyToMany {
-	Committee{contact} to Contact{committee}
-}
+//relationship ManyToMany {
+//	Committee{contact} to Contact{committee}
+//}
 
 
 

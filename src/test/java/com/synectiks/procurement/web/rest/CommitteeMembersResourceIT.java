@@ -49,6 +49,9 @@ public class CommitteeMembersResourceIT {
     private static final String DEFAULT_DEGRADATION = "AAAAAAAAAA";
     private static final String UPDATED_DEGRADATION = "BBBBBBBBBB";
 
+    private static final String DEFAULT_STATUS = "AAAAAAAAAA";
+    private static final String UPDATED_STATUS = "BBBBBBBBBB";
+
     private static final Instant DEFAULT_CREATED_ON = Instant.ofEpochMilli(0L);
     private static final Instant UPDATED_CREATED_ON = Instant.now().truncatedTo(ChronoUnit.MILLIS);
 
@@ -89,6 +92,7 @@ public class CommitteeMembersResourceIT {
             .phoneNumber(DEFAULT_PHONE_NUMBER)
             .email(DEFAULT_EMAIL)
             .degradation(DEFAULT_DEGRADATION)
+            .status(DEFAULT_STATUS)
             .createdOn(DEFAULT_CREATED_ON)
             .createdBy(DEFAULT_CREATED_BY)
             .updatedOn(DEFAULT_UPDATED_ON)
@@ -110,6 +114,7 @@ public class CommitteeMembersResourceIT {
             .phoneNumber(UPDATED_PHONE_NUMBER)
             .email(UPDATED_EMAIL)
             .degradation(UPDATED_DEGRADATION)
+            .status(UPDATED_STATUS)
             .createdOn(UPDATED_CREATED_ON)
             .createdBy(UPDATED_CREATED_BY)
             .updatedOn(UPDATED_UPDATED_ON)
@@ -143,6 +148,7 @@ public class CommitteeMembersResourceIT {
         assertThat(testCommitteeMembers.getPhoneNumber()).isEqualTo(DEFAULT_PHONE_NUMBER);
         assertThat(testCommitteeMembers.getEmail()).isEqualTo(DEFAULT_EMAIL);
         assertThat(testCommitteeMembers.getDegradation()).isEqualTo(DEFAULT_DEGRADATION);
+        assertThat(testCommitteeMembers.getStatus()).isEqualTo(DEFAULT_STATUS);
         assertThat(testCommitteeMembers.getCreatedOn()).isEqualTo(DEFAULT_CREATED_ON);
         assertThat(testCommitteeMembers.getCreatedBy()).isEqualTo(DEFAULT_CREATED_BY);
         assertThat(testCommitteeMembers.getUpdatedOn()).isEqualTo(DEFAULT_UPDATED_ON);
@@ -187,6 +193,7 @@ public class CommitteeMembersResourceIT {
             .andExpect(jsonPath("$.[*].phoneNumber").value(hasItem(DEFAULT_PHONE_NUMBER)))
             .andExpect(jsonPath("$.[*].email").value(hasItem(DEFAULT_EMAIL)))
             .andExpect(jsonPath("$.[*].degradation").value(hasItem(DEFAULT_DEGRADATION)))
+            .andExpect(jsonPath("$.[*].status").value(hasItem(DEFAULT_STATUS)))
             .andExpect(jsonPath("$.[*].createdOn").value(hasItem(DEFAULT_CREATED_ON.toString())))
             .andExpect(jsonPath("$.[*].createdBy").value(hasItem(DEFAULT_CREATED_BY)))
             .andExpect(jsonPath("$.[*].updatedOn").value(hasItem(DEFAULT_UPDATED_ON.toString())))
@@ -211,6 +218,7 @@ public class CommitteeMembersResourceIT {
             .andExpect(jsonPath("$.phoneNumber").value(DEFAULT_PHONE_NUMBER))
             .andExpect(jsonPath("$.email").value(DEFAULT_EMAIL))
             .andExpect(jsonPath("$.degradation").value(DEFAULT_DEGRADATION))
+            .andExpect(jsonPath("$.status").value(DEFAULT_STATUS))
             .andExpect(jsonPath("$.createdOn").value(DEFAULT_CREATED_ON.toString()))
             .andExpect(jsonPath("$.createdBy").value(DEFAULT_CREATED_BY))
             .andExpect(jsonPath("$.updatedOn").value(DEFAULT_UPDATED_ON.toString()))
@@ -244,6 +252,7 @@ public class CommitteeMembersResourceIT {
             .phoneNumber(UPDATED_PHONE_NUMBER)
             .email(UPDATED_EMAIL)
             .degradation(UPDATED_DEGRADATION)
+            .status(UPDATED_STATUS)
             .createdOn(UPDATED_CREATED_ON)
             .createdBy(UPDATED_CREATED_BY)
             .updatedOn(UPDATED_UPDATED_ON)
@@ -265,6 +274,7 @@ public class CommitteeMembersResourceIT {
         assertThat(testCommitteeMembers.getPhoneNumber()).isEqualTo(UPDATED_PHONE_NUMBER);
         assertThat(testCommitteeMembers.getEmail()).isEqualTo(UPDATED_EMAIL);
         assertThat(testCommitteeMembers.getDegradation()).isEqualTo(UPDATED_DEGRADATION);
+        assertThat(testCommitteeMembers.getStatus()).isEqualTo(UPDATED_STATUS);
         assertThat(testCommitteeMembers.getCreatedOn()).isEqualTo(UPDATED_CREATED_ON);
         assertThat(testCommitteeMembers.getCreatedBy()).isEqualTo(UPDATED_CREATED_BY);
         assertThat(testCommitteeMembers.getUpdatedOn()).isEqualTo(UPDATED_UPDATED_ON);

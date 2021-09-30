@@ -1,23 +1,22 @@
 package com.synectiks.procurement.domain;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import com.synectiks.procurement.web.rest.TestUtil;
 import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.Assertions.assertThat;
+import com.synectiks.procurement.web.rest.TestUtil;
 
-class PurchaseOrderTest {
+public class PurchaseOrderTest {
 
-  @Test
-  void equalsVerifier() throws Exception {
-    TestUtil.equalsVerifier(PurchaseOrder.class);
-    PurchaseOrder purchaseOrder1 = new PurchaseOrder();
-    purchaseOrder1.setId(1L);
-    PurchaseOrder purchaseOrder2 = new PurchaseOrder();
-    purchaseOrder2.setId(purchaseOrder1.getId());
-    assertThat(purchaseOrder1).isEqualTo(purchaseOrder2);
-    purchaseOrder2.setId(2L);
-    assertThat(purchaseOrder1).isNotEqualTo(purchaseOrder2);
-    purchaseOrder1.setId(null);
-    assertThat(purchaseOrder1).isNotEqualTo(purchaseOrder2);
-  }
+    @Test
+    public void equalsVerifier() throws Exception {
+        TestUtil.equalsVerifier(PurchaseOrder.class);
+        PurchaseOrder purchaseOrder1 = new PurchaseOrder();
+        purchaseOrder1.setId(1L);
+        PurchaseOrder purchaseOrder2 = new PurchaseOrder();
+        purchaseOrder2.setId(purchaseOrder1.getId());
+        assertThat(purchaseOrder1).isEqualTo(purchaseOrder2);
+        purchaseOrder2.setId(2L);
+        assertThat(purchaseOrder1).isNotEqualTo(purchaseOrder2);
+        purchaseOrder1.setId(null);
+        assertThat(purchaseOrder1).isNotEqualTo(purchaseOrder2);
+    }
 }

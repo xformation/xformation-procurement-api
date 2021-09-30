@@ -21,16 +21,34 @@
             <column name="file_type" type="varchar(255)">
                 <constraints nullable="true" />
             </column>
+            <column name="file_ext" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
             <column name="file_size" type="bigint">
+                <constraints nullable="true" />
+            </column>
+            <column name="storage_location" type="varchar(255)" remarks="LOCAL or S3 or AZURE">
                 <constraints nullable="true" />
             </column>
             <column name="local_file_path" type="varchar(255)">
                 <constraints nullable="true" />
             </column>
-            <column name="s_3_bucket" type="varchar(255)">
+            <column name="s_3_bucket" type="varchar(255)" remarks="S3 bucket name. image file stored on aws s3 bucket">
+                <constraints nullable="true" />
+            </column>
+            <column name="s_3_url" type="varchar(255)" remarks="S3 url of image file">
+                <constraints nullable="true" />
+            </column>
+            <column name="azure_url" type="varchar(255)" remarks="AZURE url of image file">
                 <constraints nullable="true" />
             </column>
             <column name="source_of_origin" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+            <column name="source_id" type="bigint" remarks="DB id of an object like invoice, committee member id etc..">
+                <constraints nullable="true" />
+            </column>
+            <column name="identifier" type="varchar(255)" remarks="PROFILE_IMAGE, DEGREE, CURRENCY_SYMBOL etc..">
                 <constraints nullable="true" />
             </column>
             <column name="created_on" type="datetime">
@@ -57,6 +75,4 @@
         <dropDefaultValue tableName="document" columnName="updated_on" columnDataType="datetime"/>
     </changeSet>
 
-    
-
-</databaseChangeLog>
+ </databaseChangeLog>

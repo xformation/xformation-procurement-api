@@ -1,0 +1,37 @@
+{
+  "name": "CommitteeAndMemberLink",
+  "fields": [
+    {
+      "fieldName": "status",
+      "fieldType": "String"
+    }
+  ],
+  "relationships": [
+    {
+      "relationshipType": "many-to-one",
+      "otherEntityName": "committee",
+      "otherEntityRelationshipName": "committeeAndMemberLink",
+      "relationshipName": "committee",
+      "otherEntityField": "id"
+    },
+    {
+      "relationshipType": "many-to-one",
+      "otherEntityName": "committeeMember",
+      "otherEntityRelationshipName": "committeeAndMemberLink",
+      "relationshipName": "committeeMember",
+      "otherEntityField": "id"
+    }
+  ],
+  "changelogDate": "20210929105434",
+  "entityTableName": "committee_and_member_link",
+  "dto": "no",
+  "pagination": "no",
+  "service": "no",
+  "jpaMetamodelFiltering": false,
+  "fluentMethods": true,
+  "readOnly": false,
+  "embedded": false,
+  "clientRootFolder": "procurement",
+  "applications": "*",
+  "microserviceName": "procurement"
+}

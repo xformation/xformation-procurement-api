@@ -1,15 +1,24 @@
 package com.synectiks.procurement.domain;
 
 
-import javax.persistence.*;
-import javax.validation.constraints.*;
-
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 import java.io.Serializable;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToOne;
+import javax.persistence.SequenceGenerator;
+import javax.persistence.Table;
+import javax.persistence.Transient;
+import javax.validation.constraints.Size;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * A Quotation.
@@ -62,24 +71,16 @@ public class Quotation implements Serializable {
     @JoinColumn(unique = true)
     private Document document;
 
-
-	@Transient
+    @Transient
     @JsonProperty
-    private List<QuotationActivity>  activityList;
+    private List<QuotationActivity> activityList;
+    
     // jhipster-needle-entity-add-field - JHipster will add fields here
     public Long getId() {
         return id;
     }
 
-    public List<QuotationActivity> getActivityList() {
-		return activityList;
-	}
-
-	public void setActivityList(List<QuotationActivity> activityList) {
-		this.activityList = activityList;
-	}
-
-	public void setId(Long id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
@@ -258,4 +259,12 @@ public class Quotation implements Serializable {
             ", notes='" + getNotes() + "'" +
             "}";
     }
+
+	public List<QuotationActivity> getActivityList() {
+		return activityList;
+	}
+
+	public void setActivityList(List<QuotationActivity> activityList) {
+		this.activityList = activityList;
+	}
 }
