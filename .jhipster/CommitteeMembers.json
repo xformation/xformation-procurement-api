@@ -26,10 +26,6 @@
       "fieldType": "String"
     },
     {
-      "fieldName": "status",
-      "fieldType": "String"
-    },
-    {
       "fieldName": "createdOn",
       "fieldType": "Instant"
     },

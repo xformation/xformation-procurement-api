@@ -33,9 +33,6 @@
             <column name="degradation" type="varchar(255)">
                 <constraints nullable="true" />
             </column>
-            <column name="status" type="varchar(255)">
-                <constraints nullable="true" />
-            </column>
             <column name="created_on" type="datetime">
                 <constraints nullable="true" />
             </column>
@@ -60,6 +57,38 @@
         <dropDefaultValue tableName="committee_members" columnName="updated_on" columnDataType="datetime"/>
     </changeSet>
 
-   
+    <changeSet id="20210927121207-1-relations" author="jhipster">
+
+    </changeSet>
+    <!-- jhipster-needle-liquibase-add-changeset - JHipster will add changesets here -->
+
+    <!--
+        Load sample data generated with Faker.js
+        - This data can be easily edited using a CSV editor (or even MS Excel) and
+          is located in the 'src/main/resources/config/liquibase/fake-data' directory
+        - By default this data is applied when running with the JHipster 'dev' profile.
+          This can be customized by adding or removing 'faker' in the 'spring.liquibase.contexts'
+          Spring Boot configuration key.
+    -->
+    <changeSet id="20210927121207-1-data" author="jhipster" context="faker">
+        <loadData
+                  file="config/liquibase/fake-data/committee_members.csv"
+                  separator=";"
+                  tableName="committee_members">
+            <column name="id" type="numeric"/>
+            <column name="name" type="string"/>
+            <column name="company" type="string"/>
+            <column name="department" type="string"/>
+            <column name="phone_number" type="string"/>
+            <column name="email" type="string"/>
+            <column name="degradation" type="string"/>
+            <column name="created_on" type="datetime"/>
+            <column name="created_by" type="string"/>
+            <column name="updated_on" type="datetime"/>
+            <column name="updated_by" type="string"/>
+            <column name="profile_image" type="string"/>
+            <!-- jhipster-needle-liquibase-add-loadcolumn - JHipster (and/or extensions) can add load columns here -->
+        </loadData>
+    </changeSet>
 
 </databaseChangeLog>

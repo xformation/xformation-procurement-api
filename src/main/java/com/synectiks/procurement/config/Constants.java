@@ -22,7 +22,8 @@ public final class Constants {
     
     public static final String  SECURITY_SERVICE_URL ="http://localhost:8094/security/roles/create";
     
-    public static final String LOCAL_REQUISITION_FILE_STORAGE_DIRECTORY = "requisition_files"; 
+    public static final String LOCAL_REQUISITION_FILE_STORAGE_DIRECTORY = "requisition_files";
+    public static final String LOCAL_COMMITEEMEMBERS_FILE_STORAGE_DIRECTORY = "commitee_members_files";
     
     public static final String RULE_APPROVE_REQUISITION = "APPROVE_REQUISITION"; 
     public static final String RULE_APPROVE_PURCHASEORDER = "APPROVE_PURCHASEORDER"; 

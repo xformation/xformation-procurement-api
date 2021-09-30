@@ -302,7 +302,6 @@ entity CommitteeMembers {
     phoneNumber String
     email String
     degradation String
-    status String
     createdOn Instant
     createdBy String
     updatedOn Instant

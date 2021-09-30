@@ -1,10 +1,17 @@
 package com.synectiks.procurement.domain;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
-import javax.persistence.*;
-
 import java.io.Serializable;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.ManyToOne;
+import javax.persistence.SequenceGenerator;
+import javax.persistence.Table;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 /**
  * A CommitteeMembersStatus.
@@ -31,7 +38,9 @@ public class CommitteeMembersStatus implements Serializable {
     @JsonIgnoreProperties(value = "committeeMembersStatuses", allowSetters = true)
     private CommitteeMembers committeeMembers;
 
-    // jhipster-needle-entity-add-field - JHipster will add fields here
+  
+
+	// jhipster-needle-entity-add-field - JHipster will add fields here
     public Long getId() {
         return id;
     }

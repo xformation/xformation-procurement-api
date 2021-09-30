@@ -27,11 +27,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.synectiks.procurement.config.Constants;
 import com.synectiks.procurement.domain.Committee;
-import com.synectiks.procurement.domain.CommitteeActivity;
 import com.synectiks.procurement.domain.CommitteeMembers;
 import com.synectiks.procurement.domain.CommitteeMembersStatus;
-import com.synectiks.procurement.domain.Roles;
-import com.synectiks.procurement.domain.RolesGroup;
 import com.synectiks.procurement.repository.CommitteeMembersRepository;
 import com.synectiks.procurement.repository.CommitteeMembersStatusRepository;
 import com.synectiks.procurement.repository.CommitteeRepository;
@@ -39,10 +36,10 @@ import com.synectiks.procurement.repository.CommitteeRepository;
 @Service
 public class CommitteeMembersService {
 	private static final Logger logger = LoggerFactory.getLogger(CommitteeMembersService.class);
-	
+
 	@Autowired
 	private CommitteeMembersStatusRepository committeeMembersStatusRepository;
-	
+
 	@Autowired
 	private CommitteeMembersRepository committeeMembersRepository;
 	@Autowired
@@ -63,25 +60,8 @@ public class CommitteeMembersService {
 	public CommitteeMembers addCommitteeMembers(String obj, MultipartFile file) throws Exception {
 		CommitteeMembers committeeMembers = new CommitteeMembers();
 
-		if (file != null) {
-			byte[] bytes = file.getBytes();
-			String filename = StringUtils.cleanPath(file.getOriginalFilename());
-			filename = filename.toLowerCase().replaceAll(" ", "-");
-			String uniqueID = UUID.randomUUID().toString();
-			filename = uniqueID.concat(filename);
-			File localStorage = new File(Constants.LOCAL_REQUISITION_FILE_STORAGE_DIRECTORY);
-			committeeMembers.setProfileImage(filename);
-			if (!localStorage.exists()) {
-				localStorage.mkdirs();
-			}
-			Path path = Paths
-					.get(Constants.LOCAL_REQUISITION_FILE_STORAGE_DIRECTORY + File.pathSeparatorChar + filename);
-			Files.write(path, bytes);
-		}
-		
 		ObjectMapper mapper = new ObjectMapper();
 		ObjectNode json = (ObjectNode) mapper.readTree(obj);
-
 		if (json.get("commiteeId") != null) {
 			Optional<Committee> com = committeeRepository.findById(json.get("commiteeId").asLong());
 			if (com.isPresent()) {
@@ -102,15 +82,29 @@ public class CommitteeMembersService {
 		if (json.get("degradation") != null) {
 			committeeMembers.setDegradation(json.get("degradation").asText());
 		}
-//		if (json.get("status") != null) {
-//			committeeMembers.setStatus(json.get("status").asText());
-//		}
 
 		if (json.get("phone_number") != null) {
 			committeeMembers.setPhoneNumber(json.get("phone_number").asText());
 		}
 		if (json.get("email") != null) {
 			committeeMembers.setEmail(json.get("email").asText());
+		}
+
+		if (file != null) {
+			byte[] bytes = file.getBytes();
+			String filename = StringUtils.cleanPath(file.getOriginalFilename());
+			filename = filename.toLowerCase().replaceAll(" ", "-");
+			String uniqueID = UUID.randomUUID().toString();
+			filename = uniqueID.concat(filename);
+			File localStorage = new File(Constants.LOCAL_COMMITEEMEMBERS_FILE_STORAGE_DIRECTORY);
+
+			if (!localStorage.exists()) {
+				localStorage.mkdirs();
+			}
+
+			Path path = Paths.get(localStorage.getAbsolutePath() + File.pathSeparatorChar + filename);
+			Files.write(path, bytes);
+			committeeMembers.setProfileImage(localStorage.getAbsolutePath() + File.pathSeparatorChar + filename);
 		}
 
 		if (json.get("user") != null) {
@@ -126,8 +120,7 @@ public class CommitteeMembersService {
 		committeeMembers.setUpdatedOn(now);
 		committeeMembers = committeeMembersRepository.save(committeeMembers);
 		logger.info("Committee members added successfully");
-	
-		
+
 		if (committeeMembers != null) {
 			CommitteeMembersStatus committeeMembersStatus = new CommitteeMembersStatus();
 			committeeMembersStatus.setCommitteeMembers(committeeMembers);
@@ -138,7 +131,7 @@ public class CommitteeMembersService {
 					committeeMembersStatus.setCommittee(com.get());
 				}
 			}
-			
+
 			if (json.get("status") != null) {
 				committeeMembersStatus.setStatus(json.get("status").asText());
 			}
@@ -153,27 +146,14 @@ public class CommitteeMembersService {
 	public CommitteeMembers updateCommitteeMembers(String obj, MultipartFile file) throws Exception {
 		ObjectMapper mapper = new ObjectMapper();
 		ObjectNode json = (ObjectNode) mapper.readTree(obj);
+
 		Optional<CommitteeMembers> ur = committeeMembersRepository.findById(Long.parseLong(json.get("id").asText()));
 		if (!ur.isPresent()) {
 			logger.info("Committee members  id not found");
 			return null;
 		}
+
 		CommitteeMembers committeeMembers = ur.get();
-		if (file != null) {
-			byte[] bytes = file.getBytes();
-			String filename = StringUtils.cleanPath(file.getOriginalFilename());
-			filename = filename.toLowerCase().replaceAll(" ", "-");
-			String uniqueID = UUID.randomUUID().toString();
-			filename = uniqueID.concat(filename);
-			committeeMembers.setProfileImage(filename);
-			File localStorage = new File(Constants.LOCAL_REQUISITION_FILE_STORAGE_DIRECTORY);
-			if (!localStorage.exists()) {
-				localStorage.mkdirs();
-			}
-			Path path = Paths
-					.get(Constants.LOCAL_REQUISITION_FILE_STORAGE_DIRECTORY + File.pathSeparatorChar + filename);
-			Files.write(path, bytes);
-		}
 
 		if (json.get("name") != null) {
 			committeeMembers.setName(json.get("name").asText());
@@ -188,15 +168,27 @@ public class CommitteeMembersService {
 		if (json.get("degradation") != null) {
 			committeeMembers.setDegradation(json.get("degradation").asText());
 		}
-		if (json.get("status") != null) {
-			committeeMembers.setStatus(json.get("status").asText());
-		}
 
 		if (json.get("phone_number") != null) {
 			committeeMembers.setPhoneNumber(json.get("phone_number").asText());
 		}
 		if (json.get("email") != null) {
 			committeeMembers.setEmail(json.get("email").asText());
+		}
+		if (file != null) {
+			byte[] bytes = file.getBytes();
+			String filename = StringUtils.cleanPath(file.getOriginalFilename());
+			filename = filename.toLowerCase().replaceAll(" ", "-");
+			String uniqueID = UUID.randomUUID().toString();
+			filename = uniqueID.concat(filename);
+			File localStorage = new File(Constants.LOCAL_COMMITEEMEMBERS_FILE_STORAGE_DIRECTORY);
+			if (!localStorage.exists()) {
+				localStorage.mkdirs();
+			}
+			Path path = Paths
+					.get(localStorage.getAbsolutePath() + File.pathSeparatorChar + filename);
+			Files.write(path, bytes);
+			committeeMembers.setProfileImage(localStorage.getAbsolutePath() + File.pathSeparatorChar + filename);
 		}
 
 		if (json.get("user") != null) {
@@ -212,7 +204,7 @@ public class CommitteeMembersService {
 		committeeMembers.setUpdatedOn(now);
 		committeeMembers = committeeMembersRepository.save(committeeMembers);
 		logger.info("Committee members updated successfully");
-		
+
 		if (committeeMembers != null) {
 			CommitteeMembersStatus committeeMembersStatus = new CommitteeMembersStatus();
 			BeanUtils.copyProperties(committeeMembers, committeeMembersStatus);
@@ -241,10 +233,6 @@ public class CommitteeMembersService {
 			committeeMembers.setId(Long.parseLong(requestObj.get("id")));
 			isFilter = true;
 		}
-//		if (requestObj.get("departmentId") != null) {
-//			requisition.setDepartment(requestObj.get("departmentId"));
-//			isFilter = true;
-//		}
 
 		if (requestObj.get("name") != null) {
 			committeeMembers.setName(requestObj.get("name"));
@@ -262,10 +250,7 @@ public class CommitteeMembersService {
 			committeeMembers.setDegradation(requestObj.get("degradation"));
 			isFilter = true;
 		}
-		if (requestObj.get("status") != null) {
-			committeeMembers.setStatus(requestObj.get("status"));
-			isFilter = true;
-		}
+
 		if (requestObj.get("phone_number") != null) {
 			committeeMembers.setPhoneNumber(requestObj.get("phone_number"));
 			isFilter = true;
@@ -284,16 +269,13 @@ public class CommitteeMembersService {
 		} else {
 			list = this.committeeMembersRepository.findAll(Sort.by(Direction.DESC, "id"));
 		}
-//		for (CommitteeMembers cmt : list) {
-//			CommitteeMembersStatus ca = new CommitteeMembersStatus();
-//			ca.setCommitteeMembers(committeeMembers);
-////			List<CommitteeMembersStatus> caList = committeeMembersStatusRepository.findAll(Example.of(ca));
-//	
-//			
-//		}
-	
-
-//		logger.info("Committee members search completed. Total records: " + list.size());
+		for (CommitteeMembers cmt : list) {
+			CommitteeMembersStatus ca = new CommitteeMembersStatus();
+			ca.setCommitteeMembers(committeeMembers);
+			List<CommitteeMembersStatus> caList = committeeMembersStatusRepository.findAll(Example.of(ca));
+			cmt.setCommitteeMembersStatus(caList);
+		}
+		logger.info("Committee members search completed. Total records: " + list.size());
 		return list;
 	}
 }

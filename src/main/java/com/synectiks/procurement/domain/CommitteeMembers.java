@@ -1,11 +1,13 @@
 package com.synectiks.procurement.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import javax.persistence.*;
 
 import java.io.Serializable;
 import java.time.Instant;
+import java.util.List;
 
 /**
  * A CommitteeMembers.
@@ -39,9 +41,6 @@ public class CommitteeMembers implements Serializable {
     @Column(name = "degradation")
     private String degradation;
 
-    @Column(name = "status")
-    private String status;
-
     @Column(name = "created_on")
     private Instant createdOn;
 
@@ -60,13 +59,33 @@ public class CommitteeMembers implements Serializable {
     @ManyToOne
     @JsonIgnoreProperties(value = "committeeMembers", allowSetters = true)
     private Committee committee;
+    
+    @Transient
+    @JsonProperty
+    private List<CommitteeMembersStatus> committeeMembersStatus ;
+    
+//    public List<CommitteeMembersStatus> getC() {
+//		return committeeMembersStatus;
+//	}
+
+//	public void setCommitteeMembersStatusList(List<CommitteeMembersStatus> committeeMembersStatus) {
+//		this.committeeMembersStatus = committeeMembersStatus;
+//	}
 
     // jhipster-needle-entity-add-field - JHipster will add fields here
     public Long getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public List<CommitteeMembersStatus> getCommitteeMembersStatus() {
+		return committeeMembersStatus;
+	}
+
+	public void setCommitteeMembersStatus(List<CommitteeMembersStatus> committeeMembersStatus) {
+		this.committeeMembersStatus = committeeMembersStatus;
+	}
+
+	public void setId(Long id) {
         this.id = id;
     }
 
@@ -146,19 +165,6 @@ public class CommitteeMembers implements Serializable {
 
     public void setDegradation(String degradation) {
         this.degradation = degradation;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public CommitteeMembers status(String status) {
-        this.status = status;
-        return this;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
     }
 
     public Instant getCreatedOn() {
@@ -267,7 +273,6 @@ public class CommitteeMembers implements Serializable {
             ", phoneNumber='" + getPhoneNumber() + "'" +
             ", email='" + getEmail() + "'" +
             ", degradation='" + getDegradation() + "'" +
-            ", status='" + getStatus() + "'" +
             ", createdOn='" + getCreatedOn() + "'" +
             ", createdBy='" + getCreatedBy() + "'" +
             ", updatedOn='" + getUpdatedOn() + "'" +
@@ -275,4 +280,6 @@ public class CommitteeMembers implements Serializable {
             ", profileImage='" + getProfileImage() + "'" +
             "}";
     }
+
+	
 }

@@ -104,8 +104,7 @@ public class RequisitionService {
 			if (!localStorage.exists()) {
 				localStorage.mkdirs();
 			}
-			Path path = Paths
-					.get(Constants.LOCAL_REQUISITION_FILE_STORAGE_DIRECTORY + File.pathSeparatorChar + filename);
+			Path path = Paths.get(localStorage.getAbsolutePath()  + File.pathSeparatorChar + filename);
 			Files.write(path, bytes);
 		}
 		ObjectMapper mapper = new ObjectMapper();
