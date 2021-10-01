@@ -1,6 +1,7 @@
 package com.synectiks.procurement.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import io.swagger.annotations.ApiModelProperty;
 
 import javax.persistence.*;
 
@@ -27,17 +28,59 @@ public class Document implements Serializable {
     @Column(name = "file_type")
     private String fileType;
 
+    @Column(name = "file_ext")
+    private String fileExt;
+
     @Column(name = "file_size")
     private Long fileSize;
+
+    /**
+     * LOCAL or S3 or AZURE
+     */
+    @ApiModelProperty(value = "LOCAL or S3 or AZURE")
+    @Column(name = "storage_location")
+    private String storageLocation;
 
     @Column(name = "local_file_path")
     private String localFilePath;
 
+    /**
+     * S3 bucket name. image file stored on aws s3 bucket
+     */
+    @ApiModelProperty(value = "S3 bucket name. image file stored on aws s3 bucket")
     @Column(name = "s_3_bucket")
     private String s3Bucket;
 
+    /**
+     * S3 url of image file
+     */
+    @ApiModelProperty(value = "S3 url of image file")
+    @Column(name = "s_3_url")
+    private String s3Url;
+
+    /**
+     * AZURE url of image file
+     */
+    @ApiModelProperty(value = "AZURE url of image file")
+    @Column(name = "azure_url")
+    private String azureUrl;
+
     @Column(name = "source_of_origin")
     private String sourceOfOrigin;
+
+    /**
+     * DB id of an object like invoice, committee member id etc..
+     */
+    @ApiModelProperty(value = "DB id of an object like invoice, committee member id etc..")
+    @Column(name = "source_id")
+    private Long sourceId;
+
+    /**
+     * PROFILE_IMAGE, DEGREE, CURRENCY_SYMBOL etc..
+     */
+    @ApiModelProperty(value = "PROFILE_IMAGE, DEGREE, CURRENCY_SYMBOL etc..")
+    @Column(name = "identifier")
+    private String identifier;
 
     @Column(name = "created_on")
     private Instant createdOn;
@@ -94,6 +137,19 @@ public class Document implements Serializable {
         this.fileType = fileType;
     }
 
+    public String getFileExt() {
+        return fileExt;
+    }
+
+    public Document fileExt(String fileExt) {
+        this.fileExt = fileExt;
+        return this;
+    }
+
+    public void setFileExt(String fileExt) {
+        this.fileExt = fileExt;
+    }
+
     public Long getFileSize() {
         return fileSize;
     }
@@ -105,6 +161,19 @@ public class Document implements Serializable {
 
     public void setFileSize(Long fileSize) {
         this.fileSize = fileSize;
+    }
+
+    public String getStorageLocation() {
+        return storageLocation;
+    }
+
+    public Document storageLocation(String storageLocation) {
+        this.storageLocation = storageLocation;
+        return this;
+    }
+
+    public void setStorageLocation(String storageLocation) {
+        this.storageLocation = storageLocation;
     }
 
     public String getLocalFilePath() {
@@ -133,6 +202,32 @@ public class Document implements Serializable {
         this.s3Bucket = s3Bucket;
     }
 
+    public String gets3Url() {
+        return s3Url;
+    }
+
+    public Document s3Url(String s3Url) {
+        this.s3Url = s3Url;
+        return this;
+    }
+
+    public void sets3Url(String s3Url) {
+        this.s3Url = s3Url;
+    }
+
+    public String getAzureUrl() {
+        return azureUrl;
+    }
+
+    public Document azureUrl(String azureUrl) {
+        this.azureUrl = azureUrl;
+        return this;
+    }
+
+    public void setAzureUrl(String azureUrl) {
+        this.azureUrl = azureUrl;
+    }
+
     public String getSourceOfOrigin() {
         return sourceOfOrigin;
     }
@@ -144,6 +239,32 @@ public class Document implements Serializable {
 
     public void setSourceOfOrigin(String sourceOfOrigin) {
         this.sourceOfOrigin = sourceOfOrigin;
+    }
+
+    public Long getSourceId() {
+        return sourceId;
+    }
+
+    public Document sourceId(Long sourceId) {
+        this.sourceId = sourceId;
+        return this;
+    }
+
+    public void setSourceId(Long sourceId) {
+        this.sourceId = sourceId;
+    }
+
+    public String getIdentifier() {
+        return identifier;
+    }
+
+    public Document identifier(String identifier) {
+        this.identifier = identifier;
+        return this;
+    }
+
+    public void setIdentifier(String identifier) {
+        this.identifier = identifier;
     }
 
     public Instant getCreatedOn() {
@@ -248,10 +369,16 @@ public class Document implements Serializable {
             "id=" + getId() +
             ", fileName='" + getFileName() + "'" +
             ", fileType='" + getFileType() + "'" +
+            ", fileExt='" + getFileExt() + "'" +
             ", fileSize=" + getFileSize() +
+            ", storageLocation='" + getStorageLocation() + "'" +
             ", localFilePath='" + getLocalFilePath() + "'" +
             ", s3Bucket='" + gets3Bucket() + "'" +
+            ", s3Url='" + gets3Url() + "'" +
+            ", azureUrl='" + getAzureUrl() + "'" +
             ", sourceOfOrigin='" + getSourceOfOrigin() + "'" +
+            ", sourceId=" + getSourceId() +
+            ", identifier='" + getIdentifier() + "'" +
             ", createdOn='" + getCreatedOn() + "'" +
             ", createdBy='" + getCreatedBy() + "'" +
             ", updatedOn='" + getUpdatedOn() + "'" +

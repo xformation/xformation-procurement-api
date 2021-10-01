@@ -38,9 +38,6 @@ public class CurrencyResourceIT {
     private static final String DEFAULT_COUNTRY_CODE = "AAAAAAAAAA";
     private static final String UPDATED_COUNTRY_CODE = "BBBBBBBBBB";
 
-    private static final String DEFAULT_SYMBOL_FILE_PATH = "AAAAAAAAAA";
-    private static final String UPDATED_SYMBOL_FILE_PATH = "BBBBBBBBBB";
-
     @Autowired
     private CurrencyRepository currencyRepository;
 
@@ -62,8 +59,7 @@ public class CurrencyResourceIT {
         Currency currency = new Currency()
             .code(DEFAULT_CODE)
             .countryName(DEFAULT_COUNTRY_NAME)
-            .countryCode(DEFAULT_COUNTRY_CODE)
-            .symbolFilePath(DEFAULT_SYMBOL_FILE_PATH);
+            .countryCode(DEFAULT_COUNTRY_CODE);
         return currency;
     }
     /**
@@ -76,8 +72,7 @@ public class CurrencyResourceIT {
         Currency currency = new Currency()
             .code(UPDATED_CODE)
             .countryName(UPDATED_COUNTRY_NAME)
-            .countryCode(UPDATED_COUNTRY_CODE)
-            .symbolFilePath(UPDATED_SYMBOL_FILE_PATH);
+            .countryCode(UPDATED_COUNTRY_CODE);
         return currency;
     }
 
@@ -103,7 +98,6 @@ public class CurrencyResourceIT {
         assertThat(testCurrency.getCode()).isEqualTo(DEFAULT_CODE);
         assertThat(testCurrency.getCountryName()).isEqualTo(DEFAULT_COUNTRY_NAME);
         assertThat(testCurrency.getCountryCode()).isEqualTo(DEFAULT_COUNTRY_CODE);
-        assertThat(testCurrency.getSymbolFilePath()).isEqualTo(DEFAULT_SYMBOL_FILE_PATH);
     }
 
     @Test
@@ -139,8 +133,7 @@ public class CurrencyResourceIT {
             .andExpect(jsonPath("$.[*].id").value(hasItem(currency.getId().intValue())))
             .andExpect(jsonPath("$.[*].code").value(hasItem(DEFAULT_CODE)))
             .andExpect(jsonPath("$.[*].countryName").value(hasItem(DEFAULT_COUNTRY_NAME)))
-            .andExpect(jsonPath("$.[*].countryCode").value(hasItem(DEFAULT_COUNTRY_CODE)))
-            .andExpect(jsonPath("$.[*].symbolFilePath").value(hasItem(DEFAULT_SYMBOL_FILE_PATH)));
+            .andExpect(jsonPath("$.[*].countryCode").value(hasItem(DEFAULT_COUNTRY_CODE)));
     }
     
     @Test
@@ -156,8 +149,7 @@ public class CurrencyResourceIT {
             .andExpect(jsonPath("$.id").value(currency.getId().intValue()))
             .andExpect(jsonPath("$.code").value(DEFAULT_CODE))
             .andExpect(jsonPath("$.countryName").value(DEFAULT_COUNTRY_NAME))
-            .andExpect(jsonPath("$.countryCode").value(DEFAULT_COUNTRY_CODE))
-            .andExpect(jsonPath("$.symbolFilePath").value(DEFAULT_SYMBOL_FILE_PATH));
+            .andExpect(jsonPath("$.countryCode").value(DEFAULT_COUNTRY_CODE));
     }
     @Test
     @Transactional
@@ -182,8 +174,7 @@ public class CurrencyResourceIT {
         updatedCurrency
             .code(UPDATED_CODE)
             .countryName(UPDATED_COUNTRY_NAME)
-            .countryCode(UPDATED_COUNTRY_CODE)
-            .symbolFilePath(UPDATED_SYMBOL_FILE_PATH);
+            .countryCode(UPDATED_COUNTRY_CODE);
 
         restCurrencyMockMvc.perform(put("/api/currencies")
             .contentType(MediaType.APPLICATION_JSON)
@@ -197,7 +188,6 @@ public class CurrencyResourceIT {
         assertThat(testCurrency.getCode()).isEqualTo(UPDATED_CODE);
         assertThat(testCurrency.getCountryName()).isEqualTo(UPDATED_COUNTRY_NAME);
         assertThat(testCurrency.getCountryCode()).isEqualTo(UPDATED_COUNTRY_CODE);
-        assertThat(testCurrency.getSymbolFilePath()).isEqualTo(UPDATED_SYMBOL_FILE_PATH);
     }
 
     @Test

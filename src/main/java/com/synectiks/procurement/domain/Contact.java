@@ -1,16 +1,26 @@
 package com.synectiks.procurement.domain;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
-
-import javax.persistence.*;
-import javax.validation.constraints.*;
 
 import java.io.Serializable;
 import java.time.Instant;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
+import javax.persistence.SequenceGenerator;
+import javax.persistence.Table;
+import javax.persistence.Transient;
+import javax.validation.constraints.Size;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * A Contact.
@@ -82,23 +92,11 @@ public class Contact implements Serializable {
     @OneToMany(mappedBy = "contact")
     private Set<Document> documentLists = new HashSet<>();
 
-    @ManyToMany(mappedBy = "contacts")
-    @JsonIgnore
-    private Set<Committee> committees = new HashSet<>();
-    
-	@Transient
+    @Transient
     @JsonProperty
-    private List<ContactActivity>  activityList;
-
-    public List<ContactActivity> getActivityList() {
-		return activityList;
-	}
-
-	public void setActivityList(List<ContactActivity> activityList) {
-		this.activityList = activityList;
-	}
-
-	// jhipster-needle-entity-add-field - JHipster will add fields here
+    private List<ContactActivity> activityList;
+    
+    // jhipster-needle-entity-add-field - JHipster will add fields here
     public Long getId() {
         return id;
     }
@@ -352,31 +350,6 @@ public class Contact implements Serializable {
     public void setDocumentLists(Set<Document> documents) {
         this.documentLists = documents;
     }
-
-    public Set<Committee> getCommittees() {
-        return committees;
-    }
-
-    public Contact committees(Set<Committee> committees) {
-        this.committees = committees;
-        return this;
-    }
-
-    public Contact addCommittee(Committee committee) {
-        this.committees.add(committee);
-        committee.getContacts().add(this);
-        return this;
-    }
-
-    public Contact removeCommittee(Committee committee) {
-        this.committees.remove(committee);
-        committee.getContacts().remove(this);
-        return this;
-    }
-
-    public void setCommittees(Set<Committee> committees) {
-        this.committees = committees;
-    }
     // jhipster-needle-entity-add-getters-setters - JHipster will add getters and setters here
 
     @Override
@@ -418,4 +391,12 @@ public class Contact implements Serializable {
             ", notes='" + getNotes() + "'" +
             "}";
     }
+
+	public List<ContactActivity> getActivityList() {
+		return activityList;
+	}
+
+	public void setActivityList(List<ContactActivity> activityList) {
+		this.activityList = activityList;
+	}
 }

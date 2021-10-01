@@ -13,16 +13,15 @@ import javax.persistence.Id;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.Transient;
-import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
- * A Committee.
+ * A CommitteeMember.
  */
 @Entity
-@Table(name = "committee")
-public class Committee implements Serializable {
+@Table(name = "committee_member")
+public class CommitteeMember implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -34,11 +33,20 @@ public class Committee implements Serializable {
     @Column(name = "name")
     private String name;
 
-    @Column(name = "type")
-    private String type;
+    @Column(name = "company")
+    private String company;
 
-    @Column(name = "status")
-    private String status;
+    @Column(name = "department")
+    private String department;
+
+    @Column(name = "phone_number")
+    private String phoneNumber;
+
+    @Column(name = "email")
+    private String email;
+
+    @Column(name = "designation")
+    private String designation;
 
     @Column(name = "created_on")
     private Instant createdOn;
@@ -52,14 +60,17 @@ public class Committee implements Serializable {
     @Column(name = "updated_by")
     private String updatedBy;
 
-    @Size(max = 5000)
-    @Column(name = "notes", length = 5000)
-    private String notes;
-
     @Transient
     @JsonProperty
-    private List<CommitteeActivity> activityList;
+    private List<CommitteeAndMemberAssociation> committeeList;
     
+    @Transient
+    @JsonProperty
+    private byte[] profileImage;
+    
+    @Transient
+    @JsonProperty
+    private List<Document> documentList;
     
     public Long getId() {
         return id;
@@ -73,48 +84,52 @@ public class Committee implements Serializable {
         return name;
     }
 
-    public Committee name(String name) {
-        this.name = name;
-        return this;
-    }
-
     public void setName(String name) {
         this.name = name;
     }
 
-    public String getType() {
-        return type;
+    public String getCompany() {
+        return company;
     }
 
-    public Committee type(String type) {
-        this.type = type;
-        return this;
+    public void setCompany(String company) {
+        this.company = company;
     }
 
-    public void setType(String type) {
-        this.type = type;
+    public String getDepartment() {
+        return department;
     }
 
-    public String getStatus() {
-        return status;
+    public void setDepartment(String department) {
+        this.department = department;
     }
 
-    public Committee status(String status) {
-        this.status = status;
-        return this;
+    public String getPhoneNumber() {
+        return phoneNumber;
     }
 
-    public void setStatus(String status) {
-        this.status = status;
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getDesignation() {
+        return designation;
+    }
+
+    public void setDesignation(String designation) {
+        this.designation = designation;
     }
 
     public Instant getCreatedOn() {
         return createdOn;
-    }
-
-    public Committee createdOn(Instant createdOn) {
-        this.createdOn = createdOn;
-        return this;
     }
 
     public void setCreatedOn(Instant createdOn) {
@@ -125,22 +140,12 @@ public class Committee implements Serializable {
         return createdBy;
     }
 
-    public Committee createdBy(String createdBy) {
-        this.createdBy = createdBy;
-        return this;
-    }
-
     public void setCreatedBy(String createdBy) {
         this.createdBy = createdBy;
     }
 
     public Instant getUpdatedOn() {
         return updatedOn;
-    }
-
-    public Committee updatedOn(Instant updatedOn) {
-        this.updatedOn = updatedOn;
-        return this;
     }
 
     public void setUpdatedOn(Instant updatedOn) {
@@ -151,64 +156,65 @@ public class Committee implements Serializable {
         return updatedBy;
     }
 
-    public Committee updatedBy(String updatedBy) {
-        this.updatedBy = updatedBy;
-        return this;
-    }
-
     public void setUpdatedBy(String updatedBy) {
         this.updatedBy = updatedBy;
     }
 
-    public String getNotes() {
-        return notes;
-    }
+	public byte[] getProfileImage() {
+		return profileImage;
+	}
 
-    public Committee notes(String notes) {
-        this.notes = notes;
-        return this;
-    }
+	public void setProfileImage(byte[] profileImage) {
+		this.profileImage = profileImage;
+	}
 
-    public void setNotes(String notes) {
-        this.notes = notes;
-    }
+	public List<CommitteeAndMemberAssociation> getCommitteeList() {
+		return committeeList;
+	}
 
-    @Override
+	public void setCommitteeList(List<CommitteeAndMemberAssociation> committeeList) {
+		this.committeeList = committeeList;
+	}
+
+	public List<Document> getDocumentList() {
+		return documentList;
+	}
+
+	public void setDocumentList(List<Document> documentList) {
+		this.documentList = documentList;
+	}
+	
+	@Override
     public boolean equals(Object o) {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof Committee)) {
+        if (!(o instanceof CommitteeMember)) {
             return false;
         }
-        return id != null && id.equals(((Committee) o).id);
+        return id != null && id.equals(((CommitteeMember) o).id);
     }
 
     @Override
     public int hashCode() {
         return 31;
     }
-
-    @Override
+    
+	@Override
     public String toString() {
-        return "Committee{" +
+        return "CommitteeMember{" +
             "id=" + getId() +
             ", name='" + getName() + "'" +
-            ", type='" + getType() + "'" +
-            ", status='" + getStatus() + "'" +
+            ", company='" + getCompany() + "'" +
+            ", department='" + getDepartment() + "'" +
+            ", phoneNumber='" + getPhoneNumber() + "'" +
+            ", email='" + getEmail() + "'" +
+            ", designation='" + getDesignation() + "'" +
             ", createdOn='" + getCreatedOn() + "'" +
             ", createdBy='" + getCreatedBy() + "'" +
             ", updatedOn='" + getUpdatedOn() + "'" +
             ", updatedBy='" + getUpdatedBy() + "'" +
-            ", notes='" + getNotes() + "'" +
             "}";
     }
-
-	public List<CommitteeActivity> getActivityList() {
-		return activityList;
-	}
-
-	public void setActivityList(List<CommitteeActivity> activityList) {
-		this.activityList = activityList;
-	}
+	
 }

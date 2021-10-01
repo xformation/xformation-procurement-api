@@ -1,18 +1,28 @@
 package com.synectiks.procurement.domain;
 
-import io.swagger.annotations.ApiModelProperty;
-
-import javax.persistence.*;
-import javax.validation.constraints.*;
-
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 import java.io.Serializable;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
+import javax.persistence.SequenceGenerator;
+import javax.persistence.Table;
+import javax.persistence.Transient;
+import javax.validation.constraints.Size;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import io.swagger.annotations.ApiModelProperty;
 
 /**
  * A Requisition.
@@ -79,21 +89,14 @@ public class Requisition implements Serializable {
 
     @OneToMany(mappedBy = "requisition")
     private Set<RequisitionLineItem> requisitionLineItemLists = new HashSet<>();
-    
 
-	@Transient
+    @OneToMany(mappedBy = "requisition")
+    private Set<VendorRequisitionBucket> requisitions = new HashSet<>();
+
+    @Transient
     @JsonProperty
-    private List<RequisitionActivity>  activityList;
-
-    public List<RequisitionActivity> getActivityList() {
-		return activityList;
-	}
-
-	public void setActivityList(List<RequisitionActivity> activityList) {
-		this.activityList = activityList;
-	}
-
-	// jhipster-needle-entity-add-field - JHipster will add fields here
+    private List<RequisitionActivity> activityList;
+    
     public Long getId() {
         return id;
     }
@@ -308,6 +311,31 @@ public class Requisition implements Serializable {
     public void setRequisitionLineItemLists(Set<RequisitionLineItem> requisitionLineItems) {
         this.requisitionLineItemLists = requisitionLineItems;
     }
+
+    public Set<VendorRequisitionBucket> getRequisitions() {
+        return requisitions;
+    }
+
+    public Requisition requisitions(Set<VendorRequisitionBucket> vendorRequisitionBuckets) {
+        this.requisitions = vendorRequisitionBuckets;
+        return this;
+    }
+
+    public Requisition addRequisition(VendorRequisitionBucket vendorRequisitionBucket) {
+        this.requisitions.add(vendorRequisitionBucket);
+        vendorRequisitionBucket.setRequisition(this);
+        return this;
+    }
+
+    public Requisition removeRequisition(VendorRequisitionBucket vendorRequisitionBucket) {
+        this.requisitions.remove(vendorRequisitionBucket);
+        vendorRequisitionBucket.setRequisition(null);
+        return this;
+    }
+
+    public void setRequisitions(Set<VendorRequisitionBucket> vendorRequisitionBuckets) {
+        this.requisitions = vendorRequisitionBuckets;
+    }
     // jhipster-needle-entity-add-getters-setters - JHipster will add getters and setters here
 
     @Override
@@ -345,4 +373,12 @@ public class Requisition implements Serializable {
             ", dueDate='" + getDueDate() + "'" +
             "}";
     }
+
+	public List<RequisitionActivity> getActivityList() {
+		return activityList;
+	}
+
+	public void setActivityList(List<RequisitionActivity> activityList) {
+		this.activityList = activityList;
+	}
 }

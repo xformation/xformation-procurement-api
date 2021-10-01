@@ -1,5 +1,5 @@
 {
-  "name": "CommitteeMembers",
+  "name": "CommitteeMember",
   "fields": [
     {
       "fieldName": "name",
@@ -22,7 +22,7 @@
       "fieldType": "String"
     },
     {
-      "fieldName": "degradation",
+      "fieldName": "designation",
       "fieldType": "String"
     },
     {
@@ -40,23 +40,11 @@
     {
       "fieldName": "updatedBy",
       "fieldType": "String"
-    },
-    {
-      "fieldName": "profileImage",
-      "fieldType": "String"
     }
   ],
-  "relationships": [
-    {
-      "relationshipType": "many-to-one",
-      "otherEntityName": "committee",
-      "otherEntityRelationshipName": "committeeMembers",
-      "relationshipName": "committee",
-      "otherEntityField": "id"
-    }
-  ],
-  "changelogDate": "20210927121207",
-  "entityTableName": "committee_members",
+  "relationships": [],
+  "changelogDate": "20210929105334",
+  "entityTableName": "committee_member",
   "dto": "no",
   "pagination": "no",
   "service": "no",

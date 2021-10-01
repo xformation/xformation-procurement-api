@@ -102,6 +102,15 @@ public class DocumentService {
 		return document;
 	}
 
+	public Document saveDocument(Document document) throws JSONException {
+		
+		document = documentRepository.save(document);
+
+		logger.info("Document saved successfully: " + document.toString());
+
+		return document;
+	}
+	
 	public Document updateDocument(ObjectNode obj) throws JSONException, URISyntaxException {
 		Optional<Document> odc = documentRepository.findById(Long.parseLong(obj.get("id").asText()));
 		if (!odc.isPresent()) {
@@ -152,11 +161,12 @@ public class DocumentService {
 
 	}
 
-	public List<Document> searchdocument(@RequestParam Map<String, String> requestObj) {
-		logger.info("Request to get document on given filter criteria");
+	public List<Document> searchDocument(@RequestParam Map<String, String> requestObj) {
+		logger.info("Request to search document on given filter criteria");
 		Document document = new Document();
 
 		boolean isFilter = false;
+		
 		if (requestObj.get("id") != null) {
 			document.setId(Long.parseLong(requestObj.get("id")));
 			isFilter = true;
@@ -174,6 +184,14 @@ public class DocumentService {
 			document.setFileSize(Long.valueOf(requestObj.get("fileSize")));
 			isFilter = true;
 		}
+		if (requestObj.get("fileExt") != null) {
+			document.setFileExt(requestObj.get("fileExt"));
+			isFilter = true;
+		}
+		if (requestObj.get("storageLocation") != null) {
+			document.setStorageLocation(requestObj.get("storageLocation"));
+			isFilter = true;
+		}
 		if (requestObj.get("localFilePath") != null) {
 			document.setLocalFilePath(requestObj.get("localFilePath"));
 			isFilter = true;
@@ -182,11 +200,44 @@ public class DocumentService {
 			document.sets3Bucket(requestObj.get("s3Bucket"));
 			isFilter = true;
 		}
+		if (requestObj.get("s3Url") != null) {
+			document.sets3Url(requestObj.get("s3Url"));
+			isFilter = true;
+		}
+		if (requestObj.get("azureUrl") != null) {
+			document.setAzureUrl(requestObj.get("azureUrl"));
+			isFilter = true;
+		}
 		if (requestObj.get("sourceOfOrigin") != null) {
 			document.setSourceOfOrigin(requestObj.get("sourceOfOrigin"));
 			isFilter = true;
 		}
-
+		if (requestObj.get("sourceId") != null) {
+			document.setSourceId(Long.valueOf(requestObj.get("sourceId")));
+			isFilter = true;
+		}
+		if (requestObj.get("identifier") != null) {
+			document.setIdentifier(requestObj.get("identifier"));
+			isFilter = true;
+		}
+		if (requestObj.get("createdOn") != null) {
+			Instant instant = Instant.parse(requestObj.get("createdOn"));
+			document.setCreatedOn(instant);
+			isFilter = true;
+		}
+		if (requestObj.get("createdBy") != null) {
+			document.setCreatedBy(requestObj.get("createdBy"));
+			isFilter = true;
+		}
+		if (requestObj.get("updatedOn") != null) {
+			Instant instant = Instant.parse(requestObj.get("updatedOn"));
+			document.setUpdatedOn(instant);
+			isFilter = true;
+		}
+	    if (requestObj.get("updatedBy") != null) {
+			document.setUpdatedBy(requestObj.get("updatedBy"));
+			isFilter = true;
+		}
 		List<Document> list = null;
 		if (isFilter) {
 			list = this.documentRepository.findAll(Example.of(document), Sort.by(Direction.DESC, "id"));

@@ -7,11 +7,11 @@ import javax.persistence.*;
 import java.io.Serializable;
 
 /**
- * A CommitteeMembersStatus.
+ * A CommitteeAndMemberLink.
  */
 @Entity
-@Table(name = "committee_members_status")
-public class CommitteeMembersStatus implements Serializable {
+@Table(name = "committee_and_member_link")
+public class CommitteeAndMemberLink implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -24,14 +24,13 @@ public class CommitteeMembersStatus implements Serializable {
     private String status;
 
     @ManyToOne
-    @JsonIgnoreProperties(value = "committeeMembersStatuses", allowSetters = true)
+    @JsonIgnoreProperties(value = "committeeAndMemberLinks", allowSetters = true)
     private Committee committee;
 
     @ManyToOne
-    @JsonIgnoreProperties(value = "committeeMembersStatuses", allowSetters = true)
-    private CommitteeMembers committeeMembers;
+    @JsonIgnoreProperties(value = "committeeAndMemberLinks", allowSetters = true)
+    private CommitteeMember committeeMember;
 
-    // jhipster-needle-entity-add-field - JHipster will add fields here
     public Long getId() {
         return id;
     }
@@ -44,11 +43,6 @@ public class CommitteeMembersStatus implements Serializable {
         return status;
     }
 
-    public CommitteeMembersStatus status(String status) {
-        this.status = status;
-        return this;
-    }
-
     public void setStatus(String status) {
         this.status = status;
     }
@@ -57,38 +51,27 @@ public class CommitteeMembersStatus implements Serializable {
         return committee;
     }
 
-    public CommitteeMembersStatus committee(Committee committee) {
-        this.committee = committee;
-        return this;
-    }
-
     public void setCommittee(Committee committee) {
         this.committee = committee;
     }
 
-    public CommitteeMembers getCommitteeMembers() {
-        return committeeMembers;
+    public CommitteeMember getCommitteeMember() {
+        return committeeMember;
     }
 
-    public CommitteeMembersStatus committeeMembers(CommitteeMembers committeeMembers) {
-        this.committeeMembers = committeeMembers;
-        return this;
+    public void setCommitteeMember(CommitteeMember committeeMember) {
+        this.committeeMember = committeeMember;
     }
-
-    public void setCommitteeMembers(CommitteeMembers committeeMembers) {
-        this.committeeMembers = committeeMembers;
-    }
-    // jhipster-needle-entity-add-getters-setters - JHipster will add getters and setters here
 
     @Override
     public boolean equals(Object o) {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof CommitteeMembersStatus)) {
+        if (!(o instanceof CommitteeAndMemberLink)) {
             return false;
         }
-        return id != null && id.equals(((CommitteeMembersStatus) o).id);
+        return id != null && id.equals(((CommitteeAndMemberLink) o).id);
     }
 
     @Override
@@ -96,10 +79,9 @@ public class CommitteeMembersStatus implements Serializable {
         return 31;
     }
 
-    // prettier-ignore
     @Override
     public String toString() {
-        return "CommitteeMembersStatus{" +
+        return "CommitteeAndMemberLink{" +
             "id=" + getId() +
             ", status='" + getStatus() + "'" +
             "}";

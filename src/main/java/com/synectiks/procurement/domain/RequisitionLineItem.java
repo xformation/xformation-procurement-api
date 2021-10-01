@@ -1,19 +1,28 @@
 package com.synectiks.procurement.domain;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
-
-import io.swagger.annotations.ApiModelProperty;
-
-import javax.persistence.*;
-import javax.validation.constraints.*;
-
 import java.io.Serializable;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.SequenceGenerator;
+import javax.persistence.Table;
+import javax.persistence.Transient;
+import javax.validation.constraints.Size;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import io.swagger.annotations.ApiModelProperty;
 
 /**
  * A RequisitionLineItem.
@@ -77,20 +86,10 @@ public class RequisitionLineItem implements Serializable {
     @JsonIgnoreProperties(value = "requisitionLineItemLists", allowSetters = true)
     private Requisition requisition;
 
-    
-	@Transient
+    @Transient
     @JsonProperty
-    private List<RequisitionLineItemActivity>  activityList;
-
-    public List<RequisitionLineItemActivity> getActivityList() {
-		return activityList;
-	}
-
-	public void setActivityList(List<RequisitionLineItemActivity> activityList) {
-		this.activityList = activityList;
-	}
-
-	// jhipster-needle-entity-add-field - JHipster will add fields here
+    private List<RequisitionLineItemActivity> activityList;
+    
     public Long getId() {
         return id;
     }
@@ -329,4 +328,12 @@ public class RequisitionLineItem implements Serializable {
             ", dueDate='" + getDueDate() + "'" +
             "}";
     }
+
+	public List<RequisitionLineItemActivity> getActivityList() {
+		return activityList;
+	}
+
+	public void setActivityList(List<RequisitionLineItemActivity> activityList) {
+		this.activityList = activityList;
+	}
 }
