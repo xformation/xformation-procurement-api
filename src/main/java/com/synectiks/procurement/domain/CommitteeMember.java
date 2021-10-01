@@ -62,11 +62,11 @@ public class CommitteeMember implements Serializable {
 
     @Transient
     @JsonProperty
-    private List<CommitteeAndMemberLink> committeeList;
+    private List<CommitteeAndMemberAssociation> committeeList;
     
     @Transient
     @JsonProperty
-    private String profileImage;
+    private byte[] profileImage;
     
     @Transient
     @JsonProperty
@@ -160,19 +160,19 @@ public class CommitteeMember implements Serializable {
         this.updatedBy = updatedBy;
     }
 
-	public String getProfileImage() {
+	public byte[] getProfileImage() {
 		return profileImage;
 	}
 
-	public void setProfileImage(String profileImage) {
+	public void setProfileImage(byte[] profileImage) {
 		this.profileImage = profileImage;
 	}
 
-	public List<CommitteeAndMemberLink> getCommitteeList() {
+	public List<CommitteeAndMemberAssociation> getCommitteeList() {
 		return committeeList;
 	}
 
-	public void setCommitteeList(List<CommitteeAndMemberLink> committeeList) {
+	public void setCommitteeList(List<CommitteeAndMemberAssociation> committeeList) {
 		this.committeeList = committeeList;
 	}
 
