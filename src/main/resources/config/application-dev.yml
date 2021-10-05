@@ -21,7 +21,7 @@ logging:
 
 spring:
   profiles:
-    active: dev
+#    active: dev
     include:
       - swagger
       # Uncomment to activate TLS for the dev profile
@@ -37,7 +37,7 @@ spring:
       indent-output: true
   datasource:
     type: com.zaxxer.hikari.HikariDataSource
-    url: jdbc:postgresql://localhost:5432/procurement
+    url: jdbc:postgresql://localhost:5432/procurementdev
     username: postgres
     password: postgres
     hikari:
