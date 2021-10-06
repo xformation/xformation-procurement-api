@@ -26,6 +26,10 @@ management:
         enabled: false
 
 spring:
+  profiles:
+#    active: prod
+    include:
+      - swagger
   devtools:
     restart:
       enabled: false
@@ -34,8 +38,8 @@ spring:
   datasource:
     type: com.zaxxer.hikari.HikariDataSource
     url: jdbc:postgresql://localhost:5432/procurement
-    username: procurement
-    password:
+    username: postgres
+    password: postgres
     hikari:
       poolName: Hikari
       auto-commit: false
@@ -98,6 +102,13 @@ jhipster:
   http:
     cache: # Used by the CachingHttpHeadersFilter
       timeToLiveInDays: 1461
+  cors:
+    allowed-origins: "*"
+    allowed-methods: "*"
+    allowed-headers: "*"
+    exposed-headers: "Authorization,Link,X-Total-Count"
+    allow-credentials: true
+    max-age: 1800
   security:
     authentication:
       jwt:
