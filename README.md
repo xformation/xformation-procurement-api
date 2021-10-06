@@ -8,6 +8,7 @@
   - [Contributing to Procurement](#contributing-to-procurement)
   - [Tests](#tests)
   - [Configure Development Environment](#configure-development-environment)
+  - [Configure Production Environment](#configure-production-environment)
   
 ## About 
   This codebase is SpringBoot backend API's for Procurement solution. Procurement application has complete life cycle flow to create a requisition request, requisition approval, getting quotations from registered vendors against an approved requisition, purchase orders and invoicing of assets etc. It has user authentication and authorization and maintains the role based request flow with different roles like PSDS Admin, Budget holder, director general, requisition etc.
@@ -46,16 +47,6 @@
   /target/procurement-0.0.1-SNAPSHOT.jar
   ```
 
-  Start Procurement application with dev profile  
-  ```
-  java -jar -Dspring.profiles.active=dev target/procurement-0.0.1-SNAPSHOT.jar
-  ```
-
-  Start Procurement application with prod profile  
-  ```
-  java -jar -Dspring.profiles.active=prod target/procurement-0.0.1-SNAPSHOT.jar
-  ```
-
   Schema for dev profile is **procurementdev** and it is defined in **application-dev.yml** file  
   Schema for prod profile is **procurement** and it is defined in **application-prod.yml** file  
 
@@ -68,4 +59,12 @@
   ```
   java -jar -Dspring.profiles.active=dev target/procurement-0.0.1-SNAPSHOT.jar
   ```
-  > NOTE: When service started with **dev** profile, faker.js inserts fake data in all the tables of **procurementdev** schema. Developer can focus on testing the APIs rather than putting efforts to generate test data before testing the core APIs.
+  > NOTE: When service started with **dev** profile, faker.js inserts fake data in all the tables of **procurementdev** schema. Developer can focus on testing the APIs rather than putting efforts to generate test data before testing the core APIs.  
+
+## Configure Production Environment  
+  Start Procurement service with prod profile  
+  ```
+  java -jar -Dspring.profiles.active=prod target/procurement-0.0.1-SNAPSHOT.jar
+  ```
+  
+
