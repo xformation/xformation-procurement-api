@@ -247,6 +247,24 @@ public class InvoiceService {
 			invoice.setNotes(requestObj.get("notes"));
 			isFilter = true;
 		}
+		if (requestObj.get("createdOn") != null) {
+			Instant instant = Instant.parse(requestObj.get("createdOn"));
+			invoice.setCreatedOn(instant);
+			isFilter = true;
+		}
+		if (requestObj.get("createdBy") != null) {
+			invoice.setCreatedBy(requestObj.get("createdBy"));
+			isFilter = true;
+		}
+		if (requestObj.get("updatedOn") != null) {
+			Instant instant = Instant.parse(requestObj.get("updatedOn"));
+			invoice.setUpdatedOn(instant);
+			isFilter = true;
+		}
+	    if (requestObj.get("updatedBy") != null) {
+	    	invoice.setUpdatedBy(requestObj.get("updatedBy"));
+			isFilter = true;
+		}
 		List<Invoice> list = null;
 		if (isFilter) {
 			list = this.invoiceRepository.findAll(Example.of(invoice), Sort.by(Direction.DESC, "id"));

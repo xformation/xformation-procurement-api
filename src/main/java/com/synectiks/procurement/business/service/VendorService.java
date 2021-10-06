@@ -158,6 +158,25 @@ public class VendorService {
 			vendor.setZipCode(requestObj.get("zipCode"));
 			isFilter = true;
 		}
+		if (requestObj.get("createdOn") != null) {
+			Instant inst = Instant.parse(requestObj.get("createdOn"));
+			vendor.setCreatedOn(inst);
+			isFilter = true;
+		}
+
+		if (requestObj.get("createdBy") != null) {
+			vendor.setCreatedBy(requestObj.get("createdBy"));
+			isFilter = true;
+		}
+		if (requestObj.get("updatedOn") != null) {
+			Instant inst = Instant.parse(requestObj.get("updatedOn"));
+			vendor.setUpdatedOn(inst);
+			isFilter = true;
+		}
+		if (requestObj.get("updatedBy") != null) {
+			vendor.setUpdatedBy(requestObj.get("updatedBy"));
+			isFilter = true;
+		}
 		List<Vendor> list = null;
 		if (isFilter) {
 			list = this.vendorRepository.findAll(Example.of(vendor), Sort.by(Direction.DESC, "id"));

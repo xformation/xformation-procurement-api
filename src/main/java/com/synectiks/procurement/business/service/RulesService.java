@@ -171,6 +171,25 @@ public class RulesService {
 			rules.setDescription(requestObj.get("description"));
 			isFilter = true;
 		}
+		if (requestObj.get("createdOn") != null) {
+			Instant inst = Instant.parse(requestObj.get("createdOn"));
+			rules.setCreatedOn(inst);
+			isFilter = true;
+		}
+
+		if (requestObj.get("createdBy") != null) {
+			rules.setCreatedBy(requestObj.get("createdBy"));
+			isFilter = true;
+		}
+		if (requestObj.get("updatedOn") != null) {
+			Instant inst = Instant.parse(requestObj.get("updatedOn"));
+			rules.setUpdatedOn(inst);
+			isFilter = true;
+		}
+		if (requestObj.get("updatedBy") != null) {
+			rules.setUpdatedBy(requestObj.get("updatedBy"));
+			isFilter = true;
+		}
 		List<Rules> list = null;
 		if (isFilter) {
 			list = this.rulesRepository.findAll(Example.of(rules), Sort.by(Direction.DESC, "id"));

@@ -156,6 +156,25 @@ public class CommitteeService {
 			committee.setNotes(requestObj.get("notes"));
 			isFilter = true;
 		}
+		if (requestObj.get("createdOn") != null) {
+			Instant inst = Instant.parse(requestObj.get("createdOn"));
+			committee.setCreatedOn(inst);
+			isFilter = true;
+		}
+
+		if (requestObj.get("createdBy") != null) {
+			committee.setCreatedBy(requestObj.get("createdBy"));
+			isFilter = true;
+		}
+		if (requestObj.get("updatedOn") != null) {
+			Instant inst = Instant.parse(requestObj.get("updatedOn"));
+			committee.setUpdatedOn(inst);
+			isFilter = true;
+		}
+		if (requestObj.get("updatedBy") != null) {
+			committee.setUpdatedBy(requestObj.get("updatedBy"));
+			isFilter = true;
+		}
 		List<Committee> list = null;
 		if (isFilter) {
 			list = this.committeeRepository.findAll(Example.of(committee), Sort.by(Direction.DESC, "id"));

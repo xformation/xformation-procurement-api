@@ -245,6 +245,24 @@ public class RequisitionLineItemService {
 			requisitionLineItem.setNotes(requestObj.get("notes"));
 			isFilter = true;
 		}
+		if (requestObj.get("createdOn") != null) {
+			Instant instant = Instant.parse(requestObj.get("createdOn"));
+			requisitionLineItem.setCreatedOn(instant);
+			isFilter = true;
+		}
+		if (requestObj.get("createdBy") != null) {
+			requisitionLineItem.setCreatedBy(requestObj.get("createdBy"));
+			isFilter = true;
+		}
+		if (requestObj.get("updatedOn") != null) {
+			Instant instant = Instant.parse(requestObj.get("updatedOn"));
+			requisitionLineItem.setUpdatedOn(instant);
+			isFilter = true;
+		}
+	    if (requestObj.get("updatedBy") != null) {
+	    	requisitionLineItem.setUpdatedBy(requestObj.get("updatedBy"));
+			isFilter = true;
+		}
 		List<RequisitionLineItem> list = null;
 		if (isFilter) {
 			list = this.requisitionLineItemRepository.findAll(Example.of(requisitionLineItem),

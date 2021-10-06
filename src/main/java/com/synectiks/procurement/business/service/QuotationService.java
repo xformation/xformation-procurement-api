@@ -247,8 +247,22 @@ public class QuotationService {
 			isFilter = true;
 		}
 
-		if (requestObj.get("updatedBy") != null) {
-			quotation.setUpdatedBy(requestObj.get("updatedBy"));
+		if (requestObj.get("createdOn") != null) {
+			Instant instant = Instant.parse(requestObj.get("createdOn"));
+			quotation.setCreatedOn(instant);
+			isFilter = true;
+		}
+		if (requestObj.get("createdBy") != null) {
+			quotation.setCreatedBy(requestObj.get("createdBy"));
+			isFilter = true;
+		}
+		if (requestObj.get("updatedOn") != null) {
+			Instant instant = Instant.parse(requestObj.get("updatedOn"));
+			quotation.setUpdatedOn(instant);
+			isFilter = true;
+		}
+	    if (requestObj.get("updatedBy") != null) {
+	    	quotation.setUpdatedBy(requestObj.get("updatedBy"));
 			isFilter = true;
 		}
 

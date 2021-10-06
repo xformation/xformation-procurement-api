@@ -1,5 +1,6 @@
 package com.synectiks.procurement.business.service;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 
@@ -68,6 +69,24 @@ public class RequisitionActivityService {
 		}
 		if (requestObj.get("notes") != null) {
 			requisitionActivity.setNotes(requestObj.get("notes"));
+			isFilter = true;
+		}
+		if (requestObj.get("createdOn") != null) {
+			Instant instant = Instant.parse(requestObj.get("createdOn"));
+			requisitionActivity.setCreatedOn(instant);
+			isFilter = true;
+		}
+		if (requestObj.get("createdBy") != null) {
+			requisitionActivity.setCreatedBy(requestObj.get("createdBy"));
+			isFilter = true;
+		}
+		if (requestObj.get("updatedOn") != null) {
+			Instant instant = Instant.parse(requestObj.get("updatedOn"));
+			requisitionActivity.setUpdatedOn(instant);
+			isFilter = true;
+		}
+	    if (requestObj.get("updatedBy") != null) {
+	    	requisitionActivity.setUpdatedBy(requestObj.get("updatedBy"));
 			isFilter = true;
 		}
 

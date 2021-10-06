@@ -379,6 +379,24 @@ public class RequisitionService {
 			requisition.setNotes(requestObj.get("notes"));
 			isFilter = true;
 		}
+		if (requestObj.get("createdOn") != null) {
+			Instant instant = Instant.parse(requestObj.get("createdOn"));
+			requisition.setCreatedOn(instant);
+			isFilter = true;
+		}
+		if (requestObj.get("createdBy") != null) {
+			requisition.setCreatedBy(requestObj.get("createdBy"));
+			isFilter = true;
+		}
+		if (requestObj.get("updatedOn") != null) {
+			Instant instant = Instant.parse(requestObj.get("updatedOn"));
+			requisition.setUpdatedOn(instant);
+			isFilter = true;
+		}
+	    if (requestObj.get("updatedBy") != null) {
+	    	requisition.setUpdatedBy(requestObj.get("updatedBy"));
+			isFilter = true;
+		}
 
 		if (!org.apache.commons.lang3.StringUtils.isBlank(requestObj.get("dueDate"))) {
 			DateTimeFormatter formatter = DateTimeFormatter.ofPattern(Constants.DEFAULT_DATE_FORMAT);

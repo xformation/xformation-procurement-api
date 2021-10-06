@@ -31,14 +31,14 @@ public class CommitteeMembersController {
 	@Autowired
 	private CommitteeMembersService committeeMembersService;
 
-	@RequestMapping(value = "/addCommitteeMembers", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+	@RequestMapping(value = "/addCommitteeMember", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<Status> addCommitteeMembers(@RequestParam("obj") String obj,
 			@RequestParam("file") MultipartFile file) throws JSONException {
 		logger.info("Request to add New committee member");
 		Status st = new Status();
 		try {
-			CommitteeMember committeeMembers = committeeMembersService.addCommitteeMember(obj, file);
-			if (committeeMembers == null) {
+			CommitteeMember committeeMember = committeeMembersService.addCommitteeMember(obj, file);
+			if (committeeMember == null) {
 				logger.error("Committee member could not be added.");
 				st.setCode(HttpStatus.EXPECTATION_FAILED.value());
 				st.setType("ERROR");
@@ -48,7 +48,7 @@ public class CommitteeMembersController {
 			st.setCode(HttpStatus.OK.value());
 			st.setType("SUCCESS");
 			st.setMessage("Committee member added successfully");
-			st.setObject(committeeMembers);
+			st.setObject(committeeMember);
 			return ResponseEntity.status(HttpStatus.OK).body(st);
 		} catch (Exception e) {
 			logger.error("Adding committee member failed: ", e);
@@ -66,8 +66,8 @@ public class CommitteeMembersController {
 		logger.info("Request to upde committee members");
 		Status st = new Status();
 		try {
-			CommitteeMember committeeMembers = committeeMembersService.updateCommitteeMembers(obj, file);
-			if (committeeMembers == null) {
+			CommitteeMember committeeMember = committeeMembersService.updateCommitteeMembers(obj, file);
+			if (committeeMember == null) {
 				logger.error("Committee members could not be updated.");
 				st.setCode(HttpStatus.EXPECTATION_FAILED.value());
 				st.setType("ERROR");
@@ -77,7 +77,7 @@ public class CommitteeMembersController {
 			st.setCode(HttpStatus.OK.value());
 			st.setType("SUCCESS");
 			st.setMessage("Committee members update successfully");
-			st.setObject(committeeMembers);
+			st.setObject(committeeMember);
 			return ResponseEntity.status(HttpStatus.OK).body(st);
 		} catch (Exception e) {
 			logger.error("Updating committee members failed. Exception: ", e);

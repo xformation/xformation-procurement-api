@@ -168,6 +168,24 @@ public class PurchaseOrderService {
 			purchaseOrder.setNotes(requestObj.get("notes"));
 			isFilter = true;
 		}
+		if (requestObj.get("createdOn") != null) {
+			Instant instant = Instant.parse(requestObj.get("createdOn"));
+			purchaseOrder.setCreatedOn(instant);
+			isFilter = true;
+		}
+		if (requestObj.get("createdBy") != null) {
+			purchaseOrder.setCreatedBy(requestObj.get("createdBy"));
+			isFilter = true;
+		}
+		if (requestObj.get("updatedOn") != null) {
+			Instant instant = Instant.parse(requestObj.get("updatedOn"));
+			purchaseOrder.setUpdatedOn(instant);
+			isFilter = true;
+		}
+	    if (requestObj.get("updatedBy") != null) {
+	    	purchaseOrder.setUpdatedBy(requestObj.get("updatedBy"));
+			isFilter = true;
+		}
 		List<PurchaseOrder> list = null;
 		if (isFilter) {
 			list = this.purchaseOrderRepository.findAll(Example.of(purchaseOrder), Sort.by(Direction.DESC, "id"));

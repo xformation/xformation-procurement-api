@@ -193,6 +193,25 @@ public class RolesService {
 			roles.setDescription(requestObj.get("description"));
 			isFilter = true;
 		}
+		if (requestObj.get("createdOn") != null) {
+			Instant inst = Instant.parse(requestObj.get("createdOn"));
+			roles.setCreatedOn(inst);
+			isFilter = true;
+		}
+
+		if (requestObj.get("createdBy") != null) {
+			roles.setCreatedBy(requestObj.get("createdBy"));
+			isFilter = true;
+		}
+		if (requestObj.get("updatedOn") != null) {
+			Instant inst = Instant.parse(requestObj.get("updatedOn"));
+			roles.setUpdatedOn(inst);
+			isFilter = true;
+		}
+		if (requestObj.get("updatedBy") != null) {
+			roles.setUpdatedBy(requestObj.get("updatedBy"));
+			isFilter = true;
+		}
 		List<Roles> list = null;
 		if (isFilter) {
 			list = this.rolesRepository.findAll(Example.of(roles), Sort.by(Direction.DESC, "id"));

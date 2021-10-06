@@ -110,6 +110,7 @@ public class CurrencyService {
 //			currency.setSymbolFilePath(requestObj.get("symbolFilePath"));
 //			isFilter = true;
 //		}
+		
 		List<Currency> list = null;
 		if (isFilter) {
 			list = this.currencyRepository.findAll(Example.of(currency), Sort.by(Direction.DESC, "id"));

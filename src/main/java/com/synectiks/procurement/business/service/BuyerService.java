@@ -158,6 +158,25 @@ public class BuyerService {
 			buyer.setZipCode(requestObj.get("zipCode"));
 			isFilter = true;
 		}
+		if (requestObj.get("createdOn") != null) {
+			Instant inst = Instant.parse(requestObj.get("createdOn"));
+			buyer.setCreatedOn(inst);
+			isFilter = true;
+		}
+
+		if (requestObj.get("createdBy") != null) {
+			buyer.setCreatedBy(requestObj.get("createdBy"));
+			isFilter = true;
+		}
+		if (requestObj.get("updatedOn") != null) {
+			Instant inst = Instant.parse(requestObj.get("updatedOn"));
+			buyer.setUpdatedOn(inst);
+			isFilter = true;
+		}
+		if (requestObj.get("updatedBy") != null) {
+			buyer.setUpdatedBy(requestObj.get("updatedBy"));
+			isFilter = true;
+		}
 		List<Buyer> list = null;
 		if (isFilter) {
 			list = this.buyerRepository.findAll(Example.of(buyer), Sort.by(Direction.DESC, "id"));

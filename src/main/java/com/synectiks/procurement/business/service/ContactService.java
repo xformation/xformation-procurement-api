@@ -198,6 +198,25 @@ public class ContactService {
 			contact.setNotes(requestObj.get("notes"));
 			isFilter = true;
 		}
+		if (requestObj.get("createdOn") != null) {
+			Instant inst = Instant.parse(requestObj.get("createdOn"));
+			contact.setCreatedOn(inst);
+			isFilter = true;
+		}
+
+		if (requestObj.get("createdBy") != null) {
+			contact.setCreatedBy(requestObj.get("createdBy"));
+			isFilter = true;
+		}
+		if (requestObj.get("updatedOn") != null) {
+			Instant inst = Instant.parse(requestObj.get("updatedOn"));
+			contact.setUpdatedOn(inst);
+			isFilter = true;
+		}
+		if (requestObj.get("updatedBy") != null) {
+			contact.setUpdatedBy(requestObj.get("updatedBy"));
+			isFilter = true;
+		}
 		List<Contact> list = null;
 		if (isFilter) {
 			list = this.contactRepository.findAll(Example.of(contact), Sort.by(Direction.DESC, "id"));
