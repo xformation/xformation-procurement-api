@@ -45,6 +45,22 @@
         <dropDefaultValue tableName="committee" columnName="updated_on" columnDataType="datetime"/>
     </changeSet>
 
-    
+     <changeSet id="20210722053955-1-data" author="jhipster" context="faker">
+        <loadData
+                  file="config/liquibase/fake-data/committee.csv"
+                  separator=";"
+                  tableName="committee">
+            <column name="id" type="numeric"/>
+            <column name="name" type="string"/>
+            <column name="type" type="string"/>
+            <column name="status" type="string"/>
+            <column name="created_on" type="datetime"/>
+            <column name="created_by" type="string"/>
+            <column name="updated_on" type="datetime"/>
+            <column name="updated_by" type="string"/>
+            <column name="notes" type="string"/>
+            <!-- jhipster-needle-liquibase-add-loadcolumn - JHipster (and/or extensions) can add load columns here -->
+        </loadData>
+    </changeSet>
 
 </databaseChangeLog>

@@ -24,7 +24,18 @@
             <!-- jhipster-needle-liquibase-add-column - JHipster will add columns here -->
         </createTable>
     </changeSet>
-
+<changeSet id="20210906111346-1-data" author="jhipster" context="faker">
+        <loadData
+                  file="config/liquibase/fake-data/roles_group.csv"
+                  separator=";"
+                  tableName="roles_group">
+            <column name="id" type="numeric"/>
+            <column name="jhi_group" type="boolean"/>
+             <column name="roles_id" type="numeric"/>
+          
+            <!-- jhipster-needle-liquibase-add-loadcolumn - JHipster (and/or extensions) can add load columns here -->
+        </loadData>
+    </changeSet>
     
 
 </databaseChangeLog>

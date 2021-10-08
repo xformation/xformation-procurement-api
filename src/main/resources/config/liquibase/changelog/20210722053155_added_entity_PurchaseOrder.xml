@@ -50,5 +50,26 @@
         <dropDefaultValue tableName="purchase_order" columnName="created_on" columnDataType="datetime"/>
         <dropDefaultValue tableName="purchase_order" columnName="updated_on" columnDataType="datetime"/>
     </changeSet>
+    
+     <changeSet id="20210722053155-1-data" author="jhipster" context="faker">
+        <loadData
+                  file="config/liquibase/fake-data/purchase_order.csv"
+                  separator=";"
+                  tableName="purchase_order">
+            <column name="id" type="numeric"/>
+            <column name="po_no" type="string"/>
+            <column name="status" type="string"/>
+            <column name="created_on" type="datetime"/>
+            <column name="created_by" type="string"/>
+            <column name="updated_on" type="datetime"/>
+            <column name="updated_by" type="string"/>
+            <column name="due_date" type="date"/>
+            <column name="terms_and_conditions" type="string"/>
+            <column name="notes" type="string"/>
+            <column name="requisition_id" type="numeric"/>
+            <!-- jhipster-needle-liquibase-add-loadcolumn - JHipster (and/or extensions) can add load columns here -->
+        </loadData>
+    </changeSet>
+    
 
 </databaseChangeLog>

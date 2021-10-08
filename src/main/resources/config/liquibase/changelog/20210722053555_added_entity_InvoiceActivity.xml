@@ -63,4 +63,28 @@
         <dropDefaultValue tableName="invoice_activity" columnName="updated_on" columnDataType="datetime"/>
     </changeSet>
 
+ <changeSet id="20210722053555-1-data" author="jhipster" context="faker">
+        <loadData
+                  file="config/liquibase/fake-data/invoice_activity.csv"
+                  separator=";"
+                  tableName="invoice_activity">
+            <column name="id" type="numeric"/>
+            <column name="invoice_no" type="string"/>
+            <column name="amount" type="numeric"/>
+            <column name="mode_of_payment" type="string"/>
+            <column name="txn_ref_no" type="string"/>
+            <column name="cheque_or_dd_no" type="string"/>
+            <column name="issuer_bank" type="string"/>
+            <column name="status" type="string"/>
+            <column name="created_on" type="datetime"/>
+            <column name="created_by" type="string"/>
+            <column name="updated_on" type="datetime"/>
+            <column name="updated_by" type="string"/>
+            <column name="due_date" type="date"/>
+            <column name="notes" type="string"/>
+             <column name="invoice_id" type="numeric"/>
+            <!-- jhipster-needle-liquibase-add-loadcolumn - JHipster (and/or extensions) can add load columns here -->
+        </loadData>
+    </changeSet>
+
 </databaseChangeLog>

@@ -46,5 +46,24 @@
         
     </changeSet>
 
+
+<changeSet id="20210901100449-1-data" author="jhipster" context="faker">
+        <loadData
+                  file="config/liquibase/fake-data/vendor_requisition_bucket.csv"
+                  separator=";"
+                  tableName="vendor_requisition_bucket">
+            <column name="id" type="numeric"/>
+            <column name="status" type="string"/>
+            <column name="stages" type="string"/>
+            <column name="created_on" type="datetime"/>
+            <column name="created_by" type="string"/>
+            <column name="updated_on" type="datetime"/>
+            <column name="updated_by" type="string"/>
+            <column name="notes" type="string"/>
+            <column name="requisition_id" type="numeric"/>
+            <column name="vendor_id" type="numeric"/>
+            <!-- jhipster-needle-liquibase-add-loadcolumn - JHipster (and/or extensions) can add load columns here -->
+        </loadData>
+    </changeSet>
     
 </databaseChangeLog>

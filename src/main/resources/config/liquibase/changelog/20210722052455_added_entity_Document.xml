@@ -74,5 +74,34 @@
         <dropDefaultValue tableName="document" columnName="created_on" columnDataType="datetime"/>
         <dropDefaultValue tableName="document" columnName="updated_on" columnDataType="datetime"/>
     </changeSet>
+    
+    
+       <changeSet id="20210722052455-1-data" author="jhipster" context="faker">
+        <loadData
+                  file="config/liquibase/fake-data/document.csv"
+                  separator=";"
+                  tableName="document">
+             <column name="id" type="numeric"/>
+            <column name="file_name" type="string"/>
+            <column name="file_type" type="string"/>
+            <column name="file_ext" type="string"/>
+            <column name="file_size" type="numeric"/>
+            <column name="storage_location" type="string" />
+            <column name="local_file_path" type="string"/>
+            <column name="s_3_bucket" type="string"/>
+            <column name="s_3_url" type="string" />
+            <column name="azure_url" type="string" />
+            <column name="source_of_origin" type="string"/>
+            <column name="source_id" type="numeric" />
+            <column name="identifier" type="string" />
+            <column name="created_on" type="${datetimeType}"/>
+            <column name="created_by" type="string"/>
+            <column name="updated_on" type="${datetimeType}"/>
+            <column name="updated_by" type="string"/>
+            <column name="requisition_line_item_id" type="numeric"/>
+            <column name="contact_id" type="numeric"/>
+            <!-- jhipster-needle-liquibase-add-loadcolumn - JHipster (and/or extensions) can add load columns here -->
+        </loadData>
+    </changeSet>
 
  </databaseChangeLog>

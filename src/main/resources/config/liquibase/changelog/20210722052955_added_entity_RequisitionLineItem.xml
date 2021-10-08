@@ -62,4 +62,28 @@
 
     
 
+    <changeSet id="20210722052955-1-data" author="jhipster" context="faker">
+        <loadData
+                  file="config/liquibase/fake-data/requisition_line_item.csv"
+                  separator=";"
+                  tableName="requisition_line_item">
+            <column name="id" type="numeric"/>
+            <column name="created_on" type="${datetimeType}"/>
+            <column name="created_by" type="string"/>
+            <column name="updated_on" type="${datetimeType}"/>
+            <column name="updated_by" type="string"/>
+            <column name="status" type="string"/>
+            <column name="progress_stage" type="string"/>
+            <column name="item_description" type="string"/>
+            <column name="order_quantity" type="numeric"/>
+            <column name="price" type="numeric"/>
+            <column name="priority" type="string"/>
+            <column name="notes" type="string"/>
+            <column name="due_date" type="date"/>
+            <column name="requisition_id" type="numeric"/>
+            <!-- jhipster-needle-liquibase-add-loadcolumn - JHipster (and/or extensions) can add load columns here -->
+        </loadData>
+    </changeSet>
+
+
 </databaseChangeLog>

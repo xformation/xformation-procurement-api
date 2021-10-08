@@ -74,6 +74,8 @@
             <column name="updated_on" type="datetime"/>
             <column name="updated_by" type="string"/>
             <column name="notes" type="string"/>
+            <column name="requisition_id" type="numeric"/>
+             <column name="vendor_id" type="numeric"/>
             <!-- jhipster-needle-liquibase-add-loadcolumn - JHipster (and/or extensions) can add load columns here -->
         </loadData>
     </changeSet>
