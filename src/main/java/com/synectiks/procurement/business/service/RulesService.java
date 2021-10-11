@@ -38,28 +38,37 @@ public class RulesService {
 	public Rules addRules(ObjectNode obj) throws JSONException, UniqueConstraintException {
 		Rules rules = new Rules();
 
-		if (obj.get("name") != null) {
-			rules.setName(obj.get("name").asText().toUpperCase());
+		if (obj.get("name").asText() != null) {
+			rules.setName(obj.get("name").asText());
+			List<Rules> ruleList = rulesRepository.findAll(Example.of(rules));
+			if(ruleList.size() > 0) {
+				logger.error("Rule already exists. Duplicate rule not allowd");
+	        	UniqueConstraintException ex = new UniqueConstraintException("Duplicate rule not allowd");
+	        	throw ex;
+			}
+		} else {
+			logger.error("Rule could not be added. Rule missing");
+			return null;
 		}
 		
-		if (obj.get("roleId") != null && obj.get("name") != null) {
-			Roles rol = rolesService.getRoles(obj.get("roleId").asLong());
-			if (rol != null) {	
-				rules.setRoles(rol);
-				try {
-					logger.debug("Checking for duplicate rule for given role : "+rol.getName());
-					List<Rules> ruleList = rulesRepository.findAll(Example.of(rules));
-					if (ruleList.size() > 0) {
-						logger.error("Rule already exists. Duplicate rule not allowed for role:" +rol.getName());
-						UniqueConstraintException ex = new UniqueConstraintException("Rule already exists. Duplicate rule not allowed for role:" +rol.getName());
-						throw ex;
-					}
-				} catch (Exception e) {
-					logger.error("Exception in validating duplicate rule. Exception: ", e);
-					throw e;
-				}
-			}
-		}
+//		if (obj.get("roleId") != null && obj.get("name") != null) {
+//			Roles rol = rolesService.getRoles(obj.get("roleId").asLong());
+//			if (rol != null) {	
+//				rules.setRoles(rol);
+//				try {
+//					logger.debug("Checking for duplicate rule for given role : "+rol.getName());
+//					List<Rules> ruleList = rulesRepository.findAll(Example.of(rules));
+//					if (ruleList.size() > 0) {
+//						logger.error("Rule already exists. Duplicate rule not allowed for role:" +rol.getName());
+//						UniqueConstraintException ex = new UniqueConstraintException("Rule already exists. Duplicate rule not allowed for role:" +rol.getName());
+//						throw ex;
+//					}
+//				} catch (Exception e) {
+//					logger.error("Exception in validating duplicate rule. Exception: ", e);
+//					throw e;
+//				}
+//			}
+//		}
 		
 		if (obj.get("description") != null) {
 			rules.setDescription(obj.get("description").asText());
@@ -214,12 +223,15 @@ public class RulesService {
 		return null;
 	}
 	
-	public List<Rules> getRulesByName(String name) {
+	public Rules getRulesByName(String name) {
 		logger.info("Getting rules by name: " + name);
 		Map<String, String> map = new HashMap<>();
 		map.put("name", name);
 		List<Rules> rules = searchRules(map);
-		return rules;
+		if(rules.size() > 0) {
+			return rules.get(0);
+		}
+		return null;
 	}
 
 
@@ -236,7 +248,7 @@ public class RulesService {
 //		logger.warn("Name not found");
 //		return null;
 //	}
-
+	
 	public List<Rules> getRulesByRole(Roles role) {
 		logger.info("Getting rules by role: " + role.getName());
 		Rules rules = new Rules();

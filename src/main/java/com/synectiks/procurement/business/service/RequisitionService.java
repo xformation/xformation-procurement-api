@@ -91,12 +91,12 @@ public class RequisitionService {
 	}
 
 	@Transactional
-	public Requisition addRequisition(MultipartFile file, String obj) throws IOException, JSONException {
+	public Requisition addRequisition(MultipartFile requisitionFile, MultipartFile requisitionLineItemFile, String obj) throws IOException, JSONException {
 		logger.info("Adding requistion");
 		Requisition requisition = new Requisition();
-		if (file != null) {
-			byte[] bytes = file.getBytes();
-			String filename = StringUtils.cleanPath(file.getOriginalFilename());
+		if (requisitionFile != null) {
+			byte[] bytes = requisitionFile.getBytes();
+			String filename = StringUtils.cleanPath(requisitionFile.getOriginalFilename());
 			filename = filename.toLowerCase().replaceAll(" ", "-");
 			String uniqueID = UUID.randomUUID().toString();
 			filename = uniqueID.concat(filename);
@@ -137,14 +137,16 @@ public class RequisitionService {
 		if (json.get("financialYear") != null) {
 			requisition.setFinancialYear(json.get("financialYear").asInt());
 		}
-		Rules rule = null; 
-		if (json.get("roleName").asText() != null) {
-			Roles role = rolesService.getRolesByName(json.get("roleName").asText());
-			rule = rulesService.getRulesByRoleAndRuleName(role, Constants.RULE_REQUISITION_TYPE);
-		} else {
-			logger.error("Requistion could not be added. User's role missing");
-			return null;
-		}
+		
+		Rules rule = rulesService.getRulesByName(Constants.RULE_REQUISITION_TYPE); 
+//		if (json.get("roleName").asText() != null) {
+//			Roles role = rolesService.getRolesByName(json.get("roleName").asText());
+//			rule = rulesService.getRulesByRoleAndRuleName(role, Constants.RULE_REQUISITION_TYPE);
+//		} else {
+//			logger.error("Requistion could not be added. User's role missing");
+//			return null;
+//		}
+		
 		JSONObject jsonObject = new JSONObject(rule.getRule());
 		JSONObject nonStandardRule = jsonObject.getJSONObject(Constants.REQUISITION_TYPE_NON_STANDARD);
 		if (json.get("totalPrice") != null) {

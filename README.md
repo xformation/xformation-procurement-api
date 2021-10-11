@@ -22,9 +22,8 @@
   **postgres** is used as backend database  
   The data model and ORM code is generated using jhipster. **jhipster-jdl.jdl** file contains all the entity definitions  
 
-  > **ER Diagram**  
+  > [**ER Diagram**](ERD.md)  
 
-  ![ER Diagram](./procurement_er_diagram.png)
 
 ## Quick start
   jhipster command is used for codebase setup  
@@ -32,7 +31,28 @@
   jhipster import-jdl src\model\jhipster-jdl.jdl
   ```
 ## Code Structure  
-  ![Code structure](./codestructure.png)
+  > [Snapshot](CODE_STRUCTURE.md)  
+
+  > Java package hierarchy  
+
+  | Type | Package | 
+  |-----------|:-----------|
+  | Main | com.synectiks.procurement | 
+  | Config | com.synectiks.procurement.config |
+  | Entities | com.synectiks.procurement.domain |  
+  | Controller | com.synectiks.procurement.controllers |
+  | Services | com.synectiks.procurement.business.service |
+  | Repository | com.synectiks.procurement.repository |
+  | Security | com.synectiks.procurement.security |  
+  
+  > Resources  
+
+  | Files/Directories | Details | 
+  |-----------|:-----------|
+  | config/liquibase/changelog | All the liquibase specific database entities (e.g. 20210722052455_added_entity_Document.xml) and their constraint definitions (e.g. 20210722052455_added_entity_constraints_Document.xml) found in changelog directory. <br> Liquibase executes the DDL and DMLs based on the definitions given in these files |
+  | config/liquibase/fake-data | It contains CSV files which contains dummy data for all the entities. if faker is turned on in Spring cofig file, faker.js inserts that data into the tables after server starts up. <br> **To make it work, make an entry of faker in liquibase context**|
+  | config/liquibase/master.xml | master.xml is the main file for liquibase. All the changelog files must be registered in master.xml |  
+  
 
 ## Build the Source  
 > NOTE: Procurement service is built and tested with JDK 8  

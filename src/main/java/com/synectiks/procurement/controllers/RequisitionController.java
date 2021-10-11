@@ -43,12 +43,14 @@ public class RequisitionController {
 //	private RulesRepository rulesRepository;
 
 	@RequestMapping(value = "/addRequisition", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<Status> addRequisition(@RequestParam("file") MultipartFile file,
+	public ResponseEntity<Status> addRequisition(
+			@RequestParam(name = "requisitionFile", required = false) MultipartFile requisitionFile,
+			@RequestParam(name = "requisitionLineItemFile", required = false) MultipartFile requisitionLineItemFile,
 			@RequestParam("obj") String obj) throws IOException {
 		logger.info("Request to add a requsition");
 		Status st = new Status();
 		try {
-			Requisition requisition = requisitionService.addRequisition(file, obj);
+			Requisition requisition = requisitionService.addRequisition(requisitionFile,requisitionLineItemFile, obj);
 			if (requisition == null) {
 				logger.error("Add requisition failed");
 				st.setCode(HttpStatus.EXPECTATION_FAILED.value());

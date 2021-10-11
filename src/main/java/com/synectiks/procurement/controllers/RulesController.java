@@ -169,7 +169,7 @@ public class RulesController {
 		logger.info("Getting rule by name: " + name);
 		Status st = new Status();
 		try {
-			List<Rules> rules = rulesService.getRulesByName(name);
+			Rules rules = rulesService.getRulesByName(name);
 			if (rules == null) {
 				logger.warn("Rule not found.");
 				st.setCode(HttpStatus.EXPECTATION_FAILED.value());
