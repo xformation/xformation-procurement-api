@@ -8,6 +8,8 @@ import java.nio.file.Paths;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -15,6 +17,9 @@ import java.util.UUID;
 
 import javax.transaction.Transactional;
 
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
@@ -105,7 +110,7 @@ public class RequisitionService {
 				localStorage.mkdirs();
 			}
 			Path path = Paths
-					.get(Constants.LOCAL_REQUISITION_FILE_STORAGE_DIRECTORY + File.pathSeparatorChar + filename);
+					.get(Constants.LOCAL_REQUISITION_FILE_STORAGE_DIRECTORY + File.separatorChar + filename);
 			Files.write(path, bytes);
 		}
 		ObjectMapper mapper = new ObjectMapper();
@@ -113,20 +118,19 @@ public class RequisitionService {
 //	ObjectNode json = (ObjectNode) new ObjectMapper().readTree(obj);
 		ObjectNode json = (ObjectNode) mapper.readTree(obj);
 
-		Department department = departmentService.getDepartment(Long.parseLong(json.get("departmentId").asText()));
-		if (department == null) {
-			logger.error("Requistion could not be added. Department missing");
-			return null;
+		if(json.get("departmentId") != null) {
+			Department department = departmentService.getDepartment(Long.parseLong(json.get("departmentId").asText()));
+			if (department != null) {
+				requisition.setDepartment(department);
+			}
 		}
-
-		Currency currency = currencyService.getCurrency(Long.parseLong(json.get("currencyId").asText()));
-		if (currency == null) {
-			logger.error("Requistion could not be added. Currency missing");
-			return null;
+		
+		if(json.get("currencyId") != null) {
+			Currency currency = currencyService.getCurrency(Long.parseLong(json.get("currencyId").asText()));
+			if (currency != null) {
+				requisition.setCurrency(currency);
+			}
 		}
-
-		requisition.setDepartment(department);
-		requisition.setCurrency(currency);
 
 		if (json.get("requisitionNo") != null) {
 			requisition.setRequisitionNo(json.get("requisitionNo").asText());
@@ -146,19 +150,23 @@ public class RequisitionService {
 //			logger.error("Requistion could not be added. User's role missing");
 //			return null;
 //		}
-		
-		JSONObject jsonObject = new JSONObject(rule.getRule());
-		JSONObject nonStandardRule = jsonObject.getJSONObject(Constants.REQUISITION_TYPE_NON_STANDARD);
-		if (json.get("totalPrice") != null) {
-			int price = json.get("totalPrice").asInt();
-			if (price >= nonStandardRule.getInt("min") && price <= nonStandardRule.getInt("max")) {
-				requisition.setType(Constants.REQUISITION_TYPE_NON_STANDARD);
+		if(rule != null) {
+			JSONObject ruleJson = new JSONObject(rule.getRule());
+			JSONObject nonStandardRule = ruleJson.getJSONObject(Constants.REQUISITION_TYPE_NON_STANDARD);
+			if (json.get("totalPrice") != null) {
+				int price = json.get("totalPrice").asInt();
+				if (price >= nonStandardRule.getInt("min") && price <= nonStandardRule.getInt("max")) {
+					requisition.setType(Constants.REQUISITION_TYPE_NON_STANDARD);
+				} else {
+					requisition.setType(Constants.REQUISITION_TYPE_STANDARD);
+				}
 			} else {
-				requisition.setType(Constants.REQUISITION_TYPE_STANDARD);
+				requisition.setType(Constants.REQUISITION_TYPE_NON_STANDARD);
 			}
-		} else {
+		}else {
 			requisition.setType(Constants.REQUISITION_TYPE_NON_STANDARD);
 		}
+		
 //		}
 
 		if (json.get("totalPrice") != null) {
@@ -168,9 +176,11 @@ public class RequisitionService {
 		if (json.get("notes") != null) {
 			requisition.setNotes(json.get("notes").asText());
 		}
+		
 		if (json.get("status") != null) {
 			requisition.setStatus(json.get("status").asText());
 		}
+		
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern(Constants.DEFAULT_DATE_FORMAT);
 		if (json.get("dueDate") != null) {
 			LocalDate localDate = LocalDate.parse(json.get("dueDate").asText(), formatter);
@@ -199,6 +209,8 @@ public class RequisitionService {
 		logger.debug("Requisition saved");
 		saveRequisitionActivity(requisition);
 
+		List<RequisitionLineItem> liteItemList = getLineItem(requisitionLineItemFile);
+		
 		JSONObject jsonObj = new JSONObject(obj);
 		JSONArray reqLineItemArray = jsonObj.getJSONArray("requisitionLineItemLists");
 		if (reqLineItemArray != null && reqLineItemArray.length() > 0) {
@@ -207,18 +219,83 @@ public class RequisitionService {
 //			ObjectMapper mapper=new ObjectMapper();
 			for (int j = 0; j < reqLineItemArray.length(); j++) {
 				JSONObject json1 = reqLineItemArray.getJSONObject(j);
-				RequisitionLineItem result = mapper.readValue(json1.toString(j), RequisitionLineItem.class);
-				logger.debug("Requisition line item: " + result.toString());
-				result.setRequisition(requisition);
-				result = requisitionLineItemService.addRequisitionLineItem(result);
-				requisition.getRequisitionLineItemLists().add(result);
+				RequisitionLineItem reqLineItem = mapper.readValue(json1.toString(j), RequisitionLineItem.class);
+				liteItemList.add(reqLineItem);
+				
+//				logger.debug("Requisition line item: " + reqLineItem.toString());
+//				reqLineItem.setRequisition(requisition);
+//				reqLineItem = requisitionLineItemService.addRequisitionLineItem(reqLineItem);
+//				requisition.getRequisitionLineItemLists().add(reqLineItem);
 			}
 		}
 
+		for(RequisitionLineItem reqLineItem: liteItemList) {
+			logger.debug("Requisition line item: " + reqLineItem.toString());
+			reqLineItem.setRequisition(requisition);
+			reqLineItem.setCreatedBy(requisition.getCreatedBy());
+			reqLineItem.setCreatedOn(requisition.getCreatedOn());
+			reqLineItem.setUpdatedBy(requisition.getUpdatedBy());
+			reqLineItem.setUpdatedOn(requisition.getUpdatedOn());
+			reqLineItem.setStatus(requisition.getStatus());
+			reqLineItem = requisitionLineItemService.addRequisitionLineItem(reqLineItem);
+			requisition.getRequisitionLineItemLists().add(reqLineItem);
+		}
+		
 		logger.info("Requisition added successfully");
 		return requisition;
 	}
 
+	public List<RequisitionLineItem> getLineItem(MultipartFile requisitionLineItemFile) throws IOException{
+		if(requisitionLineItemFile == null) {
+			return Collections.emptyList();
+		}
+		
+		List<RequisitionLineItem> lineItemList = new ArrayList<>();
+		XSSFWorkbook workbook = new XSSFWorkbook(requisitionLineItemFile.getInputStream());
+		XSSFSheet worksheet = workbook.getSheetAt(0);
+		//skiping first row, that is row index 0. Starting loop with 1
+		for (int i = 1; i <worksheet.getPhysicalNumberOfRows(); i++) {
+			XSSFRow row = worksheet.getRow(i);
+			RequisitionLineItem item = new RequisitionLineItem();
+			if (row.getCell(0) != null) {
+				item.setItemDescription(row.getCell(0).getStringCellValue());
+			}
+			
+			try {
+				if (row.getCell(1) != null) {
+					item.setOrderQuantity((int) row.getCell(1).getNumericCellValue());
+				} 
+			}catch(Exception e) {
+				if (row.getCell(1) != null) {
+					item.setOrderQuantity(Integer.parseInt(row.getCell(1).getStringCellValue()));
+				}
+			}
+
+//			try {
+//				if (row.getCell(2) != null) {
+//					item.setRate((int) row.getCell(2).getNumericCellValue());
+//				} 
+//			}catch(Exception e) {
+//				if (row.getCell(2) != null) {
+//					item.setRate(Integer.parseInt(row.getCell(2).getStringCellValue()));
+//				}
+//			}
+			
+			try {
+				if (row.getCell(3) != null) {
+					item.setPrice((int) row.getCell(3).getNumericCellValue());
+				} 
+			}catch(Exception e) {
+				if (row.getCell(3) != null) {
+					item.setPrice(Integer.parseInt(row.getCell(3).getStringCellValue()));
+				}
+			}
+			lineItemList.add(item);
+		}
+		return lineItemList;
+	}
+	
+	
 	@Transactional
 	public Requisition updateRequisition(ObjectNode obj) throws JSONException {
 		logger.info("Update requisition");

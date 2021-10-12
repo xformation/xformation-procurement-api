@@ -349,6 +349,14 @@ entity Buyer {
     updatedBy String
 }
 
+entity RolesRulesLink{
+	status String
+    createdOn Instant
+    createdBy String
+    updatedOn Instant
+    updatedBy String 
+}
+
 relationship OneToOne {
 	Requisition{department} to Department,
     Requisition{currency} to Currency,
@@ -375,6 +383,9 @@ relationship ManyToOne {
 //	CommitteeMembers{committee} to Committee,
 	CommitteeAndMemberLink{committee} to Committee,
 	CommitteeAndMemberLink{committeeMember} to CommitteeMember,
+	
+	RolesRulesLink {rules} to Rules,
+	RolesRulesLink {roles} to Roles
 }
 
 //relationship ManyToMany {
