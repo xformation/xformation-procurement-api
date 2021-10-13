@@ -103,6 +103,7 @@ entity RequisitionLineItem {
     priority String
     notes String maxlength(5000)
     dueDate LocalDate
+    ratePerItem Integer
 }
 
 entity RequisitionLineItemActivity {
@@ -127,6 +128,7 @@ entity RequisitionLineItemActivity {
     priority String
     notes String maxlength(5000)
     dueDate LocalDate
+    ratePerItem Integer
 	requisitionLineItemId Long
 }
 

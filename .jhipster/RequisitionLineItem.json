@@ -45,12 +45,18 @@
     {
       "fieldName": "notes",
       "fieldType": "String",
-      "fieldValidateRules": ["maxlength"],
+      "fieldValidateRules": [
+        "maxlength"
+      ],
       "fieldValidateRulesMaxlength": "5000"
     },
     {
       "fieldName": "dueDate",
       "fieldType": "LocalDate"
+    },
+    {
+      "fieldName": "ratePerItem",
+      "fieldType": "Integer"
     }
   ],
   "relationships": [
@@ -64,7 +70,8 @@
       "relationshipType": "many-to-one",
       "otherEntityName": "requisition",
       "otherEntityRelationshipName": "requisitionLineItemList",
-      "relationshipName": "requisition"
+      "relationshipName": "requisition",
+      "otherEntityField": "id"
     }
   ],
   "changelogDate": "20210722052955",

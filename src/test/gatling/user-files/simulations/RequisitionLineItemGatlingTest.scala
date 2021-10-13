@@ -84,6 +84,7 @@ class RequisitionLineItemGatlingTest extends Simulation {
                 , "priority":"SAMPLE_TEXT"
                 , "notes":"SAMPLE_TEXT"
                 , "dueDate":"2020-01-01T00:00:00.000Z"
+                , "ratePerItem":"0"
                 }""")).asJson
             .check(status.is(201))
             .check(headerRegex("Location", "(.*)").saveAs("new_requisitionLineItem_url"))).exitHereIfFailed

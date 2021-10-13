@@ -51,6 +51,9 @@
             <column name="due_date" type="date">
                 <constraints nullable="true" />
             </column>
+            <column name="rate_per_item" type="integer">
+                <constraints nullable="true" />
+            </column>
             <column name="requisition_line_item_id" type="bigint">
                 <constraints nullable="true" />
             </column>
@@ -78,6 +81,7 @@
             <column name="priority" type="string"/>
             <column name="notes" type="string"/>
             <column name="due_date" type="date"/>
+            <column name="rate_per_item" type="numeric"/>
              <column name="requisition_line_item_id" type="numeric"/>
             <!-- jhipster-needle-liquibase-add-loadcolumn - JHipster (and/or extensions) can add load columns here -->
         </loadData>

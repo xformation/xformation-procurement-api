@@ -79,6 +79,9 @@ public class RequisitionLineItem implements Serializable {
     @Column(name = "due_date")
     private LocalDate dueDate;
 
+    @Column(name = "rate_per_item")
+    private Integer ratePerItem;
+
     @OneToMany(mappedBy = "requisitionLineItem")
     private Set<Document> documentLists = new HashSet<>();
 
@@ -254,6 +257,19 @@ public class RequisitionLineItem implements Serializable {
         this.dueDate = dueDate;
     }
 
+    public Integer getRatePerItem() {
+        return ratePerItem;
+    }
+
+    public RequisitionLineItem ratePerItem(Integer ratePerItem) {
+        this.ratePerItem = ratePerItem;
+        return this;
+    }
+
+    public void setRatePerItem(Integer ratePerItem) {
+        this.ratePerItem = ratePerItem;
+    }
+
     public Set<Document> getDocumentLists() {
         return documentLists;
     }
@@ -326,6 +342,7 @@ public class RequisitionLineItem implements Serializable {
             ", priority='" + getPriority() + "'" +
             ", notes='" + getNotes() + "'" +
             ", dueDate='" + getDueDate() + "'" +
+            ", ratePerItem=" + getRatePerItem() +
             "}";
     }
 

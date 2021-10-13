@@ -120,9 +120,9 @@ public class RequisitionService {
 			}
 		}
 
-		if (json.get("requisitionNo") != null) {
-			requisition.setRequisitionNo(json.get("requisitionNo").asText());
-		}
+//		if (json.get("requisitionNo") != null) {
+//			requisition.setRequisitionNo(json.get("requisitionNo").asText());
+//		}
 
 		requisition.setProgressStage(Constants.PROGRESS_STAGE_NEW);
 
@@ -260,15 +260,15 @@ public class RequisitionService {
 				}
 			}
 
-//			try {
-//				if (row.getCell(2) != null) {
-//					item.setRate((int) row.getCell(2).getNumericCellValue());
-//				} 
-//			}catch(Exception e) {
-//				if (row.getCell(2) != null) {
-//					item.setRate(Integer.parseInt(row.getCell(2).getStringCellValue()));
-//				}
-//			}
+			try {
+				if (row.getCell(2) != null) {
+					item.setRatePerItem((int) row.getCell(2).getNumericCellValue());
+				} 
+			}catch(Exception e) {
+				if (row.getCell(2) != null) {
+					item.setRatePerItem(Integer.parseInt(row.getCell(2).getStringCellValue()));
+				}
+			}
 			
 			try {
 				if (row.getCell(3) != null) {
@@ -289,7 +289,7 @@ public class RequisitionService {
 	public Requisition updateRequisition(ObjectNode obj) throws JSONException {
 		logger.info("Update requisition");
 
-		Optional<Requisition> orq = requisitionRepository.findById(Long.parseLong(obj.get("RequisitionId").asText()));
+		Optional<Requisition> orq = requisitionRepository.findById(Long.parseLong(obj.get("requisitionId").asText()));
 		if (!orq.isPresent()) {
 			logger.error("Requisition could not be updated. Requisition not found");
 			return null;
@@ -297,23 +297,23 @@ public class RequisitionService {
 
 		Requisition requisition = orq.get();
 
-		if (obj.get("departmentId") != null) {
+		if(obj.get("departmentId") != null) {
 			Department department = departmentService.getDepartment(Long.parseLong(obj.get("departmentId").asText()));
-			if (department == null) {
+			if (department != null) {
 				requisition.setDepartment(department);
 			}
 		}
-
-		if (obj.get("currencyId") != null) {
+		
+		if(obj.get("currencyId") != null) {
 			Currency currency = currencyService.getCurrency(Long.parseLong(obj.get("currencyId").asText()));
-			if (currency == null) {
+			if (currency != null) {
 				requisition.setCurrency(currency);
 			}
 		}
-
-		if (obj.get("requisitionNo") != null) {
-			requisition.setRequisitionNo(obj.get("requisitionNo").asText());
-		}
+		
+//		if (obj.get("requisitionNo") != null) {
+//			requisition.setRequisitionNo(obj.get("requisitionNo").asText());
+//		}
 
 		if (obj.get("status") != null) {
 			requisition.setStatus(obj.get("status").asText());
@@ -416,10 +416,10 @@ public class RequisitionService {
 			isFilter = true;
 		}
 
-		if (!org.apache.commons.lang3.StringUtils.isBlank(requestObj.get("requisitionNo"))) {
-			requisition.setRequisitionNo(requestObj.get("requisitionNo"));
-			isFilter = true;
-		}
+//		if (!org.apache.commons.lang3.StringUtils.isBlank(requestObj.get("requisitionNo"))) {
+//			requisition.setRequisitionNo(requestObj.get("requisitionNo"));
+//			isFilter = true;
+//		}
 
 		if (!org.apache.commons.lang3.StringUtils.isBlank(requestObj.get("status"))) {
 			requisition.setStatus(requestObj.get("status"));
@@ -432,7 +432,7 @@ public class RequisitionService {
 		}
 
 		if (!org.apache.commons.lang3.StringUtils.isBlank(requestObj.get("financialYear"))) {
-			requisition.setFinancialYear(Integer.parseInt(requestObj.get("progressStage")));
+			requisition.setFinancialYear(Integer.parseInt(requestObj.get("financialYear")));
 			isFilter = true;
 		}
 		if (!org.apache.commons.lang3.StringUtils.isBlank(requestObj.get("type"))) {

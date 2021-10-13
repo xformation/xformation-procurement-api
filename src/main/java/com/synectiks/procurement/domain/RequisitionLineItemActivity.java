@@ -64,6 +64,9 @@ public class RequisitionLineItemActivity implements Serializable {
     @Column(name = "due_date")
     private LocalDate dueDate;
 
+    @Column(name = "rate_per_item")
+    private Integer ratePerItem;
+    
     @Column(name = "requisition_line_item_id")
     private Long requisitionLineItemId;
 
@@ -282,4 +285,12 @@ public class RequisitionLineItemActivity implements Serializable {
             ", requisitionLineItemId=" + getRequisitionLineItemId() +
             "}";
     }
+
+	public Integer getRatePerItem() {
+		return ratePerItem;
+	}
+
+	public void setRatePerItem(Integer ratePerItem) {
+		this.ratePerItem = ratePerItem;
+	}
 }
