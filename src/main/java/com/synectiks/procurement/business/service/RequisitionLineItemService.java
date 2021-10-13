@@ -47,7 +47,7 @@ public class RequisitionLineItemService {
 		logger.info("Add requisition line item");
 		obj = requisitionLineItemRepository.save(obj);
 
-		if (obj != null) {
+		if (obj != null) {  			 
 			logger.info("Saving requisition line item acitivity");
 			RequisitionLineItemActivity requisitionLineItemActivity = new RequisitionLineItemActivity();
 			BeanUtils.copyProperties(obj, requisitionLineItemActivity);
