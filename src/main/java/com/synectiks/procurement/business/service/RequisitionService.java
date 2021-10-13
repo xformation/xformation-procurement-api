@@ -13,7 +13,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
 
 import javax.transaction.Transactional;
 
@@ -39,6 +38,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.synectiks.procurement.config.Constants;
 import com.synectiks.procurement.domain.Currency;
 import com.synectiks.procurement.domain.Department;
+import com.synectiks.procurement.domain.Document;
 import com.synectiks.procurement.domain.Requisition;
 import com.synectiks.procurement.domain.RequisitionActivity;
 import com.synectiks.procurement.domain.RequisitionLineItem;
@@ -83,6 +83,9 @@ public class RequisitionService {
 
 	@Autowired
 	private RulesService rulesService;
+	
+	@Autowired
+	private DocumentService documentService;
 
 	public Requisition getRequisition(Long id) {
 		logger.info("Getting requisition by id: " + id);
@@ -96,26 +99,11 @@ public class RequisitionService {
 	}
 
 	@Transactional
-	public Requisition addRequisition(MultipartFile requisitionFile, MultipartFile requisitionLineItemFile, String obj) throws IOException, JSONException {
+	public Requisition addRequisition(MultipartFile extraBudgetoryFile, MultipartFile requisitionLineItemFile, String obj) throws IOException, JSONException {
 		logger.info("Adding requistion");
 		Requisition requisition = new Requisition();
-		if (requisitionFile != null) {
-			byte[] bytes = requisitionFile.getBytes();
-			String filename = StringUtils.cleanPath(requisitionFile.getOriginalFilename());
-			filename = filename.toLowerCase().replaceAll(" ", "-");
-			String uniqueID = UUID.randomUUID().toString();
-			filename = uniqueID.concat(filename);
-			File localStorage = new File(Constants.LOCAL_REQUISITION_FILE_STORAGE_DIRECTORY);
-			if (!localStorage.exists()) {
-				localStorage.mkdirs();
-			}
-			Path path = Paths
-					.get(Constants.LOCAL_REQUISITION_FILE_STORAGE_DIRECTORY + File.separatorChar + filename);
-			Files.write(path, bytes);
-		}
-		ObjectMapper mapper = new ObjectMapper();
 
-//	ObjectNode json = (ObjectNode) new ObjectMapper().readTree(obj);
+		ObjectMapper mapper = new ObjectMapper();
 		ObjectNode json = (ObjectNode) mapper.readTree(obj);
 
 		if(json.get("departmentId") != null) {
@@ -206,7 +194,10 @@ public class RequisitionService {
 		requisition.setUpdatedOn(now);
 
 		requisition = requisitionRepository.save(requisition);
-		logger.debug("Requisition saved");
+		logger.info("Requisition added successfully");
+		
+		saveExtraBudgetoryFile(extraBudgetoryFile, requisition, now);
+		
 		saveRequisitionActivity(requisition);
 
 		List<RequisitionLineItem> liteItemList = getLineItem(requisitionLineItemFile);
@@ -214,21 +205,21 @@ public class RequisitionService {
 		JSONObject jsonObj = new JSONObject(obj);
 		JSONArray reqLineItemArray = jsonObj.getJSONArray("requisitionLineItemLists");
 		if (reqLineItemArray != null && reqLineItemArray.length() > 0) {
-			logger.info("Saving requisition line items");
-//			int length = reqLineItemArray.length(); 
-//			ObjectMapper mapper=new ObjectMapper();
 			for (int j = 0; j < reqLineItemArray.length(); j++) {
 				JSONObject json1 = reqLineItemArray.getJSONObject(j);
 				RequisitionLineItem reqLineItem = mapper.readValue(json1.toString(j), RequisitionLineItem.class);
 				liteItemList.add(reqLineItem);
-				
-//				logger.debug("Requisition line item: " + reqLineItem.toString());
-//				reqLineItem.setRequisition(requisition);
-//				reqLineItem = requisitionLineItemService.addRequisitionLineItem(reqLineItem);
-//				requisition.getRequisitionLineItemLists().add(reqLineItem);
 			}
 		}
 
+		saveRequisitionLineItem(requisition, liteItemList);
+		
+		logger.info("Requisition added successfully");
+		return requisition;
+	}
+
+	private void saveRequisitionLineItem(Requisition requisition, List<RequisitionLineItem> liteItemList) {
+		logger.info("Saving requisition line items");
 		for(RequisitionLineItem reqLineItem: liteItemList) {
 			logger.debug("Requisition line item: " + reqLineItem.toString());
 			reqLineItem.setRequisition(requisition);
@@ -240,9 +231,7 @@ public class RequisitionService {
 			reqLineItem = requisitionLineItemService.addRequisitionLineItem(reqLineItem);
 			requisition.getRequisitionLineItemLists().add(reqLineItem);
 		}
-		
-		logger.info("Requisition added successfully");
-		return requisition;
+		logger.info("Requisition line items saved successfully");
 	}
 
 	public List<RequisitionLineItem> getLineItem(MultipartFile requisitionLineItemFile) throws IOException{
@@ -688,4 +677,49 @@ public class RequisitionService {
 	}
 	
 
+	private void saveExtraBudgetoryFile(MultipartFile file, Requisition requisition, Instant now)
+			throws IOException, JSONException {
+		if (file != null) {
+			logger.info("Saving extra budgetory file");
+			byte[] bytes = file.getBytes();
+			String orgFileName = StringUtils.cleanPath(file.getOriginalFilename());
+			String ext = "";
+			if (orgFileName.lastIndexOf(".") != -1) {
+				ext = orgFileName.substring(orgFileName.lastIndexOf(".") + 1);
+			}
+			String filename = orgFileName;
+			if (orgFileName.lastIndexOf(".") != -1) {
+				filename = orgFileName.substring(0, orgFileName.lastIndexOf("."));
+			}
+			filename = filename.toLowerCase().replaceAll(" ", "-") + "_" + System.currentTimeMillis() + "." + ext;
+			
+			File localStorage = new File(Constants.LOCAL_REQUISITION_FILE_STORAGE_DIRECTORY);
+			if (!localStorage.exists()) {
+				localStorage.mkdirs();
+			}
+			Path path = Paths.get(localStorage.getAbsolutePath() + File.separatorChar + filename);
+			Files.write(path, bytes);
+
+			Document document = new Document();
+			document.setFileName(filename);
+			document.setFileExt(ext);
+			document.setFileType(ext.toUpperCase());
+			document.setFileSize(file.getSize());
+			document.setStorageLocation(Constants.FILE_STORAGE_LOCATION_LOCAL);
+			document.setLocalFilePath(localStorage.getAbsolutePath() + File.separatorChar + filename);
+			document.setSourceOfOrigin(this.getClass().getSimpleName());
+			document.setSourceId(requisition.getId());
+			document.setIdentifier(Constants.IDENTIFIER_REQUISITION_EXTRA_BUDGETORY_FILE);
+			document.setCreatedBy(requisition.getCreatedBy());
+			document.updatedBy(requisition.getCreatedBy());
+			document.setCreatedOn(now);
+			document.setUpdatedOn(now);
+			document = documentService.saveDocument(document);
+			requisition.setExtraBudgetoryFile(bytes);
+			logger.info("Extra budgetory file saved successfully");
+		}else {
+			logger.info("Requisition extra budgetory file not provided");
+		}
+	}
+	
 }

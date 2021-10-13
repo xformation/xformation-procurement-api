@@ -97,6 +97,14 @@ public class Requisition implements Serializable {
     @JsonProperty
     private List<RequisitionActivity> activityList;
     
+    @Transient
+    @JsonProperty
+    private byte[] extraBudgetoryFile;
+    
+    @Transient
+    @JsonProperty
+    private List<Document> documentList;
+    
     public Long getId() {
         return id;
     }
@@ -380,5 +388,21 @@ public class Requisition implements Serializable {
 
 	public void setActivityList(List<RequisitionActivity> activityList) {
 		this.activityList = activityList;
+	}
+
+	public byte[] getExtraBudgetoryFile() {
+		return extraBudgetoryFile;
+	}
+
+	public void setExtraBudgetoryFile(byte[] extraBudgetoryFile) {
+		this.extraBudgetoryFile = extraBudgetoryFile;
+	}
+
+	public List<Document> getDocumentList() {
+		return documentList;
+	}
+
+	public void setDocumentList(List<Document> documentList) {
+		this.documentList = documentList;
 	}
 }
