@@ -40,6 +40,7 @@ public class RequisitionLineItemService {
 
 	@Autowired
 	private RequisitionRepository requisitionRepository;
+	
 	@Autowired
 	private RequisitionLineItemActivityRepository requisitionLineItemActivityRepository;
 
@@ -263,6 +264,15 @@ public class RequisitionLineItemService {
 	    	requisitionLineItem.setUpdatedBy(requestObj.get("updatedBy"));
 			isFilter = true;
 		}
+	    
+	    if (requestObj.get("requisitionId") != null) {
+	    	Optional<Requisition> oReq = requisitionRepository.findById(Long.parseLong(requestObj.get("requisitionId")));
+			if(oReq.isPresent()) {
+				requisitionLineItem.setRequisition(oReq.get());
+			}
+			isFilter = true;
+		}
+	    
 		List<RequisitionLineItem> list = null;
 		if (isFilter) {
 			list = this.requisitionLineItemRepository.findAll(Example.of(requisitionLineItem),

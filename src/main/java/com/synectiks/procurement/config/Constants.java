@@ -11,6 +11,10 @@ public final class Constants {
     public static final String PROGRESS_STAGE_PENDING_FOR_APPROVAL = "PENDING_FOR_APPROVAL";
     public static final String PROGRESS_STAGE_APPROVED = "APPROVED";
 
+    public static final String STATUS_DRAFT = "DRAFT";
+    public static final String STATUS_ACTIVE = "ACTIVE";
+    public static final String STATUS_DEACTIVE = "DEACTIVE";
+    public static final String STATUS_DELETED = "DELETED";
     
     public static final String PROGRESS_STAGE_REJECTED = "REJECTED";
     

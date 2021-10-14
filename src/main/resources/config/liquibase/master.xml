@@ -47,10 +47,7 @@
     <!-- jhipster-needle-liquibase-add-changelog - JHipster will add liquibase changelogs here -->
     <include file="config/liquibase/changelog/20210722052455_added_entity_constraints_Document.xml" relativeToChangelogFile="false"/>
     <include file="config/liquibase/changelog/20210722052755_added_entity_constraints_Requisition.xml" relativeToChangelogFile="false"/>
-    <include file="config/liquibase/changelog/20210722052855_added_entity_constraints_RequisitionActivity.xml" relativeToChangelogFile="false"/>
-    <include file="config/liquibase/changelog/20210722052955_added_entity_constraints_RequisitionLineItem.xml" relativeToChangelogFile="false"/>
-    <include file="config/liquibase/changelog/20210722053055_added_entity_constraints_RequisitionLineItemActivity.xml" relativeToChangelogFile="false"/>
-    <include file="config/liquibase/changelog/20210722053155_added_entity_constraints_PurchaseOrder.xml" relativeToChangelogFile="false"/>
+     <include file="config/liquibase/changelog/20210722053155_added_entity_constraints_PurchaseOrder.xml" relativeToChangelogFile="false"/>
     <include file="config/liquibase/changelog/20210722053255_added_entity_constraints_Quotation.xml" relativeToChangelogFile="false"/>
     <include file="config/liquibase/changelog/20210722053355_added_entity_constraints_QuotationActivity.xml" relativeToChangelogFile="false"/>
     <include file="config/liquibase/changelog/20210722053455_added_entity_constraints_Invoice.xml" relativeToChangelogFile="false"/>

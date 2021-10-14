@@ -10,6 +10,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -42,6 +43,7 @@ import com.synectiks.procurement.domain.Document;
 import com.synectiks.procurement.domain.Requisition;
 import com.synectiks.procurement.domain.RequisitionActivity;
 import com.synectiks.procurement.domain.RequisitionLineItem;
+import com.synectiks.procurement.domain.RequisitionLineItemActivity;
 import com.synectiks.procurement.domain.Roles;
 import com.synectiks.procurement.domain.Rules;
 import com.synectiks.procurement.domain.Vendor;
@@ -86,6 +88,9 @@ public class RequisitionService {
 	
 	@Autowired
 	private DocumentService documentService;
+	
+	@Autowired
+	private RequisitionLineItemActivityService requisitionLineItemActivityService;
 
 	public Requisition getRequisition(Long id) {
 		logger.info("Getting requisition by id: " + id);
@@ -384,6 +389,10 @@ public class RequisitionService {
 			requisitionActivity = new RequisitionActivity();
 			BeanUtils.copyProperties(requisition, requisitionActivity);
 			requisitionActivity.setRequisitionId(requisition.getId());
+			
+			requisitionActivity.setUpdatedBy(requisition.getUpdatedBy());
+			requisitionActivity.setUpdatedOn(requisition.getUpdatedOn());
+			
 			requisitionActivity = requisitionActivityService.addRequisitionActivity(requisitionActivity);
 			logger.info("Requisition activity added successfully");
 		}
@@ -722,4 +731,32 @@ public class RequisitionService {
 		}
 	}
 	
+	@Transactional
+	public void deleteRequisition(Long requisitionId) {
+		logger.info("Deleting requisition");
+		Requisition req = getRequisition(requisitionId);
+		Instant now = Instant.now();
+		if(req != null) {
+			req.setStatus(Constants.STATUS_DELETED);
+			req.setUpdatedOn(now);
+			saveRequisitionActivity(req);
+		}
+		
+		Map<String, String> reqLineItemMap = new HashMap<>();
+		reqLineItemMap.put("requisitionId", String.valueOf(requisitionId));
+		List<RequisitionLineItem> reqLineItemList = requisitionLineItemService.searchRequisitionLineItem(reqLineItemMap);
+		for(RequisitionLineItem reqLineItem : reqLineItemList) {
+			
+			RequisitionLineItemActivity reqLiAct = new RequisitionLineItemActivity();
+			BeanUtils.copyProperties(reqLineItem, reqLiAct);
+			reqLiAct.setRequisitionLineItemId(reqLineItem.getId());
+			reqLiAct.status(Constants.STATUS_DELETED);
+			reqLiAct.setUpdatedOn(now);
+			reqLiAct = requisitionLineItemActivityService.addRequisitionLineItemActivity(reqLiAct);
+			requisitionLineItemService.deleteRequisitionLineItem(reqLineItem.getId());
+			
+		}
+		requisitionRepository.deleteById(requisitionId);
+		logger.info(" Requisition deleted successfully");
+	}
 }
