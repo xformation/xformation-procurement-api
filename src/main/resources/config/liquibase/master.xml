@@ -44,6 +44,8 @@
     <include file="config/liquibase/changelog/20210929105334_added_entity_CommitteeMember.xml" relativeToChangelogFile="false"/>
     <include file="config/liquibase/changelog/20210929105434_added_entity_CommitteeAndMemberLink.xml" relativeToChangelogFile="false"/>
     <include file="config/liquibase/changelog/20211011125847_added_entity_RolesRulesLink.xml" relativeToChangelogFile="false"/>
+ 
+    <include file="config/liquibase/changelog/20211014092300_added_entity_DataFile.xml" relativeToChangelogFile="false"/>
     <!-- jhipster-needle-liquibase-add-changelog - JHipster will add liquibase changelogs here -->
     <include file="config/liquibase/changelog/20210722052455_added_entity_constraints_Document.xml" relativeToChangelogFile="false"/>
     <include file="config/liquibase/changelog/20210722052755_added_entity_constraints_Requisition.xml" relativeToChangelogFile="false"/>

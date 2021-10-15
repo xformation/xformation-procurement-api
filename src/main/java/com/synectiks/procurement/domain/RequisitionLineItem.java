@@ -89,6 +89,18 @@ public class RequisitionLineItem implements Serializable {
     @JsonIgnoreProperties(value = "requisitionLineItemLists", allowSetters = true)
     private Requisition requisition;
 
+    public byte[] getDataFile() {
+		return dataFile;
+	}
+
+	public void setDataFile(byte[] dataFile) {
+		this.dataFile = dataFile;
+	}
+
+	@Transient
+    @JsonProperty
+    private byte[] dataFile;
+    
     @Transient
     @JsonProperty
     private List<RequisitionLineItemActivity> activityList;

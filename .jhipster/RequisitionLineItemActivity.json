@@ -53,6 +53,10 @@
       "fieldType": "LocalDate"
     },
     {
+      "fieldName": "ratePerItem",
+      "fieldType": "Integer"
+    },
+    {
       "fieldName": "requisitionLineItemId",
       "fieldType": "Long"
     }

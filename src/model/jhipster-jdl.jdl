@@ -17,6 +17,21 @@ entity Document {
     updatedBy String
 }
 
+entity DataFile {
+	fileName String
+    fileType String
+    fileExt String
+	fileSize Long
+    storageLocation String /** LOCAL or S3 or AZURE */
+	cloudName String
+    s3Bucket String /** S3 bucket name. image file stored on aws s3 bucket */
+    s3Url String /** S3 url of image file */
+    sourceOfOrigin String
+    createdOn Instant
+    createdBy String
+ }
+
+
 entity Department {
 	name String
 }

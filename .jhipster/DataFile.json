@@ -1,0 +1,66 @@
+{
+  "name": "DataFile",
+  "fields": [
+    {
+      "fieldName": "fileName",
+      "fieldType": "String"
+    },
+    {
+      "fieldName": "fileType",
+      "fieldType": "String"
+    },
+    {
+      "fieldName": "fileExt",
+      "fieldType": "String"
+    },
+    {
+      "fieldName": "fileSize",
+      "fieldType": "Long"
+    },
+    {
+      "fieldName": "storageLocation",
+      "fieldType": "String",
+      "javadoc": "LOCAL or S3 or AZURE"
+    },
+    {
+      "fieldName": "cloudName",
+      "fieldType": "String"
+    },
+    {
+      "fieldName": "s3Bucket",
+      "fieldType": "String",
+      "javadoc": "S3 bucket name. image file stored on aws s3 bucket"
+    },
+    {
+      "fieldName": "s3Url",
+      "fieldType": "String",
+      "javadoc": "S3 url of image file"
+    },
+    {
+      "fieldName": "sourceOfOrigin",
+      "fieldType": "String"
+    },
+    {
+      "fieldName": "createdOn",
+      "fieldType": "Instant"
+    },
+    {
+      "fieldName": "createdBy",
+      "fieldType": "String"
+    }
+  ],
+  "relationships": [],
+  "entityTableName": "data_file",
+  "dto": "no",
+  "pagination": "no",
+  "service": "no",
+  "jpaMetamodelFiltering": false,
+  "fluentMethods": true,
+  "readOnly": false,
+  "embedded": false,
+  "applications": "*",
+  "microserviceName": "procurement",
+  "clientRootFolder": "procurement",
+  "databaseType": "sql",
+  "changelogDate": "20211014092300"
+}

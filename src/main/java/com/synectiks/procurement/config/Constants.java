@@ -49,6 +49,10 @@ public final class Constants {
     public static final String FILE_STORAGE_LOCATION_S3 = "S3";
     public static final String FILE_STORAGE_LOCATION_AZURE = "AZURE";
     
+    public static final String FILE_CLOUD_NAME_AWS = "AWS";
+    public static final String FILE_CLOUD_NAME_AZURE= "AZURE";
+    public static final String FILE_CLOUD_NAME_GCP = "GCP";
+    
     public static final String IDENTIFIER_PROFILE_IMAGE = "PROFILE_IMAGE";
     public static final String IDENTIFIER_REQUISITION_EXTRA_BUDGETORY_FILE = "REQUISITION_EXTRA_BUDGETORY_FILE";
     

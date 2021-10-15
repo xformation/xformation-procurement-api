@@ -38,6 +38,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.synectiks.procurement.config.Constants;
 import com.synectiks.procurement.domain.Currency;
+import com.synectiks.procurement.domain.DataFile;
 import com.synectiks.procurement.domain.Department;
 import com.synectiks.procurement.domain.Document;
 import com.synectiks.procurement.domain.Requisition;
@@ -48,6 +49,7 @@ import com.synectiks.procurement.domain.Roles;
 import com.synectiks.procurement.domain.Rules;
 import com.synectiks.procurement.domain.Vendor;
 import com.synectiks.procurement.domain.VendorRequisitionBucket;
+import com.synectiks.procurement.repository.DataFileRepository;
 import com.synectiks.procurement.repository.RequisitionActivityRepository;
 import com.synectiks.procurement.repository.RequisitionRepository;
 import com.synectiks.procurement.repository.VendorRequisitionBucketRepository;
@@ -76,6 +78,9 @@ public class RequisitionService {
 
 	@Autowired
 	private VendorRequisitionBucketRepository vendorRequisitionBucketRepository;
+	
+	@Autowired
+	private DataFileRepository dataFileRepository;
 
 	@Autowired
 	private VendorService vendorService;
@@ -136,14 +141,14 @@ public class RequisitionService {
 		}
 		
 		Rules rule = rulesService.getRulesByName(Constants.RULE_REQUISITION_TYPE); 
-//		if (json.get("roleName").asText() != null) {
-//			Roles role = rolesService.getRolesByName(json.get("roleName").asText());
-//			rule = rulesService.getRulesByRoleAndRuleName(role, Constants.RULE_REQUISITION_TYPE);
-//		} else {
-//			logger.error("Requistion could not be added. User's role missing");
-//			return null;
-//		}
-		if(rule != null) {
+////		if (json.get("roleName").asText() != null) {
+////			Roles role = rolesService.getRolesByName(json.get("roleName").asText());
+////			rule = rulesService.getRulesByRoleAndRuleName(role, Constants.RULE_REQUISITION_TYPE);
+////		} else {
+////			logger.error("Requistion could not be added. User's role missing");
+////			return null;
+////		}
+     	  if(rule != null) {
 			JSONObject ruleJson = new JSONObject(rule.getRule());
 			JSONObject nonStandardRule = ruleJson.getJSONObject(Constants.REQUISITION_TYPE_NON_STANDARD);
 			if (json.get("totalPrice") != null) {
@@ -202,11 +207,8 @@ public class RequisitionService {
 		logger.info("Requisition added successfully");
 		
 		saveExtraBudgetoryFile(extraBudgetoryFile, requisition, now);
-		
 		saveRequisitionActivity(requisition);
-
 		List<RequisitionLineItem> liteItemList = getLineItem(requisitionLineItemFile);
-		
 		JSONObject jsonObj = new JSONObject(obj);
 		JSONArray reqLineItemArray = jsonObj.getJSONArray("requisitionLineItemLists");
 		if (reqLineItemArray != null && reqLineItemArray.length() > 0) {
@@ -218,7 +220,7 @@ public class RequisitionService {
 		}
 
 		saveRequisitionLineItem(requisition, liteItemList);
-		
+		dataFile( requisitionLineItemFile, now);
 		logger.info("Requisition added successfully");
 		return requisition;
 	}
@@ -243,10 +245,10 @@ public class RequisitionService {
 		if(requisitionLineItemFile == null) {
 			return Collections.emptyList();
 		}
-		
 		List<RequisitionLineItem> lineItemList = new ArrayList<>();
 		XSSFWorkbook workbook = new XSSFWorkbook(requisitionLineItemFile.getInputStream());
 		XSSFSheet worksheet = workbook.getSheetAt(0);
+		
 		//skiping first row, that is row index 0. Starting loop with 1
 		for (int i = 1; i <worksheet.getPhysicalNumberOfRows(); i++) {
 			XSSFRow row = worksheet.getRow(i);
@@ -284,7 +286,9 @@ public class RequisitionService {
 					item.setPrice(Integer.parseInt(row.getCell(3).getStringCellValue()));
 				}
 			}
+			
 			lineItemList.add(item);
+
 		}
 		return lineItemList;
 	}
@@ -728,6 +732,49 @@ public class RequisitionService {
 			logger.info("Extra budgetory file saved successfully");
 		}else {
 			logger.info("Requisition extra budgetory file not provided");
+		}
+	}
+	
+	private void  dataFile(MultipartFile requisitionLineItemFile, Instant now)throws IOException, JSONException {
+		if (requisitionLineItemFile != null) {
+			logger.info("Data  file");
+			byte[] bytes = requisitionLineItemFile.getBytes();
+			String orgFileName = StringUtils.cleanPath(requisitionLineItemFile.getOriginalFilename());
+			String ext = "";
+			if (orgFileName.lastIndexOf(".") != -1) {
+				ext = orgFileName.substring(orgFileName.lastIndexOf(".") + 1);
+			}
+			
+			String filename = orgFileName;
+			if (orgFileName.lastIndexOf(".") != -1) {
+				filename = orgFileName.substring(0, orgFileName.lastIndexOf("."));
+			}
+			filename = filename.toLowerCase().replaceAll(" ", "-") + "_" + System.currentTimeMillis() + "." + ext;
+			
+			File localStorage = new File(Constants.LOCAL_REQUISITION_FILE_STORAGE_DIRECTORY);
+			if (!localStorage.exists()) {
+				localStorage.mkdirs();
+			}
+			Path path = Paths.get(localStorage.getAbsolutePath() + File.separatorChar + filename);
+			Files.write(path, bytes);
+
+			DataFile dataFile= new DataFile(); 
+			dataFile.setFileName(filename);
+			dataFile.setFileExt(ext);
+			dataFile.setFileType(ext.toUpperCase());
+			dataFile.setFileSize(requisitionLineItemFile.getSize());
+			dataFile.setStorageLocation(Constants.FILE_STORAGE_LOCATION_LOCAL);
+			dataFile.setSourceOfOrigin(this.getClass().getSimpleName());
+			dataFile.sets3Bucket(filename);
+//			dataFile.setCreatedBy(liteItemList.getCreatedBy());
+			dataFile.setCreatedOn(now);
+			dataFile.setCloudName(Constants.FILE_CLOUD_NAME_AWS);
+			
+			
+     		dataFile = dataFileRepository.save(dataFile);
+			logger.info(" Data file saved successfully");
+		}else {
+			logger.info("Requisitionlineitem data file falide");
 		}
 	}
 	
