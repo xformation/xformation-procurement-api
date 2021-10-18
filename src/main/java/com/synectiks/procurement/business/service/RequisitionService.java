@@ -7,9 +7,12 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -53,6 +56,7 @@ import com.synectiks.procurement.repository.DataFileRepository;
 import com.synectiks.procurement.repository.RequisitionActivityRepository;
 import com.synectiks.procurement.repository.RequisitionRepository;
 import com.synectiks.procurement.repository.VendorRequisitionBucketRepository;
+import com.synectiks.procurement.util.DateFormatUtil;
 
 @Service
 public class RequisitionService {
@@ -220,7 +224,7 @@ public class RequisitionService {
 		}
 
 		saveRequisitionLineItem(requisition, liteItemList);
-		dataFile( requisitionLineItemFile, now);
+		saveRequisitionLineItemFile( requisitionLineItemFile, now);
 		logger.info("Requisition added successfully");
 		return requisition;
 	}
@@ -403,7 +407,7 @@ public class RequisitionService {
 		return requisitionActivity;
 	}
 
-	public List<Requisition> searchRequisition(Map<String, String> requestObj) {
+	public List<Requisition> searchRequisition(Map<String, String> requestObj) throws Exception {
 		logger.info("Request to search requisition on given filter criteria");
 		Requisition requisition = new Requisition();
 
@@ -413,6 +417,16 @@ public class RequisitionService {
 			isFilter = true;
 		}
 
+		if (!org.apache.commons.lang3.StringUtils.isBlank(requestObj.get("reqNo"))) {
+			requisition.setId(Long.parseLong(requestObj.get("reqNo").toLowerCase()));
+			isFilter = true;
+		}
+		
+		if (!org.apache.commons.lang3.StringUtils.isBlank(requestObj.get("reqestNo"))) {
+			requisition.setId(Long.parseLong(requestObj.get("reqestNo").toLowerCase()));
+			isFilter = true;
+		}
+		
 		if (!org.apache.commons.lang3.StringUtils.isBlank(requestObj.get("departmentId"))) {
 			Department department = departmentService.getDepartment(Long.parseLong(requestObj.get("departmentId")));
 			if (department == null) {
@@ -483,14 +497,59 @@ public class RequisitionService {
 			DateTimeFormatter formatter = DateTimeFormatter.ofPattern(Constants.DEFAULT_DATE_FORMAT);
 			LocalDate localDate = LocalDate.parse(requestObj.get("dueDate"), formatter);
 			requisition.setDueDate(localDate);
+			isFilter = true;
 		}
-
+		
 		List<Requisition> list = null;
 		if (isFilter) {
 			list = this.requisitionRepository.findAll(Example.of(requisition), Sort.by(Direction.DESC, "id"));
 		} else {
 			list = this.requisitionRepository.findAll(Sort.by(Direction.DESC, "id"));
 		}
+
+		Date fromDate = null;
+		boolean isDateFilter = false;
+		if(requestObj.get("fromDate") != null){
+			fromDate = DateFormatUtil.convertStringToUtilDate(Constants.DEFAULT_DATE_FORMAT,requestObj.get("fromDate"));
+			isDateFilter = true;
+		}
+		
+		Date toDate = null;
+		if(requestObj.get("toDate") != null){
+			toDate = DateFormatUtil.convertStringToUtilDate(Constants.DEFAULT_DATE_FORMAT,requestObj.get("toDate"));
+			isDateFilter = true;
+		}
+		
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd").withZone(ZoneId.from(ZoneOffset.UTC));
+		List<Requisition> filteredList = new ArrayList<>();
+		for (Requisition req : list) {
+			if(fromDate != null && toDate != null && fromDate.equals(toDate)) {
+				Date reqDate = DateFormatUtil.convertInstantToUtilDate(formatter, req.getCreatedOn());
+				if(reqDate.equals(fromDate)) {
+					filteredList.add(req);
+				}
+			}else if(fromDate != null && toDate != null && !fromDate.equals(toDate)) {
+				Date reqDate = DateFormatUtil.convertInstantToUtilDate(formatter, req.getCreatedOn());
+		        if(reqDate.getTime() >= fromDate.getTime() && reqDate.getTime() <= toDate.getTime()) {
+					filteredList.add(req);
+				}
+			}else if(fromDate != null && toDate == null ) {
+				Date reqDate = DateFormatUtil.convertInstantToUtilDate(formatter, req.getCreatedOn());
+				if(reqDate.getTime() >= fromDate.getTime()) {
+					filteredList.add(req);
+				}
+			}else if(fromDate == null && toDate != null ) {
+				Date reqDate = DateFormatUtil.convertInstantToUtilDate(formatter, req.getCreatedOn());
+				if(reqDate.getTime() <= toDate.getTime()) {
+					filteredList.add(req);
+				}
+			}
+		}
+		
+		if(isDateFilter) {
+			list = filteredList;
+		}
+		
 		for (Requisition req : list) {
 			RequisitionActivity ca = new RequisitionActivity();
 			ca.setRequisitionId(req.getId());
@@ -498,6 +557,7 @@ public class RequisitionService {
 			req.setActivityList(caList);
 		}
 
+		
 		logger.info("Requisition search completed. Total records: " + list.size());
 
 		return list;
@@ -735,9 +795,9 @@ public class RequisitionService {
 		}
 	}
 	
-	private void  dataFile(MultipartFile requisitionLineItemFile, Instant now)throws IOException, JSONException {
+	private void  saveRequisitionLineItemFile(MultipartFile requisitionLineItemFile, Instant now)throws IOException, JSONException {
 		if (requisitionLineItemFile != null) {
-			logger.info("Data  file");
+			logger.info("Saving requsition line items data file and its details");
 			byte[] bytes = requisitionLineItemFile.getBytes();
 			String orgFileName = StringUtils.cleanPath(requisitionLineItemFile.getOriginalFilename());
 			String ext = "";
@@ -751,7 +811,7 @@ public class RequisitionService {
 			}
 			filename = filename.toLowerCase().replaceAll(" ", "-") + "_" + System.currentTimeMillis() + "." + ext;
 			
-			File localStorage = new File(Constants.LOCAL_REQUISITION_FILE_STORAGE_DIRECTORY);
+			File localStorage = new File(Constants.LOCAL_DATA_FILE_STORAGE_DIRECTORY);
 			if (!localStorage.exists()) {
 				localStorage.mkdirs();
 			}
@@ -765,16 +825,11 @@ public class RequisitionService {
 			dataFile.setFileSize(requisitionLineItemFile.getSize());
 			dataFile.setStorageLocation(Constants.FILE_STORAGE_LOCATION_LOCAL);
 			dataFile.setSourceOfOrigin(this.getClass().getSimpleName());
-			dataFile.sets3Bucket(filename);
 //			dataFile.setCreatedBy(liteItemList.getCreatedBy());
 			dataFile.setCreatedOn(now);
-			dataFile.setCloudName(Constants.FILE_CLOUD_NAME_AWS);
-			
 			
      		dataFile = dataFileRepository.save(dataFile);
-			logger.info(" Data file saved successfully");
-		}else {
-			logger.info("Requisitionlineitem data file falide");
+     		logger.info("Requsition line items data file and its details saved successfully");
 		}
 	}
 	
@@ -806,4 +861,6 @@ public class RequisitionService {
 		requisitionRepository.deleteById(requisitionId);
 		logger.info(" Requisition deleted successfully");
 	}
+	
+	
 }
