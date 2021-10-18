@@ -52,10 +52,12 @@
                 <constraints nullable="true" />
             </column>
             <column name="department_id" type="bigint">
-                <constraints unique="true" nullable="true" uniqueConstraintName="ux_requisition_department_id" />
+            	<constraints nullable="true" />
+                <!-- <constraints unique="true" nullable="true" uniqueConstraintName="ux_requisition_department_id" /> -->
             </column>
             <column name="currency_id" type="bigint">
-                <constraints unique="true" nullable="true" uniqueConstraintName="ux_requisition_currency_id" />
+            	<constraints nullable="true" />
+                <!-- <constraints unique="true" nullable="true" uniqueConstraintName="ux_requisition_currency_id" /> -->
             </column>
             <!-- jhipster-needle-liquibase-add-column - JHipster will add columns here -->
         </createTable>
