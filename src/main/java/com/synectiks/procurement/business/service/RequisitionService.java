@@ -294,12 +294,12 @@ public class RequisitionService {
 				
 				if (json.get("price") != null) {
 					try {
-						String q = (String)json.get("ratePerItem");
-						reqLineItem.setRatePerItem(Integer.parseInt(q));
+						String q = (String)json.get("price");
+						reqLineItem.setPrice(Integer.parseInt(q));
 					}catch(Exception e) {
 						try {
-							Integer q = (Integer)json.get("ratePerItem");
-							reqLineItem.setRatePerItem(q);
+							Integer q = (Integer)json.get("price");
+							reqLineItem.setPrice(q);
 						}catch(Exception ee) {
 							logger.error("Cannot read per item rate. Exception ", e);
 							throw ee;
