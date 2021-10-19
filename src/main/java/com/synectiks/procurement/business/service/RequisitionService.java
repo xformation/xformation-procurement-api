@@ -314,10 +314,11 @@ public class RequisitionService {
 	}
 	
 	public List<RequisitionLineItem> getLineItemFromFile(MultipartFile requisitionLineItemFile) throws IOException{
-		if(requisitionLineItemFile == null) {
-			return Collections.emptyList();
-		}
 		List<RequisitionLineItem> lineItemList = new ArrayList<>();
+		if(requisitionLineItemFile == null) {
+			return lineItemList;
+		}
+		
 		XSSFWorkbook workbook = new XSSFWorkbook(requisitionLineItemFile.getInputStream());
 		XSSFSheet worksheet = workbook.getSheetAt(0);
 		
