@@ -72,13 +72,16 @@ public class RequisitionController {
 		}
 	}
 
-	@PostMapping("/updateRequisition")
-	public ResponseEntity<Status> updateRequisition(@RequestBody ObjectNode obj)
+	@RequestMapping(value = "/updateRequisition", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<Status> updateRequisition(
+			@RequestParam(name = "requisitionFile", required = false) MultipartFile requisitionFile,
+			@RequestParam(name = "requisitionLineItemFile", required = false) MultipartFile requisitionLineItemFile,
+			@RequestParam("obj") String obj)
 			throws JSONException, URISyntaxException {
 		logger.info("Request to update a requsition");
 		Status st = new Status();
 		try {
-			Requisition requisition = requisitionService.updateRequisition(obj);
+			Requisition requisition = requisitionService.updateRequisition(requisitionFile, requisitionLineItemFile, obj);
 			if (requisition == null) {
 				logger.error("Update requisition failed");
 				st.setCode(HttpStatus.EXPECTATION_FAILED.value());

@@ -369,10 +369,13 @@ public class RequisitionService {
 	
 	
 	@Transactional
-	public Requisition updateRequisition(ObjectNode obj) throws JSONException {
+	public Requisition updateRequisition(MultipartFile extraBudgetoryFile, MultipartFile requisitionLineItemFile, String obj) throws Exception {
 		logger.info("Update requisition");
 
-		Optional<Requisition> orq = requisitionRepository.findById(Long.parseLong(obj.get("id").asText()));
+		ObjectMapper mapper = new ObjectMapper();
+		ObjectNode json = (ObjectNode) mapper.readTree(obj);
+		
+		Optional<Requisition> orq = requisitionRepository.findById(Long.parseLong(json.get("id").asText()));
 		if (!orq.isPresent()) {
 			logger.error("Requisition could not be updated. Requisition not found");
 			return null;
@@ -380,86 +383,97 @@ public class RequisitionService {
 
 		Requisition requisition = orq.get();
 
-		if(obj.get("departmentId") != null) {
-			Department department = departmentService.getDepartment(Long.parseLong(obj.get("departmentId").asText()));
+		if (json.get("financialYear") != null) {
+			requisition.setFinancialYear(json.get("financialYear").asInt());
+		}
+		
+		if(json.get("departmentId") != null) {
+			Department department = departmentService.getDepartment(Long.parseLong(json.get("departmentId").asText()));
 			if (department != null) {
 				requisition.setDepartment(department);
 			}
 		}
 		
-		if(obj.get("currencyId") != null) {
-			Currency currency = currencyService.getCurrency(Long.parseLong(obj.get("currencyId").asText()));
+		if(json.get("currencyId") != null) {
+			Currency currency = currencyService.getCurrency(Long.parseLong(json.get("currencyId").asText()));
 			if (currency != null) {
 				requisition.setCurrency(currency);
 			}
 		}
 		
-//		if (obj.get("requisitionNo") != null) {
-//			requisition.setRequisitionNo(obj.get("requisitionNo").asText());
+		if (json.get("notes") != null) {
+			requisition.setNotes(json.get("notes").asText());
+		}
+		
+		if (json.get("progressStage") != null) {
+			requisition.setProgressStage(json.get("progressStage").asText());
+		}
+
+		
+//		Rules rule = null; 
+//		if (obj.get("roleName").asText() != null) {
+//			Roles role = rolesService.getRolesByName(obj.get("roleName").asText());
+//			rule = rulesService.getRulesByRoleAndRuleName(role, Constants.RULE_REQUISITION_TYPE);
+//		} else {
+//			logger.error("Requistion could not be added. User's role missing");
+//			return null;
+//		}
+		
+//		JSONObject jsonObject = new JSONObject(rule.getRule());
+//		JSONObject nonStandardRule = jsonObject.getJSONObject(Constants.REQUISITION_TYPE_NON_STANDARD);
+//		if (obj.get("totalPrice") != null) {
+//			int price = obj.get("totalPrice").asInt();
+//			if (price >= nonStandardRule.getInt("min") && price <= nonStandardRule.getInt("max")) {
+//				requisition.setType(Constants.REQUISITION_TYPE_NON_STANDARD);
+//			} else {
+//				requisition.setType(Constants.REQUISITION_TYPE_STANDARD);
+//			}
 //		}
 
-		if (obj.get("status") != null) {
-			requisition.setStatus(obj.get("status").asText());
+		if (json.get("totalPrice") != null) {
+			requisition.setTotalPrice(json.get("totalPrice").asInt());
 		}
 
-		if (obj.get("progressStage") != null) {
-			requisition.setProgressStage(obj.get("progressStage").asText());
+		
+		if (json.get("status") != null) {
+			requisition.setStatus(json.get("status").asText());
 		}
-
-		if (obj.get("financialYear") != null) {
-			requisition.setFinancialYear(obj.get("financialYear").asInt());
-		}
-		Rules rule = null; 
-		if (obj.get("roleName").asText() != null) {
-			Roles role = rolesService.getRolesByName(obj.get("roleName").asText());
-			rule = rulesService.getRulesByRoleAndRuleName(role, Constants.RULE_REQUISITION_TYPE);
-		} else {
-			logger.error("Requistion could not be added. User's role missing");
-			return null;
-		}
-		JSONObject jsonObject = new JSONObject(rule.getRule());
-//       		JSONObject standardRule = jsonObject.getJSONObject(Constants.REQUISITION_TYPE_STANDARD);
-		JSONObject nonStandardRule = jsonObject.getJSONObject(Constants.REQUISITION_TYPE_NON_STANDARD);
-		if (obj.get("totalPrice") != null) {
-			int price = obj.get("totalPrice").asInt();
-			if (price >= nonStandardRule.getInt("min") && price <= nonStandardRule.getInt("max")) {
-				requisition.setType(Constants.REQUISITION_TYPE_NON_STANDARD);
-			} else {
-				requisition.setType(Constants.REQUISITION_TYPE_STANDARD);
-			}
-		}
+		
+//		DateTimeFormatter formatter = DateTimeFormatter.ofPattern(Constants.DEFAULT_DATE_FORMAT);
+//		if (obj.get("dueDate") != null) {
+//			LocalDate localDate = LocalDate.parse(obj.get("dueDate").asText(), formatter);
+//			requisition.setDueDate(localDate);
 //		}
 
-		if (obj.get("totalPrice") != null) {
-			requisition.setTotalPrice(obj.get("totalPrice").asInt());
-		}
-
-		if (obj.get("notes") != null) {
-			requisition.setNotes(obj.get("notes").asText());
-		}
-		if (obj.get("status") != null) {
-			requisition.setStatus(obj.get("status").asText());
-		}
-		DateTimeFormatter formatter = DateTimeFormatter.ofPattern(Constants.DEFAULT_DATE_FORMAT);
-		if (obj.get("dueDate") != null) {
-			LocalDate localDate = LocalDate.parse(obj.get("dueDate").asText(), formatter);
-			requisition.setDueDate(localDate);
-		}
-
-		if (obj.get("user") != null) {
-			requisition.setUpdatedBy(obj.get("user").asText());
+		if (json.get("user") != null) {
+			requisition.setUpdatedBy(json.get("user").asText());
 		} else {
 			requisition.setUpdatedBy(Constants.SYSTEM_ACCOUNT);
 		}
-		requisition.setUpdatedOn(Instant.now());
+		
+		Instant now = Instant.now();
+		requisition.setUpdatedOn(now);
+		
 		requisition = requisitionRepository.save(requisition);
 		logger.info("Requisition updated successfully");
 
+		saveExtraBudgetoryFile(extraBudgetoryFile, requisition, now);
 		saveRequisitionActivity(requisition);
 
+		List<RequisitionLineItem> liteItemList = getLineItemFromFile(requisitionLineItemFile);
+		List<RequisitionLineItem> liteItemList2 = getLineItemFromJson(obj);
+		liteItemList.addAll(liteItemList2);
+
+		saveRequisitionLineItem(requisition, liteItemList);
+		saveRequisitionLineItemFile( requisitionLineItemFile, now);
+		
 		return requisition;
 	}
 
+//	private List<RequisitionLineItem> getLineItemFromJson(ObjectNode obj) throws Exception {
+//		return getLineItemFromJson(obj.toPrettyString());
+//	}
+	
 	private RequisitionActivity saveRequisitionActivity(Requisition requisition) {
 		RequisitionActivity requisitionActivity = null;
 		if (requisition != null) {
