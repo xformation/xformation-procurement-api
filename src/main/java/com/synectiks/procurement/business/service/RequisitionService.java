@@ -326,6 +326,10 @@ public class RequisitionService {
 			XSSFRow row = worksheet.getRow(i);
 			RequisitionLineItem item = new RequisitionLineItem();
 			
+			if (row.getCell(0) != null) {
+				item.setItemDescription(row.getCell(0).getStringCellValue());
+			}
+			
 			try {
 				if (row.getCell(1) != null) {
 					item.setOrderQuantity((int) row.getCell(1).getNumericCellValue());
@@ -335,12 +339,6 @@ public class RequisitionService {
 					item.setOrderQuantity(Integer.parseInt(row.getCell(1).getStringCellValue()));
 				}
 			}
-			
-			if (row.getCell(0) != null) {
-				item.setItemDescription(row.getCell(0).getStringCellValue());
-			}
-			
-			
 
 			try {
 				if (row.getCell(2) != null) {
@@ -626,9 +624,15 @@ public class RequisitionService {
 			ca.setRequisitionId(req.getId());
 			List<RequisitionActivity> caList = requisitionActivityRepository.findAll(Example.of(ca));
 			req.setActivityList(caList);
+			
+			Map<String, String> searchDoc = new HashMap<>();
+			searchDoc.put("sourceOfOrigin", this.getClass().getSimpleName());
+			searchDoc.put("sourceId", String.valueOf(req.getId()));
+			searchDoc.put("identifier", Constants.IDENTIFIER_REQUISITION_EXTRA_BUDGETORY_FILE);
+			List<Document> docList = documentService.searchDocument(searchDoc);
+			req.setDocumentList(docList);
 		}
 
-		
 		logger.info("Requisition search completed. Total records: " + list.size());
 
 		return list;
@@ -724,6 +728,85 @@ public class RequisitionService {
 		}
 	}
 
+//	public boolean approveRequisition(ObjectNode obj) throws JSONException {
+//		logger.info("Getting requisition by id: " + obj);
+//
+//		try {
+//			if (obj.get("requisitionId") == null) {
+//				logger.error("Requision id not found. Cannot approve requisition.");
+//				return false;
+//			}
+//
+////			if (obj.get("roleName") == null) {
+////				logger.error("Role not found. Cannot approve requisition.");
+////				return false;
+////			}
+//
+//			Optional<Requisition> req = requisitionRepository.findById(obj.get("requisitionId").asLong());
+//			if (!req.isPresent()) {
+//				logger.error("Requision not found. Cannot approve requisition.");
+//				return false;
+//			}
+//
+//			Requisition requisition = req.get();
+//			
+//			Rules rule = rulesService.getRulesByName(Constants.RULE_APPROVE_REQUISITION); 
+//			Roles role = rolesService.getRolesByName(obj.get("roleName").asText());
+//			// TO DO. Find rule assigned to a role in roles_rules_link table 
+//			JSONObject jsonObject = new JSONObject(rule.getRule());
+//
+//			int price = 0;
+//			if (requisition.getTotalPrice() != null) {
+//				price = requisition.getTotalPrice().intValue();
+//			}
+//
+//			int minRulePrice = 0;
+//			int maxRulePrice = 0;
+//
+//			try {
+//				minRulePrice = jsonObject.getInt("min");
+//			} catch (Exception e) {
+//				logger.error("Minimum price rule not found. Cannot approve requisiont. Exception: ", e);
+//				return false;
+//			}
+//
+//			if (jsonObject.get("max") != null) {
+//				try {
+//					maxRulePrice = jsonObject.getInt("max");
+//				} catch (Exception e) {
+//					logger.error("Incorrect maximum price rule. Cannot approve requisiont. Exception: ", e);
+//					return false;
+//				}
+//			}
+//
+//			boolean isRuleApplied = false;
+//			if (price >= minRulePrice && jsonObject.get("max") == null) {
+//				requisition.setStatus(Constants.PROGRESS_STAGE_APPROVED);
+//				isRuleApplied = true;
+//			}
+//
+//			if (price >= minRulePrice && jsonObject.get("max") != null && price <= maxRulePrice) {
+//				requisition.setStatus(Constants.PROGRESS_STAGE_APPROVED);
+//				isRuleApplied = true;
+//			}
+//
+//			if (isRuleApplied) {
+//				requisition = requisitionRepository.save(requisition);
+//				saveRequisitionActivity(requisition);
+//				return true;
+//			} else {
+//				logger.warn("Approve requisition failed. No rule applied");
+//				return false;
+//			}
+//
+//		} catch (Exception e) {
+//			logger.error("Approve requisition failed. Exception: ", e);
+//			return false;
+//		}
+//
+//	}
+	
+
 	public boolean approveRequisition(ObjectNode obj) throws JSONException {
 		logger.info("Getting requisition by id: " + obj);
 
@@ -733,85 +816,18 @@ public class RequisitionService {
 				return false;
 			}
 
-			if (obj.get("roleName") == null) {
-				logger.error("Role not found. Cannot approve requisition.");
-				return false;
-			}
-
 			Optional<Requisition> req = requisitionRepository.findById(obj.get("requisitionId").asLong());
 			if (!req.isPresent()) {
 				logger.error("Requision not found. Cannot approve requisition.");
 				return false;
 			}
-//			Roles role = rolesService.getRolesByName(json.get("roleName").asText());
-//			Roles role = rolesService.getRolesByName(obj.get("roleName").asText());
-//			if (role == null) {
-//				logger.error("Given role " + obj.get("roleName").asText() + "Role not found. Cannot approve requisition.");
-//				return false;
-//			}
 
 			Requisition requisition = req.get();
-			
-			Rules rule = null; 
-			if (obj.get("roleName").asText() != null) {
-				Roles role = rolesService.getRolesByName(obj.get("roleName").asText());
-				rule = rulesService.getRulesByRoleAndRuleName(role, Constants.RULE_APPROVE_REQUISITION);
-			} else {
-				logger.error("Requistion could not be added. User's role missing");
-				return false;
-			}
-//			
-//			Rules rule = rulesService.getRulesByRoleAndRuleName(role, Constants.RULE_APPROVE_REQUISITION);
-//			if (rule == null) {
-//				logger.error("Approval rule not found. Cannot approve requisition.");
-//				return false;
-//			}
-
-			JSONObject jsonObject = new JSONObject(rule.getRule());
-
-			int price = 0;
-			if (requisition.getTotalPrice() != null) {
-				price = requisition.getTotalPrice().intValue();
-			}
-
-			int minRulePrice = 0;
-			int maxRulePrice = 0;
-
-			try {
-				minRulePrice = jsonObject.getInt("min");
-			} catch (Exception e) {
-				logger.error("Minimum price rule not found. Cannot approve requisiont. Exception: ", e);
-				return false;
-			}
-
-			if (jsonObject.get("max") != null) {
-				try {
-					maxRulePrice = jsonObject.getInt("max");
-				} catch (Exception e) {
-					logger.error("Incorrect maximum price rule. Cannot approve requisiont. Exception: ", e);
-					return false;
-				}
-			}
-
-			boolean isRuleApplied = false;
-			if (price >= minRulePrice && jsonObject.get("max") == null) {
-				requisition.setStatus(Constants.PROGRESS_STAGE_APPROVED);
-				isRuleApplied = true;
-			}
-
-			if (price >= minRulePrice && jsonObject.get("max") != null && price <= maxRulePrice) {
-				requisition.setStatus(Constants.PROGRESS_STAGE_APPROVED);
-				isRuleApplied = true;
-			}
-
-			if (isRuleApplied) {
-				requisition = requisitionRepository.save(requisition);
-				saveRequisitionActivity(requisition);
-				return true;
-			} else {
-				logger.warn("Approve requisition failed. No rule applied");
-				return false;
-			}
+			requisition.setStatus(Constants.PROGRESS_STAGE_APPROVED);
+			requisition = requisitionRepository.save(requisition);
+			saveRequisitionActivity(requisition);
+			logger.info("Requisition approved successfully");
+			return true;
 
 		} catch (Exception e) {
 			logger.error("Approve requisition failed. Exception: ", e);
@@ -819,8 +835,8 @@ public class RequisitionService {
 		}
 
 	}
-	
 
+	
 	private void saveExtraBudgetoryFile(MultipartFile file, Requisition requisition, Instant now)
 			throws IOException, JSONException {
 		if (file != null) {
