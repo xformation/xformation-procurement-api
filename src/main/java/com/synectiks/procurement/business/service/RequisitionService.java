@@ -113,7 +113,7 @@ public class RequisitionService {
 	}
 
 	@Transactional
-	public Requisition addRequisition(MultipartFile extraBudgetoryFile, MultipartFile requisitionLineItemFile, String obj) throws IOException, JSONException {
+	public Requisition addRequisition(MultipartFile extraBudgetoryFile, MultipartFile requisitionLineItemFile, String obj) throws Exception {
 		logger.info("Adding requistion");
 		Requisition requisition = new Requisition();
 
@@ -185,8 +185,18 @@ public class RequisitionService {
 		
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern(Constants.DEFAULT_DATE_FORMAT);
 		if (json.get("dueDate") != null) {
-			LocalDate localDate = LocalDate.parse(json.get("dueDate").asText(), formatter);
-			requisition.setDueDate(localDate);
+			try {
+				LocalDate localDate = LocalDate.parse(json.get("dueDate").asText(), formatter);
+				requisition.setDueDate(localDate);
+			}catch(Exception e) {
+				logger.error("Cannot read due date. Exception: "+e.getMessage());
+				long millis = System.currentTimeMillis();
+				java.sql.Date date = new java.sql.Date(millis);
+
+				LocalDate datew = LocalDate.parse(date.toString());
+				LocalDate localDate = datew.plusDays(Constants.DEFAULT_DUE_DAYS);
+				requisition.setDueDate(localDate);
+			}
 		} else {
 			long millis = System.currentTimeMillis();
 			java.sql.Date date = new java.sql.Date(millis);
@@ -195,6 +205,7 @@ public class RequisitionService {
 			LocalDate localDate = datew.plusDays(Constants.DEFAULT_DUE_DAYS);
 			requisition.setDueDate(localDate);
 		}
+		
 		if (json.get("user") != null) {
 			requisition.setCreatedBy(json.get("user").asText());
 			requisition.setUpdatedBy(json.get("user").asText());
@@ -212,16 +223,10 @@ public class RequisitionService {
 		
 		saveExtraBudgetoryFile(extraBudgetoryFile, requisition, now);
 		saveRequisitionActivity(requisition);
-		List<RequisitionLineItem> liteItemList = getLineItem(requisitionLineItemFile);
-		JSONObject jsonObj = new JSONObject(obj);
-		JSONArray reqLineItemArray = jsonObj.getJSONArray("requisitionLineItemLists");
-		if (reqLineItemArray != null && reqLineItemArray.length() > 0) {
-			for (int j = 0; j < reqLineItemArray.length(); j++) {
-				JSONObject json1 = reqLineItemArray.getJSONObject(j);
-				RequisitionLineItem reqLineItem = mapper.readValue(json1.toString(j), RequisitionLineItem.class);
-				liteItemList.add(reqLineItem);
-			}
-		}
+		
+		List<RequisitionLineItem> liteItemList = getLineItemFromFile(requisitionLineItemFile);
+		List<RequisitionLineItem> liteItemList2 = getLineItemFromJson(obj);
+		liteItemList.addAll(liteItemList2);
 
 		saveRequisitionLineItem(requisition, liteItemList);
 		saveRequisitionLineItemFile( requisitionLineItemFile, now);
@@ -245,7 +250,70 @@ public class RequisitionService {
 		logger.info("Requisition line items saved successfully");
 	}
 
-	public List<RequisitionLineItem> getLineItem(MultipartFile requisitionLineItemFile) throws IOException{
+	private List<RequisitionLineItem> getLineItemFromJson(String obj) throws Exception {
+		List<RequisitionLineItem> liteItemList = new ArrayList<>();
+		JSONObject jsonObj = new JSONObject(obj);
+		JSONArray reqLineItemArray = jsonObj.getJSONArray("requisitionLineItemLists");
+		if (reqLineItemArray != null && reqLineItemArray.length() > 0) {
+			for (int j = 0; j < reqLineItemArray.length(); j++) {
+				JSONObject json = reqLineItemArray.getJSONObject(j);
+				RequisitionLineItem reqLineItem = new RequisitionLineItem(); 
+				
+				if (json.get("orderQuantity") != null) {
+					try {
+						String q = (String)json.get("orderQuantity");
+						reqLineItem.setOrderQuantity(Integer.parseInt(q));
+					}catch(Exception e) {
+						try {
+							Integer q = (Integer)json.get("orderQuantity");
+							reqLineItem.setOrderQuantity(q);
+						}catch(Exception ee) {
+							logger.error("Cannot read quantity. Exception ", e);
+							throw ee;
+						}
+					}
+				}
+					
+				if (json.get("itemDescription") != null) {
+					reqLineItem.setItemDescription((String)json.get("itemDescription"));
+				}
+				if (json.get("ratePerItem") != null) {
+					try {
+						String q = (String)json.get("ratePerItem");
+						reqLineItem.setRatePerItem(Integer.parseInt(q));
+					}catch(Exception e) {
+						try {
+							Integer q = (Integer)json.get("ratePerItem");
+							reqLineItem.setRatePerItem(q);
+						}catch(Exception ee) {
+							logger.error("Cannot read per item rate. Exception ", e);
+							throw ee;
+						}
+					}				
+				}
+				
+				if (json.get("price") != null) {
+					try {
+						String q = (String)json.get("ratePerItem");
+						reqLineItem.setRatePerItem(Integer.parseInt(q));
+					}catch(Exception e) {
+						try {
+							Integer q = (Integer)json.get("ratePerItem");
+							reqLineItem.setRatePerItem(q);
+						}catch(Exception ee) {
+							logger.error("Cannot read per item rate. Exception ", e);
+							throw ee;
+						}
+					}	
+				}
+				
+				liteItemList.add(reqLineItem);
+			}
+		}
+		return liteItemList;
+	}
+	
+	public List<RequisitionLineItem> getLineItemFromFile(MultipartFile requisitionLineItemFile) throws IOException{
 		if(requisitionLineItemFile == null) {
 			return Collections.emptyList();
 		}
@@ -257,9 +325,6 @@ public class RequisitionService {
 		for (int i = 1; i <worksheet.getPhysicalNumberOfRows(); i++) {
 			XSSFRow row = worksheet.getRow(i);
 			RequisitionLineItem item = new RequisitionLineItem();
-			if (row.getCell(0) != null) {
-				item.setItemDescription(row.getCell(0).getStringCellValue());
-			}
 			
 			try {
 				if (row.getCell(1) != null) {
@@ -270,6 +335,12 @@ public class RequisitionService {
 					item.setOrderQuantity(Integer.parseInt(row.getCell(1).getStringCellValue()));
 				}
 			}
+			
+			if (row.getCell(0) != null) {
+				item.setItemDescription(row.getCell(0).getStringCellValue());
+			}
+			
+			
 
 			try {
 				if (row.getCell(2) != null) {
@@ -302,7 +373,7 @@ public class RequisitionService {
 	public Requisition updateRequisition(ObjectNode obj) throws JSONException {
 		logger.info("Update requisition");
 
-		Optional<Requisition> orq = requisitionRepository.findById(Long.parseLong(obj.get("requisitionId").asText()));
+		Optional<Requisition> orq = requisitionRepository.findById(Long.parseLong(obj.get("id").asText()));
 		if (!orq.isPresent()) {
 			logger.error("Requisition could not be updated. Requisition not found");
 			return null;
@@ -429,7 +500,7 @@ public class RequisitionService {
 		
 		if (!org.apache.commons.lang3.StringUtils.isBlank(requestObj.get("departmentId"))) {
 			Department department = departmentService.getDepartment(Long.parseLong(requestObj.get("departmentId")));
-			if (department == null) {
+			if (department != null) {
 				requisition.setDepartment(department);
 			}
 			isFilter = true;
@@ -437,7 +508,7 @@ public class RequisitionService {
 
 		if (!org.apache.commons.lang3.StringUtils.isBlank(requestObj.get("currencyId"))) {
 			Currency currency = currencyService.getCurrency(Long.parseLong(requestObj.get("currencyId")));
-			if (currency == null) {
+			if (currency != null) {
 				requisition.setCurrency(currency);
 			}
 			isFilter = true;
