@@ -105,6 +105,10 @@ public class Requisition implements Serializable {
     @JsonProperty
     private List<Document> documentList;
     
+    @Transient
+    @JsonProperty
+    private List<RequisitionLineItem> lineItemList;
+    
     public Long getId() {
         return id;
     }
@@ -404,5 +408,13 @@ public class Requisition implements Serializable {
 
 	public void setDocumentList(List<Document> documentList) {
 		this.documentList = documentList;
+	}
+
+	public List<RequisitionLineItem> getLineItemList() {
+		return lineItemList;
+	}
+
+	public void setLineItemList(List<RequisitionLineItem> lineItemList) {
+		this.lineItemList = lineItemList;
 	}
 }

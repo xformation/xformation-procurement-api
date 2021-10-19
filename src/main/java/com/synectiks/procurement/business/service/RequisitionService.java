@@ -106,7 +106,8 @@ public class RequisitionService {
 		Optional<Requisition> ovn = requisitionRepository.findById(id);
 		if (ovn.isPresent()) {
 			logger.info("Requisition: " + ovn.get().toString());
-			return ovn.get();
+			Requisition req = ovn.get();
+			return req;
 		}
 		logger.warn("Requisition not found");
 		return null;
@@ -646,6 +647,11 @@ public class RequisitionService {
 			searchDoc.put("identifier", Constants.IDENTIFIER_REQUISITION_EXTRA_BUDGETORY_FILE);
 			List<Document> docList = documentService.searchDocument(searchDoc);
 			req.setDocumentList(docList);
+			
+			Map<String, String> searchLineItem = new HashMap<>();
+			searchLineItem.put("requisitionId", String.valueOf(req.getId()));
+			List<RequisitionLineItem> lineItemList = requisitionLineItemService.searchRequisitionLineItem(searchLineItem);
+			req.setLineItemList(lineItemList);
 		}
 
 		logger.info("Requisition search completed. Total records: " + list.size());

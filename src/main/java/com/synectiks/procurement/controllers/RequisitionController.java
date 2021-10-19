@@ -2,6 +2,7 @@ package com.synectiks.procurement.controllers;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -179,8 +180,14 @@ public class RequisitionController {
 	public ResponseEntity<Status> getRequisition(@PathVariable Long id) {
 		logger.info("Getting requisition by id: " + id);
 		Status st = new Status();
+		Requisition requisition = null;
 		try {
-			Requisition requisition = requisitionService.getRequisition(id);
+			Map<String, String> reqObj = new HashMap<>();
+			reqObj.put("id", String.valueOf(id));
+			List<Requisition> reqList = requisitionService.searchRequisition(reqObj);
+			if(reqList.size() > 0) {
+				requisition = reqList.get(0);
+			}
 			if (requisition == null) {
 				logger.warn("Requisition not found.");
 				st.setCode(HttpStatus.EXPECTATION_FAILED.value());
