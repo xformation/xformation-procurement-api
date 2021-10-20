@@ -172,9 +172,9 @@ public class RequisitionService {
 		
 //		}
 
-		if (json.get("totalPrice") != null) {
-			requisition.setTotalPrice(json.get("totalPrice").asInt());
-		}
+//		if (json.get("totalPrice") != null) {
+//			requisition.setTotalPrice(json.get("totalPrice").asInt());
+//		}
 
 		if (json.get("notes") != null) {
 			requisition.setNotes(json.get("notes").asText());
@@ -219,16 +219,23 @@ public class RequisitionService {
 		requisition.setCreatedOn(now);
 		requisition.setUpdatedOn(now);
 
+		List<RequisitionLineItem> liteItemList = getLineItemFromFile(requisitionLineItemFile);
+		List<RequisitionLineItem> liteItemList2 = getLineItemFromJson(obj);
+		liteItemList.addAll(liteItemList2);
+		
+		int totalAmt = 0;
+		for(RequisitionLineItem rqLnItm: liteItemList) {
+			int amt = rqLnItm.getOrderQuantity() * rqLnItm.getRatePerItem();
+			totalAmt = totalAmt + amt;
+		}
+		requisition.setTotalPrice(totalAmt);
+		
 		requisition = requisitionRepository.save(requisition);
 		logger.info("Requisition added successfully");
 		
 		saveExtraBudgetoryFile(extraBudgetoryFile, requisition, now);
 		saveRequisitionActivity(requisition);
 		
-		List<RequisitionLineItem> liteItemList = getLineItemFromFile(requisitionLineItemFile);
-		List<RequisitionLineItem> liteItemList2 = getLineItemFromJson(obj);
-		liteItemList.addAll(liteItemList2);
-
 		saveRequisitionLineItem(requisition, liteItemList);
 		saveRequisitionLineItemFile( requisitionLineItemFile, now);
 		logger.info("Requisition added successfully");
@@ -240,8 +247,10 @@ public class RequisitionService {
 		for(RequisitionLineItem reqLineItem: liteItemList) {
 			logger.debug("Requisition line item: " + reqLineItem.toString());
 			reqLineItem.setRequisition(requisition);
-			reqLineItem.setCreatedBy(requisition.getCreatedBy());
-			reqLineItem.setCreatedOn(requisition.getCreatedOn());
+			if(reqLineItem.getId() == null) {
+				reqLineItem.setCreatedBy(requisition.getCreatedBy());
+				reqLineItem.setCreatedOn(requisition.getCreatedOn());
+			}
 			reqLineItem.setUpdatedBy(requisition.getUpdatedBy());
 			reqLineItem.setUpdatedOn(requisition.getUpdatedOn());
 			reqLineItem.setStatus(requisition.getStatus());
@@ -260,7 +269,22 @@ public class RequisitionService {
 				JSONObject json = reqLineItemArray.getJSONObject(j);
 				RequisitionLineItem reqLineItem = new RequisitionLineItem(); 
 				
-				if (json.get("orderQuantity") != null) {
+				if (!json.isNull("id")) {
+					try {
+						String q = (String)json.get("id");
+						reqLineItem = this.requisitionLineItemService.getRequisitionLineItem(Long.parseLong(q));
+					}catch(Exception e) {
+						try {
+							Integer q = (Integer)json.get("id");
+							reqLineItem = this.requisitionLineItemService.getRequisitionLineItem(q.longValue());
+						}catch(Exception ee) {
+							logger.error("Cannot read line item id. Exception ", e);
+							throw ee;
+						}
+					}
+				}
+				
+				if (!json.isNull("orderQuantity")) {
 					try {
 						String q = (String)json.get("orderQuantity");
 						reqLineItem.setOrderQuantity(Integer.parseInt(q));
@@ -275,10 +299,10 @@ public class RequisitionService {
 					}
 				}
 					
-				if (json.get("itemDescription") != null) {
+				if (!json.isNull("itemDescription")) {
 					reqLineItem.setItemDescription((String)json.get("itemDescription"));
 				}
-				if (json.get("ratePerItem") != null) {
+				if (!json.isNull("ratePerItem")) {
 					try {
 						String q = (String)json.get("ratePerItem");
 						reqLineItem.setRatePerItem(Integer.parseInt(q));
@@ -293,19 +317,9 @@ public class RequisitionService {
 					}				
 				}
 				
-				if (json.get("price") != null) {
-					try {
-						String q = (String)json.get("price");
-						reqLineItem.setPrice(Integer.parseInt(q));
-					}catch(Exception e) {
-						try {
-							Integer q = (Integer)json.get("price");
-							reqLineItem.setPrice(q);
-						}catch(Exception ee) {
-							logger.error("Cannot read per item rate. Exception ", e);
-							throw ee;
-						}
-					}	
+				if(reqLineItem.getOrderQuantity() != null && reqLineItem.getRatePerItem() != null) {
+					int amt = reqLineItem.getOrderQuantity() * reqLineItem.getRatePerItem();
+					reqLineItem.setPrice(amt);
 				}
 				
 				liteItemList.add(reqLineItem);
@@ -352,15 +366,20 @@ public class RequisitionService {
 				}
 			}
 			
-			try {
-				if (row.getCell(3) != null) {
-					item.setPrice((int) row.getCell(3).getNumericCellValue());
-				} 
-			}catch(Exception e) {
-				if (row.getCell(3) != null) {
-					item.setPrice(Integer.parseInt(row.getCell(3).getStringCellValue()));
-				}
+			if(item.getOrderQuantity() != null && item.getRatePerItem() != null) {
+				int amt = item.getOrderQuantity() * item.getRatePerItem();
+				item.setPrice(amt);
 			}
+			
+//			try {
+//				if (row.getCell(3) != null) {
+//					item.setPrice((int) row.getCell(3).getNumericCellValue());
+//				} 
+//			}catch(Exception e) {
+//				if (row.getCell(3) != null) {
+//					item.setPrice(Integer.parseInt(row.getCell(3).getStringCellValue()));
+//				}
+//			}
 			
 			lineItemList.add(item);
 
@@ -431,9 +450,7 @@ public class RequisitionService {
 //			}
 //		}
 
-		if (json.get("totalPrice") != null) {
-			requisition.setTotalPrice(json.get("totalPrice").asInt());
-		}
+		
 
 		
 		if (json.get("status") != null) {
@@ -455,15 +472,23 @@ public class RequisitionService {
 		Instant now = Instant.now();
 		requisition.setUpdatedOn(now);
 		
+		List<RequisitionLineItem> liteItemList = getLineItemFromFile(requisitionLineItemFile);
+		List<RequisitionLineItem> liteItemList2 = getLineItemFromJson(obj);
+		liteItemList.addAll(liteItemList2);
+
+		int totalAmt = 0;
+		for(RequisitionLineItem rqLnItm: liteItemList) {
+			int amt = rqLnItm.getOrderQuantity() * rqLnItm.getRatePerItem();
+			totalAmt = totalAmt + amt;
+		}
+		
+		requisition.setTotalPrice(totalAmt);
+		
 		requisition = requisitionRepository.save(requisition);
 		logger.info("Requisition updated successfully");
 
 		saveExtraBudgetoryFile(extraBudgetoryFile, requisition, now);
 		saveRequisitionActivity(requisition);
-
-		List<RequisitionLineItem> liteItemList = getLineItemFromFile(requisitionLineItemFile);
-		List<RequisitionLineItem> liteItemList2 = getLineItemFromJson(obj);
-		liteItemList.addAll(liteItemList2);
 
 		saveRequisitionLineItem(requisition, liteItemList);
 		saveRequisitionLineItemFile( requisitionLineItemFile, now);
@@ -471,10 +496,6 @@ public class RequisitionService {
 		return requisition;
 	}
 
-//	private List<RequisitionLineItem> getLineItemFromJson(ObjectNode obj) throws Exception {
-//		return getLineItemFromJson(obj.toPrettyString());
-//	}
-	
 	private RequisitionActivity saveRequisitionActivity(Requisition requisition) {
 		RequisitionActivity requisitionActivity = null;
 		if (requisition != null) {
