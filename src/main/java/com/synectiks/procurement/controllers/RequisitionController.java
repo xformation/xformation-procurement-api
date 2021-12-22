@@ -45,8 +45,8 @@ public class RequisitionController {
 
 	@RequestMapping(value = "/addRequisition", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<Status> addRequisition(
-			@RequestParam(name = "requisitionFile", required = false) MultipartFile requisitionFile,
-			@RequestParam(name = "requisitionLineItemFile", required = false) MultipartFile requisitionLineItemFile,
+			@RequestParam(name = "requisitionFile",required = false) MultipartFile[] requisitionFile,
+			@RequestParam(name = "requisitionLineItemFile", required = false) MultipartFile[] requisitionLineItemFile,
 			@RequestParam("obj") String obj) throws IOException {
 		logger.info("Request to add a requsition");
 		Status st = new Status();
@@ -75,8 +75,8 @@ public class RequisitionController {
 
 	@RequestMapping(value = "/updateRequisition", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<Status> updateRequisition(
-			@RequestParam(name = "requisitionFile", required = false) MultipartFile requisitionFile,
-			@RequestParam(name = "requisitionLineItemFile", required = false) MultipartFile requisitionLineItemFile,
+			@RequestParam(name = "requisitionFile", required = false) MultipartFile[] requisitionFile,
+			@RequestParam(name = "requisitionLineItemFile", required = false) MultipartFile[] requisitionLineItemFile,
 			@RequestParam("obj") String obj)
 			throws JSONException, URISyntaxException {
 		logger.info("Request to update a requsition");
