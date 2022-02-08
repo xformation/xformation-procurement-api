@@ -1,6 +1,5 @@
 package com.synectiks.procurement.business.service;
 
-import java.net.URISyntaxException;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -14,7 +13,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.configurationprocessor.json.JSONException;
 //import org.springframework.boot.configurationprocessor.json.JSONObject;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Sort;
@@ -62,7 +60,7 @@ public class InvoiceService {
 //	private RequisitionRepository requisitionRepository;
 
 	@Transactional
-	public Invoice addInvoice(ObjectNode obj) throws JSONException {
+	public Invoice addInvoice(ObjectNode obj) {
 		Invoice invoice = new Invoice();
 
 		Optional<Document> odc = documentRepository.findById(Long.parseLong(obj.get("documentId").asText()));
@@ -139,7 +137,7 @@ public class InvoiceService {
 	}
 
 	@Transactional
-	public Invoice updateinvoice(ObjectNode obj) throws JSONException, URISyntaxException {
+	public Invoice updateinvoice(ObjectNode obj){
 		Optional<Invoice> ur = invoiceRepository.findById(Long.parseLong(obj.get("id").asText()));
 		if (!ur.isPresent()) {
 			logger.error("Invoice not found");

@@ -1,6 +1,5 @@
 package com.synectiks.procurement.business.service;
 
-import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -8,7 +7,6 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.configurationprocessor.json.JSONException;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
@@ -36,7 +34,7 @@ public class CurrencyService {
 		return null;
 	}
 
-	public Currency addCurrency(ObjectNode obj) throws JSONException {
+	public Currency addCurrency(ObjectNode obj){
 		Currency currency = new Currency();
 
 		if (obj.get("code") != null) {
@@ -57,7 +55,7 @@ public class CurrencyService {
 		return currency;
 	}
 
-	public Currency updateCurrency(ObjectNode obj) throws JSONException, URISyntaxException {
+	public Currency updateCurrency(ObjectNode obj){
 		Optional<Currency> ur = currencyRepository.findById(Long.parseLong(obj.get("id").asText()));
 		if (!ur.isPresent()) {
 			logger.warn("Currency id not found");

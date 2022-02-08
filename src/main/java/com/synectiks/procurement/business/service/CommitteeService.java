@@ -1,6 +1,5 @@
 package com.synectiks.procurement.business.service;
 
-import java.net.URISyntaxException;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
@@ -12,7 +11,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.configurationprocessor.json.JSONException;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
@@ -47,7 +45,7 @@ public class CommitteeService {
 	}
 
 	@Transactional
-	public Committee addCommittee(ObjectNode obj) throws Exception {
+	public Committee addCommittee(ObjectNode obj)  {
 		Committee committee = new Committee();
 
 		if (obj.get("name") != null) {
@@ -85,14 +83,13 @@ public class CommitteeService {
 			committeeActivity.setCommitteeId(committee.getId());
 			committeeActivity = committeeActivityRepository.save(committeeActivity);
 			logger.info("Committee activity added successfully");
-		}
+		} 
 		logger.info("Committee added successfully" + committee.toString());
 		return committee;
-
 	}
 
 	@Transactional
-	public Committee updateCommittee(ObjectNode obj) throws JSONException, URISyntaxException {
+	public Committee updateCommittee(ObjectNode obj)  {
 		Optional<Committee> ur = committeeRepository.findById(Long.parseLong(obj.get("id").asText()));
 		if (!ur.isPresent()) {
 			logger.info("Committee id not found");
@@ -110,6 +107,9 @@ public class CommitteeService {
 
 		if (obj.get("notes") != null) {
 			committee.setNotes(obj.get("notes").asText());
+		}
+		if (obj.get("status") != null) {
+			committee.setStatus(obj.get("status").asText());
 		}
 
 		if (obj.get("user") != null) {

@@ -1,7 +1,7 @@
 package com.synectiks.procurement.controllers;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
+import java.text.ParseException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,10 +24,15 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.synectiks.procurement.business.service.RequisitionService;
+import com.synectiks.procurement.config.Constants;
 import com.synectiks.procurement.domain.Requisition;
-import com.synectiks.procurement.domain.Status;
+
+import io.github.jhipster.web.util.HeaderUtil;
 
 @RestController
 @RequestMapping("/api")
@@ -37,116 +42,79 @@ public class RequisitionController {
 	@Autowired
 	private RequisitionService requisitionService;
 
-//	@Autowired
-//	private RequisitionRepository requisitionRepository;
-
-//	@Autowired
-//	private RulesRepository rulesRepository;
-
-	@RequestMapping(value = "/addRequisition", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<Status> addRequisition(
-			@RequestParam(name = "requisitionFile",required = false) MultipartFile[] requisitionFile,
+	@RequestMapping(value = "/requisitions", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<Requisition> addRequisition   (
+			@RequestParam(name = "requisitionFile", required = false) MultipartFile[] requisitionFile,
 			@RequestParam(name = "requisitionLineItemFile", required = false) MultipartFile[] requisitionLineItemFile,
-			@RequestParam("obj") String obj) throws IOException {
+			@RequestParam("obj") String obj) throws JsonMappingException, JsonProcessingException, JSONException, IOException {
 		logger.info("Request to add a requsition");
-		Status st = new Status();
+		Requisition requisition = null;
 		try {
-			Requisition requisition = requisitionService.addRequisition(requisitionFile,requisitionLineItemFile, obj);
-			if (requisition == null) {
-				logger.error("Add requisition failed");
-				st.setCode(HttpStatus.EXPECTATION_FAILED.value());
-				st.setType("ERROR");
-				st.setMessage("Add requisition failed");
-				return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(st);
-			}
-			st.setCode(HttpStatus.OK.value());
-			st.setType("SUCCESS");
-			st.setMessage("Add requisition successful");
-			st.setObject(requisition);
-			return ResponseEntity.status(HttpStatus.OK).body(st);
-		} catch (Exception e) {
-			logger.error("Add requisition failed. Exception: ", e);
-			st.setCode(HttpStatus.EXPECTATION_FAILED.value());
-			st.setType("ERROR");
-			st.setMessage("Add requisition failed");
-			return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(st);
+			requisition = requisitionService.addRequisition(requisitionFile,requisitionLineItemFile, obj);
+			return ResponseEntity.status(HttpStatus.OK).body(requisition);
+		} catch (JsonMappingException e) {
+			logger.error("Add requisition failed. JsonMappingException: ", e);
+			throw e;
+		} catch (JsonProcessingException e) {
+			logger.error("Add requisition failed. JsonProcessingException: ", e);
+			throw e;
+		} catch (JSONException e) {
+			logger.error("Add requisition failed. JSONException: ", e);
+			throw e;
+		} catch (IOException e) {
+			logger.error("Add requisition failed. IOException: ", e);
+			throw e;
 		}
 	}
 
-	@RequestMapping(value = "/updateRequisition", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<Status> updateRequisition(
+	@RequestMapping(value = "/requisitions", method = RequestMethod.PUT, produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<Requisition> updateRequisition(
 			@RequestParam(name = "requisitionFile", required = false) MultipartFile[] requisitionFile,
 			@RequestParam(name = "requisitionLineItemFile", required = false) MultipartFile[] requisitionLineItemFile,
 			@RequestParam("obj") String obj)
-			throws JSONException, URISyntaxException {
+			throws JsonMappingException, JsonProcessingException, JSONException, IOException {
 		logger.info("Request to update a requsition");
-		Status st = new Status();
+		Requisition requisition = null;
 		try {
-			Requisition requisition = requisitionService.updateRequisition(requisitionFile, requisitionLineItemFile, obj);
-			if (requisition == null) {
-				logger.error("Update requisition failed");
-				st.setCode(HttpStatus.EXPECTATION_FAILED.value());
-				st.setType("ERROR");
-				st.setMessage("Update requisition failed");
-				return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(st);
-			}
-			st.setCode(HttpStatus.OK.value());
-			st.setType("SUCCESS");
-			st.setMessage("Update requisition successful");
-			st.setObject(requisition);
-			return ResponseEntity.status(HttpStatus.OK).body(st);
-		} catch (Exception e) {
-			logger.error("Update requisition failed. Exception: ", e);
-			st.setCode(HttpStatus.EXPECTATION_FAILED.value());
-			st.setType("ERROR");
-			st.setMessage("Update requisition failed");
-			return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(st);
+			requisition = requisitionService.updateRequisition(requisitionFile,requisitionLineItemFile, obj);
+			return ResponseEntity.status(HttpStatus.OK).body(requisition);
+		} catch (JsonMappingException e) {
+			logger.error("Add requisition failed. JsonMappingException: ", e);
+			throw e;
+		} catch (JsonProcessingException e) {
+			logger.error("Add requisition failed. JsonProcessingException: ", e);
+			throw e;
+		} catch (JSONException e) {
+			logger.error("Add requisition failed. JSONException: ", e);
+			throw e;
+		} catch (IOException e) {
+			logger.error("Add requisition failed. IOException: ", e);
+			throw e;
 		}
 	}
 
-	@GetMapping("/searchRequisition")
-	public ResponseEntity<Status> searchRequisition(@RequestParam Map<String, String> requestObj) {
+	@GetMapping("/requisitions")
+	public ResponseEntity<List<Requisition>> searchRequisition(@RequestParam Map<String, String> requestObj) throws ParseException {
 		logger.info("Request to search requsitions");
-		Status st = new Status();
 		try {
 			List<Requisition> list = requisitionService.searchRequisition(requestObj);
-			if (list == null) {
-				logger.error("Search requisition failed");
-				st.setCode(HttpStatus.EXPECTATION_FAILED.value());
-				st.setType("ERROR");
-				st.setMessage("Search requisition failed");
-				return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(st);
-			}
-			st.setCode(HttpStatus.OK.value());
-			st.setType("SUCCESS");
-			st.setMessage("Search requisition successful");
-			st.setObject(list);
-			return ResponseEntity.status(HttpStatus.OK).body(st);
-		} catch (Exception e) {
-			logger.error("Search requisition failed. Exception: ", e);
-			st.setCode(HttpStatus.EXPECTATION_FAILED.value());
-			st.setType("ERROR");
-			st.setMessage("Search requisition failed");
-			return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(st);
+			return ResponseEntity.status(HttpStatus.OK).body(list);
+		} catch (ParseException e) {
+			logger.error("Search requisition failed. ParseException: ", e);
+			throw e;
 		}
 
 	}
 
-	@DeleteMapping("/deleteRequisition/{id}")
-	public ResponseEntity<Status> deleteRequisition(@PathVariable Long id) {
-		Status st = new Status();
-		try {
-			requisitionService.deleteRequisition(id);
-			st.setCode(HttpStatus.OK.value());
-			st.setType("SUCCESS");
-			st.setMessage("Requisition deleted successfully");
-			return ResponseEntity.status(HttpStatus.OK).body(st);
-		} catch (Throwable th) {
-			st.setCode(HttpStatus.OK.value());
-			st.setType("ERROR");
-			st.setMessage("Delete Requisition failed");
-			return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(st);
-		}
+	@DeleteMapping("/requisitions/{id}")
+	public ResponseEntity<Void> deleteRequisition(@PathVariable Long id) throws ParseException, JsonMappingException, JsonProcessingException, JSONException, IOException {
+		ObjectMapper mapper = new ObjectMapper();
+		ObjectNode obj = mapper.createObjectNode();
+		obj.put("id", id);
+		obj.put("status", Constants.STATUS_DEACTIVE);
+			
+		requisitionService.updateRequisition(null,null, obj.toString());
+		return ResponseEntity.noContent().headers(HeaderUtil.createEntityDeletionAlert("requisition", false, "requisition", id.toString())).build();
 	}
 
 //	@GetMapping("/getAllRequisitions")
@@ -176,103 +144,45 @@ public class RequisitionController {
 //		}
 //	}
 
-	@GetMapping("/getRequisition/{id}")
-	public ResponseEntity<Status> getRequisition(@PathVariable Long id) {
+	@GetMapping("/requisitions/{id}")
+	public ResponseEntity<Requisition> getRequisitionById(@PathVariable Long id) throws ParseException{
 		logger.info("Getting requisition by id: " + id);
-		Status st = new Status();
 		Requisition requisition = null;
+		Map<String, String> reqObj = new HashMap<>();
 		try {
-			Map<String, String> reqObj = new HashMap<>();
 			reqObj.put("id", String.valueOf(id));
 			List<Requisition> reqList = requisitionService.searchRequisition(reqObj);
 			if(reqList.size() > 0) {
 				requisition = reqList.get(0);
 			}
-			if (requisition == null) {
-				logger.warn("Requisition not found.");
-				st.setCode(HttpStatus.EXPECTATION_FAILED.value());
-				st.setType("ERROR");
-				st.setMessage("Requisition found suses");
-				return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(st);
-			}
-			st.setCode(HttpStatus.OK.value());
-			st.setType("SUCCESS");
-			st.setMessage("Requisition found");
-			st.setObject(requisition);
-			return ResponseEntity.status(HttpStatus.OK).body(st);
-		} catch (Exception e) {
-			logger.error("Requisition not found. Exception: ", e);
-			st.setCode(HttpStatus.EXPECTATION_FAILED.value());
-			st.setType("ERROR");
-			st.setMessage("Requisition not found");
-			return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(st);
+			return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(requisition);
+		}
+		catch (ParseException e) {
+			logger.error("Search requisition failed. ParseException: ", e);
+			throw e;
 		}
 	}
 
-	@PostMapping("/sendRequisitionToVendor")
-	public ResponseEntity<Status> sendRequisitionToVendor(@RequestBody List<ObjectNode> list) {
+	@PostMapping("/requisitions/sendToVendor")
+	public ResponseEntity<Requisition> sendRequisitionToVendor(@RequestBody List<ObjectNode> list) {
 		logger.info("Assigning requisitions to vendors ");
-		Status st = new Status();
-		try {
+//		Requisition requisition = null;
 			requisitionService.sendRequisitionToVendor(list);
-			st.setCode(HttpStatus.OK.value());
-			st.setType("SUCCESS");
-			st.setMessage("Requisition to vendor found");
-			return ResponseEntity.status(HttpStatus.OK).body(st);
-		} catch (Exception e) {
-			logger.error("Requisition not found. Exception: ", e);
-			st.setCode(HttpStatus.EXPECTATION_FAILED.value());
-			st.setType("ERROR");
-			st.setMessage("Requisition not found");
-			return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(st);
-		}
+			return null;
+		
 	}
 
-//	@PostMapping("/updateRequisitionToVendor")
-//	public ResponseEntity<Status> updateRequisitionToVendor(@RequestBody List<ObjectNode> list) {
+//	@PostMapping("/requisitions/updateToVendor")
+//	public void updateRequisitionToVendor(@RequestBody List<ObjectNode> list) {
 //		logger.info("Assigning requisitions to vendors ");
-//		Status st = new Status();
-//		try {
-//			requisitionService.updateRequisitionToVendor(list);
-//			st.setCode(HttpStatus.OK.value());
-//			st.setType("SUCCESS");
-//			st.setMessage("Requisition to vendor  found");
-//			st.setObject("All the requisition to vendor  updated  successfully");
-//			return ResponseEntity.status(HttpStatus.OK).body(st);
-//		} catch (Exception e) {
-//			logger.error(" update of  failed");
-//			st.setCode(HttpStatus.EXPECTATION_FAILED.value());
-//			st.setType("ERROR");
-//			st.setMessage("Requisition to vendor update  failed");
-//			return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(st);
-//		}
+//		requisitionService.updateRequisitionToVendor(list);
 //	}
 
-	@PostMapping("/approveRequisition")
-	public ResponseEntity<Status> approveRequisition(@RequestBody ObjectNode obj)
-			throws JSONException {
+	@PostMapping("/requisitions/approve")
+	public ResponseEntity<Boolean> approveRequisition(@RequestBody ObjectNode obj) {
 		logger.info("Request to approve a requsition");
-		
-		Status st = new Status();
-		try {
 			boolean updateFlag = requisitionService.approveRequisition(obj);
-			if (updateFlag) {
-				st.setCode(HttpStatus.OK.value());
-				st.setType("SUCCESS");
-				st.setMessage("Requisition approved successfully");
-			} else {
-				st.setCode(HttpStatus.EXPECTATION_FAILED.value());
-				st.setType("ERROR");
-				st.setMessage("Requestion could not be approved");
-			}
-			return ResponseEntity.status(HttpStatus.OK).body(st);
-		} catch (Exception e) {
-			logger.error("Approve requisition failed");
-			st.setCode(HttpStatus.EXPECTATION_FAILED.value());
-			st.setType("ERROR");
-			st.setMessage("Approve Requisition failed");
-			return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(st);
-		}
-	}
+			return ResponseEntity.status(HttpStatus.OK).body(updateFlag);
+		} 
 
 }

@@ -5,14 +5,13 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.text.ParseException;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -38,6 +37,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.synectiks.procurement.config.Constants;
@@ -49,12 +50,12 @@ import com.synectiks.procurement.domain.Requisition;
 import com.synectiks.procurement.domain.RequisitionActivity;
 import com.synectiks.procurement.domain.RequisitionLineItem;
 import com.synectiks.procurement.domain.RequisitionLineItemActivity;
-import com.synectiks.procurement.domain.Roles;
 import com.synectiks.procurement.domain.Rules;
 import com.synectiks.procurement.domain.Vendor;
 import com.synectiks.procurement.domain.VendorRequisitionBucket;
 import com.synectiks.procurement.repository.DataFileRepository;
 import com.synectiks.procurement.repository.RequisitionActivityRepository;
+import com.synectiks.procurement.repository.RequisitionLineItemRepository;
 import com.synectiks.procurement.repository.RequisitionRepository;
 import com.synectiks.procurement.repository.VendorRequisitionBucketRepository;
 import com.synectiks.procurement.util.DateFormatUtil;
@@ -72,6 +73,9 @@ public class RequisitionService {
 	@Autowired
 	private RequisitionActivityService requisitionActivityService;
 
+//	@Autowired
+//	private RequisitionLineItemService requisitionLineItemService;
+	
 	@Autowired
 	private DepartmentService departmentService;
 
@@ -83,7 +87,7 @@ public class RequisitionService {
 
 	@Autowired
 	private VendorRequisitionBucketRepository vendorRequisitionBucketRepository;
-	
+
 	@Autowired
 	private DataFileRepository dataFileRepository;
 
@@ -95,12 +99,15 @@ public class RequisitionService {
 
 	@Autowired
 	private RulesService rulesService;
-	
+
 	@Autowired
 	private DocumentService documentService;
-	
+
 	@Autowired
 	private RequisitionLineItemActivityService requisitionLineItemActivityService;
+	
+	@Autowired
+	private RequisitionLineItemRepository requisitionLineItemRepository;
 
 	public Requisition getRequisition(Long id) {
 		logger.info("Getting requisition by id: " + id);
@@ -115,21 +122,22 @@ public class RequisitionService {
 	}
 
 	@Transactional
-	public Requisition addRequisition(MultipartFile[] requisitionFile, MultipartFile[] requisitionLineItemFile, String obj) throws Exception {
+	public Requisition addRequisition(MultipartFile[] requisitionFile, MultipartFile[] requisitionLineItemFile,
+			String obj) throws JsonMappingException, JsonProcessingException, JSONException, IOException {
 		logger.info("Adding requistion");
 		Requisition requisition = new Requisition();
 
 		ObjectMapper mapper = new ObjectMapper();
 		ObjectNode json = (ObjectNode) mapper.readTree(obj);
 
-		if(json.get("departmentId") != null) {
+		if (json.get("departmentId") != null) {
 			Department department = departmentService.getDepartment(Long.parseLong(json.get("departmentId").asText()));
 			if (department != null) {
 				requisition.setDepartment(department);
 			}
 		}
-		
-		if(json.get("currencyId") != null) {
+
+		if (json.get("currencyId") != null) {
 			Currency currency = currencyService.getCurrency(Long.parseLong(json.get("currencyId").asText()));
 			if (currency != null) {
 				requisition.setCurrency(currency);
@@ -142,11 +150,11 @@ public class RequisitionService {
 
 		requisition.setProgressStage(Constants.PROGRESS_STAGE_NEW);
 
-		if (json.get("financialYear") != null) { 
+		if (json.get("financialYear") != null) {
 			requisition.setFinancialYear(json.get("financialYear").asInt());
 		}
-		
-		Rules rule = rulesService.getRulesByName(Constants.RULE_REQUISITION_TYPE); 
+
+		Rules rule = rulesService.getRulesByName(Constants.RULE_REQUISITION_TYPE);
 ////		if (json.get("roleName").asText() != null) {
 ////			Roles role = rolesService.getRolesByName(json.get("roleName").asText());
 ////			rule = rulesService.getRulesByRoleAndRuleName(role, Constants.RULE_REQUISITION_TYPE);
@@ -154,7 +162,7 @@ public class RequisitionService {
 ////			logger.error("Requistion could not be added. User's role missing");
 ////			return null;
 ////		}
-     	  if(rule != null) {
+		if (rule != null) {
 			JSONObject ruleJson = new JSONObject(rule.getRule());
 			JSONObject nonStandardRule = ruleJson.getJSONObject(Constants.REQUISITION_TYPE_NON_STANDARD);
 			if (json.get("totalPrice") != null) {
@@ -167,10 +175,10 @@ public class RequisitionService {
 			} else {
 				requisition.setType(Constants.REQUISITION_TYPE_NON_STANDARD);
 			}
-		}else {
+		} else {
 			requisition.setType(Constants.REQUISITION_TYPE_NON_STANDARD);
 		}
-		
+
 //		}
 
 //		if (json.get("totalPrice") != null) {
@@ -180,18 +188,18 @@ public class RequisitionService {
 		if (json.get("notes") != null) {
 			requisition.setNotes(json.get("notes").asText());
 		}
-		
+
 		if (json.get("status") != null) {
 			requisition.setStatus(json.get("status").asText());
 		}
-		
+
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern(Constants.DEFAULT_DATE_FORMAT);
 		if (json.get("dueDate") != null) {
 			try {
 				LocalDate localDate = LocalDate.parse(json.get("dueDate").asText(), formatter);
 				requisition.setDueDate(localDate);
-			}catch(Exception e) {
-				logger.error("Cannot read due date. Exception: "+e.getMessage());
+			} catch (Exception e) {
+				logger.error("Cannot read due date. Exception: " + e.getMessage());
 				long millis = System.currentTimeMillis();
 				java.sql.Date date = new java.sql.Date(millis);
 
@@ -207,7 +215,7 @@ public class RequisitionService {
 			LocalDate localDate = datew.plusDays(Constants.DEFAULT_DUE_DAYS);
 			requisition.setDueDate(localDate);
 		}
-		
+
 		if (json.get("user") != null) {
 			requisition.setCreatedBy(json.get("user").asText());
 			requisition.setUpdatedBy(json.get("user").asText());
@@ -221,35 +229,158 @@ public class RequisitionService {
 		requisition.setUpdatedOn(now);
 
 		List<RequisitionLineItem> liteItemList = getLineItemFromFile(requisitionLineItemFile);
-		
+
 		List<RequisitionLineItem> liteItemList2 = getLineItemFromJson(obj);
 		liteItemList.addAll(liteItemList2);
-		
+
 		int totalAmt = 0;
-		for(RequisitionLineItem rqLnItm: liteItemList) {
+		for (RequisitionLineItem rqLnItm : liteItemList) {
 			int amt = rqLnItm.getOrderQuantity() * rqLnItm.getRatePerItem();
 			totalAmt = totalAmt + amt;
 		}
 		requisition.setTotalPrice(totalAmt);
-		
+
 		requisition = requisitionRepository.save(requisition);
 		logger.info("Requisition added successfully");
-		
+
 		saveExtraBudgetoryFile(requisitionFile, requisition, now);
 		saveRequisitionActivity(requisition);
-		
+
 		saveRequisitionLineItem(requisition, liteItemList);
-		saveRequisitionLineItemFile( requisitionLineItemFile, now);
+		saveRequisitionLineItemFile(requisitionLineItemFile, now);
 		logger.info("Requisition added successfully");
+		return requisition;
+	}
+
+	@Transactional
+	public Requisition updateRequisition(MultipartFile[] extraBudgetoryFile, MultipartFile[] requisitionLineItemFile,
+			String obj) throws JsonMappingException, JsonProcessingException, JSONException, IOException {
+		logger.info("Update requisition");
+
+		ObjectMapper mapper = new ObjectMapper();
+		ObjectNode json = (ObjectNode) mapper.readTree(obj);
+
+		Optional<Requisition> orq = requisitionRepository.findById(Long.parseLong(json.get("id").asText()));
+		if (!orq.isPresent()) {
+			logger.error("Requisition could not be updated. Requisition not found");
+			return null;
+		}
+
+		Requisition requisition = orq.get();
+
+		if (json.get("financialYear") != null) {
+			requisition.setFinancialYear(json.get("financialYear").asInt());
+		}
+
+		if (json.get("departmentId") != null) {
+			Department department = departmentService.getDepartment(Long.parseLong(json.get("departmentId").asText()));
+			if (department != null) {
+				requisition.setDepartment(department);
+			}
+		}
+
+		if (json.get("currencyId") != null) {
+			Currency currency = currencyService.getCurrency(Long.parseLong(json.get("currencyId").asText()));
+			if (currency != null) {
+				requisition.setCurrency(currency);
+			}
+		}
+
+		if (json.get("notes") != null) {
+			requisition.setNotes(json.get("notes").asText());
+		}
+
+		if (json.get("progressStage") != null) {
+			requisition.setProgressStage(json.get("progressStage").asText());
+		}
+
+//		Rules rule = null; 
+//		if (obj.get("roleName").asText() != null) {
+//			Roles role = rolesService.getRolesByName(obj.get("roleName").asText());
+//			rule = rulesService.getRulesByRoleAndRuleName(role, Constants.RULE_REQUISITION_TYPE);
+//		} else {
+//			logger.error("Requistion could not be added. User's role missing");
+//			return null;
+//		}
+
+//		JSONObject jsonObject = new JSONObject(rule.getRule());
+//		JSONObject nonStandardRule = jsonObject.getJSONObject(Constants.REQUISITION_TYPE_NON_STANDARD);
+//		if (obj.get("totalPrice") != null) {
+//			int price = obj.get("totalPrice").asInt();
+//			if (price >= nonStandardRule.getInt("min") && price <= nonStandardRule.getInt("max")) {
+//				requisition.setType(Constants.REQUISITION_TYPE_NON_STANDARD);
+//			} else {
+//				requisition.setType(Constants.REQUISITION_TYPE_STANDARD);
+//			}
+//		}
+
+		if (json.get("status") != null) {
+			requisition.setStatus(json.get("status").asText());
+		}
+
+//		DateTimeFormatter formatter = DateTimeFormatter.ofPattern(Constants.DEFAULT_DATE_FORMAT);
+//		if (obj.get("dueDate") != null) {
+//			LocalDate localDate = LocalDate.parse(obj.get("dueDate").asText(), formatter);
+//			requisition.setDueDate(localDate);
+//		}
+
+		if (json.get("user") != null) {
+			requisition.setUpdatedBy(json.get("user").asText());
+		} else {
+			requisition.setUpdatedBy(Constants.SYSTEM_ACCOUNT);
+		}
+
+		Instant now = Instant.now();
+		requisition.setUpdatedOn(now);
+
+		if (requisitionLineItemFile != null) {
+
+			List<RequisitionLineItem> liteItemList = getLineItemFromFile(requisitionLineItemFile);
+			List<RequisitionLineItem> liteItemList2 = getLineItemFromJson(obj);
+			liteItemList.addAll(liteItemList2);
+			int totalAmt = 0;
+			for (RequisitionLineItem rqLnItm : liteItemList) {
+				int amt = rqLnItm.getOrderQuantity() * rqLnItm.getRatePerItem();
+				totalAmt = totalAmt + amt;
+			}
+			requisition.setTotalPrice(totalAmt);
+			saveRequisitionLineItem(requisition, liteItemList);
+			saveRequisitionLineItemFile(requisitionLineItemFile, now);
+		}
+
+		if (extraBudgetoryFile != null) {
+			saveExtraBudgetoryFile(extraBudgetoryFile, requisition, now);
+		}
+
+		if (json.get("status").asText().equals(Constants.STATUS_DEACTIVE)) {
+
+			HashMap<String, String> mp = new HashMap<String, String>();
+			mp.put("requisitionId", json.get("id").asText());
+			List<RequisitionLineItem> list = requisitionLineItemService
+					.searchRequisitionLineItem(mp);
+
+			for (RequisitionLineItem requisitionLineItem : list) {
+				requisitionLineItem.setStatus(Constants.STATUS_DEACTIVE);
+				
+				requisitionLineItem = requisitionLineItemRepository.save(requisitionLineItem);
+				
+				requisitionLineItemService.addRequisitionLineItem(requisitionLineItem);
+				
+			}
+		}
+		requisition = requisitionRepository.save(requisition);
+		logger.info("Requisition updated successfully");
+		saveRequisitionActivity(requisition);
+
 		return requisition;
 	}
 
 	private void saveRequisitionLineItem(Requisition requisition, List<RequisitionLineItem> liteItemList) {
 		logger.info("Saving requisition line items");
-		for(RequisitionLineItem reqLineItem: liteItemList) {
+		for (RequisitionLineItem reqLineItem : liteItemList) {
 			logger.debug("Requisition line item: " + reqLineItem.toString());
 			reqLineItem.setRequisition(requisition);
-			if(reqLineItem.getId() == null) {
+			if (reqLineItem.getId() == null) {
 				reqLineItem.setCreatedBy(requisition.getCreatedBy());
 				reqLineItem.setCreatedOn(requisition.getCreatedOn());
 			}
@@ -262,117 +393,117 @@ public class RequisitionService {
 		logger.info("Requisition line items saved successfully");
 	}
 
-	private List<RequisitionLineItem> getLineItemFromJson(String obj) throws Exception {
+	private List<RequisitionLineItem> getLineItemFromJson(String obj) throws JSONException {
 		List<RequisitionLineItem> liteItemList = new ArrayList<>();
 		JSONObject jsonObj = new JSONObject(obj);
 		JSONArray reqLineItemArray = jsonObj.getJSONArray("requisitionLineItemLists");
 		if (reqLineItemArray != null && reqLineItemArray.length() > 0) {
 			for (int j = 0; j < reqLineItemArray.length(); j++) {
 				JSONObject json = reqLineItemArray.getJSONObject(j);
-				RequisitionLineItem reqLineItem = new RequisitionLineItem(); 
-				
+				RequisitionLineItem reqLineItem = new RequisitionLineItem();
+
 				if (!json.isNull("id")) {
 					try {
-						String q = (String)json.get("id");
+						String q = (String) json.get("id");
 						reqLineItem = this.requisitionLineItemService.getRequisitionLineItem(Long.parseLong(q));
-					}catch(Exception e) {
+					} catch (Exception e) {
 						try {
-							Integer q = (Integer)json.get("id");
+							Integer q = (Integer) json.get("id");
 							reqLineItem = this.requisitionLineItemService.getRequisitionLineItem(q.longValue());
-						}catch(Exception ee) {
+						} catch (Exception ee) {
 							logger.error("Cannot read line item id. Exception ", e);
 							throw ee;
 						}
 					}
 				}
-				
+
 				if (!json.isNull("orderQuantity")) {
 					try {
-						String q = (String)json.get("orderQuantity");
+						String q = (String) json.get("orderQuantity");
 						reqLineItem.setOrderQuantity(Integer.parseInt(q));
-					}catch(Exception e) {
+					} catch (Exception e) {
 						try {
-							Integer q = (Integer)json.get("orderQuantity");
+							Integer q = (Integer) json.get("orderQuantity");
 							reqLineItem.setOrderQuantity(q);
-						}catch(Exception ee) {
+						} catch (Exception ee) {
 							logger.error("Cannot read quantity. Exception ", e);
 							throw ee;
 						}
 					}
 				}
-					
+
 				if (!json.isNull("itemDescription")) {
-					reqLineItem.setItemDescription((String)json.get("itemDescription"));
+					reqLineItem.setItemDescription((String) json.get("itemDescription"));
 				}
 				if (!json.isNull("ratePerItem")) {
 					try {
-						String q = (String)json.get("ratePerItem");
+						String q = (String) json.get("ratePerItem");
 						reqLineItem.setRatePerItem(Integer.parseInt(q));
-					}catch(Exception e) {
+					} catch (Exception e) {
 						try {
-							Integer q = (Integer)json.get("ratePerItem");
+							Integer q = (Integer) json.get("ratePerItem");
 							reqLineItem.setRatePerItem(q);
-						}catch(Exception ee) {
+						} catch (Exception ee) {
 							logger.error("Cannot read per item rate. Exception ", e);
 							throw ee;
 						}
-					}				
+					}
 				}
-				
-				if(reqLineItem.getOrderQuantity() != null && reqLineItem.getRatePerItem() != null) {
+
+				if (reqLineItem.getOrderQuantity() != null && reqLineItem.getRatePerItem() != null) {
 					int amt = reqLineItem.getOrderQuantity() * reqLineItem.getRatePerItem();
 					reqLineItem.setPrice(amt);
 				}
-				
+
 				liteItemList.add(reqLineItem);
 			}
 		}
 		return liteItemList;
 	}
-	
-	public List<RequisitionLineItem> getLineItemFromFile(MultipartFile[] requisitionLineItemFile) throws IOException{
+
+	public List<RequisitionLineItem> getLineItemFromFile(MultipartFile[] requisitionLineItemFile) throws IOException {
 		List<RequisitionLineItem> lineItemList = new ArrayList<>();
-		if(requisitionLineItemFile == null) {
+		if (requisitionLineItemFile == null) {
 			return lineItemList;
 		}
-		 for(MultipartFile file: requisitionLineItemFile) {
-		XSSFWorkbook workbook = new XSSFWorkbook(file.getInputStream());
-		XSSFSheet worksheet = workbook.getSheetAt(0);
-		
-		//skiping first row, that is row index 0. Starting loop with 1
-		for (int i = 1; i <worksheet.getPhysicalNumberOfRows(); i++) {
-			XSSFRow row = worksheet.getRow(i);
-			RequisitionLineItem item = new RequisitionLineItem();
-			
-			if (row.getCell(0) != null) {
-				item.setItemDescription(row.getCell(0).getStringCellValue());
-			}
-			
-			try {
-				if (row.getCell(1) != null) {
-					item.setOrderQuantity((int) row.getCell(1).getNumericCellValue());
-				} 
-			}catch(Exception e) {
-				if (row.getCell(1) != null) {
-					item.setOrderQuantity(Integer.parseInt(row.getCell(1).getStringCellValue()));
-				}
-			}
+		for (MultipartFile file : requisitionLineItemFile) {
+			XSSFWorkbook workbook = new XSSFWorkbook(file.getInputStream());
+			XSSFSheet worksheet = workbook.getSheetAt(0);
 
-			try {
-				if (row.getCell(2) != null) {
-					item.setRatePerItem((int) row.getCell(2).getNumericCellValue());
-				} 
-			}catch(Exception e) {
-				if (row.getCell(2) != null) {
-					item.setRatePerItem(Integer.parseInt(row.getCell(2).getStringCellValue()));
+			// skiping first row, that is row index 0. Starting loop with 1
+			for (int i = 1; i < worksheet.getPhysicalNumberOfRows(); i++) {
+				XSSFRow row = worksheet.getRow(i);
+				RequisitionLineItem item = new RequisitionLineItem();
+
+				if (row.getCell(0) != null) {
+					item.setItemDescription(row.getCell(0).getStringCellValue());
 				}
-			}
-			
-			if(item.getOrderQuantity() != null && item.getRatePerItem() != null) {
-				int amt = item.getOrderQuantity() * item.getRatePerItem();
-				item.setPrice(amt);
-			}
-			
+
+				try {
+					if (row.getCell(1) != null) {
+						item.setOrderQuantity((int) row.getCell(1).getNumericCellValue());
+					}
+				} catch (Exception e) {
+					if (row.getCell(1) != null) {
+						item.setOrderQuantity(Integer.parseInt(row.getCell(1).getStringCellValue()));
+					}
+				}
+
+				try {
+					if (row.getCell(2) != null) {
+						item.setRatePerItem((int) row.getCell(2).getNumericCellValue());
+					}
+				} catch (Exception e) {
+					if (row.getCell(2) != null) {
+						item.setRatePerItem(Integer.parseInt(row.getCell(2).getStringCellValue()));
+					}
+				}
+
+				if (item.getOrderQuantity() != null && item.getRatePerItem() != null) {
+					int amt = item.getOrderQuantity() * item.getRatePerItem();
+					item.setPrice(amt);
+				}
+
 //			try {
 //				if (row.getCell(3) != null) {
 //					item.setPrice((int) row.getCell(3).getNumericCellValue());
@@ -382,122 +513,13 @@ public class RequisitionService {
 //					item.setPrice(Integer.parseInt(row.getCell(3).getStringCellValue()));
 //				}
 //			}
-			
-			lineItemList.add(item);
 
+				lineItemList.add(item);
+
+			}
 		}
-		 }
 		return lineItemList;
-		 
-	}
-	
-	
-	@Transactional
-	public Requisition updateRequisition(MultipartFile[] extraBudgetoryFile, MultipartFile[] requisitionLineItemFile, String obj) throws Exception {
-		logger.info("Update requisition");
 
-		ObjectMapper mapper = new ObjectMapper();
-		ObjectNode json = (ObjectNode) mapper.readTree(obj);
-		
-		Optional<Requisition> orq = requisitionRepository.findById(Long.parseLong(json.get("id").asText()));
-		if (!orq.isPresent()) {
-			logger.error("Requisition could not be updated. Requisition not found");
-			return null;
-		}
-
-		Requisition requisition = orq.get();
-
-		if (json.get("financialYear") != null) {
-			requisition.setFinancialYear(json.get("financialYear").asInt());
-		}
-		
-		if(json.get("departmentId") != null) {
-			Department department = departmentService.getDepartment(Long.parseLong(json.get("departmentId").asText()));
-			if (department != null) {
-				requisition.setDepartment(department);
-			}
-		}
-		
-		if(json.get("currencyId") != null) {
-			Currency currency = currencyService.getCurrency(Long.parseLong(json.get("currencyId").asText()));
-			if (currency != null) {
-				requisition.setCurrency(currency);
-			}
-		}
-		
-		if (json.get("notes") != null) {
-			requisition.setNotes(json.get("notes").asText());
-		}
-		
-		if (json.get("progressStage") != null) {
-			requisition.setProgressStage(json.get("progressStage").asText());
-		}
-
-		
-//		Rules rule = null; 
-//		if (obj.get("roleName").asText() != null) {
-//			Roles role = rolesService.getRolesByName(obj.get("roleName").asText());
-//			rule = rulesService.getRulesByRoleAndRuleName(role, Constants.RULE_REQUISITION_TYPE);
-//		} else {
-//			logger.error("Requistion could not be added. User's role missing");
-//			return null;
-//		}
-		
-//		JSONObject jsonObject = new JSONObject(rule.getRule());
-//		JSONObject nonStandardRule = jsonObject.getJSONObject(Constants.REQUISITION_TYPE_NON_STANDARD);
-//		if (obj.get("totalPrice") != null) {
-//			int price = obj.get("totalPrice").asInt();
-//			if (price >= nonStandardRule.getInt("min") && price <= nonStandardRule.getInt("max")) {
-//				requisition.setType(Constants.REQUISITION_TYPE_NON_STANDARD);
-//			} else {
-//				requisition.setType(Constants.REQUISITION_TYPE_STANDARD);
-//			}
-//		}
-
-		
-
-		
-		if (json.get("status") != null) {
-			requisition.setStatus(json.get("status").asText());
-		}
-		
-//		DateTimeFormatter formatter = DateTimeFormatter.ofPattern(Constants.DEFAULT_DATE_FORMAT);
-//		if (obj.get("dueDate") != null) {
-//			LocalDate localDate = LocalDate.parse(obj.get("dueDate").asText(), formatter);
-//			requisition.setDueDate(localDate);
-//		}
-
-		if (json.get("user") != null) {
-			requisition.setUpdatedBy(json.get("user").asText());
-		} else {
-			requisition.setUpdatedBy(Constants.SYSTEM_ACCOUNT);
-		}
-		
-		Instant now = Instant.now();
-		requisition.setUpdatedOn(now);
-		
-		List<RequisitionLineItem> liteItemList = getLineItemFromFile(requisitionLineItemFile);
-		List<RequisitionLineItem> liteItemList2 = getLineItemFromJson(obj);
-		liteItemList.addAll(liteItemList2);
-
-		int totalAmt = 0;
-		for(RequisitionLineItem rqLnItm: liteItemList) {
-			int amt = rqLnItm.getOrderQuantity() * rqLnItm.getRatePerItem();
-			totalAmt = totalAmt + amt;
-		}
-		
-		requisition.setTotalPrice(totalAmt);
-		
-		requisition = requisitionRepository.save(requisition);
-		logger.info("Requisition updated successfully");
-
-		saveExtraBudgetoryFile(extraBudgetoryFile, requisition, now);
-		saveRequisitionActivity(requisition);
-
-		saveRequisitionLineItem(requisition, liteItemList);
-		saveRequisitionLineItemFile( requisitionLineItemFile, now);
-		
-		return requisition;
 	}
 
 	private RequisitionActivity saveRequisitionActivity(Requisition requisition) {
@@ -507,17 +529,17 @@ public class RequisitionService {
 			requisitionActivity = new RequisitionActivity();
 			BeanUtils.copyProperties(requisition, requisitionActivity);
 			requisitionActivity.setRequisitionId(requisition.getId());
-			
+
 			requisitionActivity.setUpdatedBy(requisition.getUpdatedBy());
 			requisitionActivity.setUpdatedOn(requisition.getUpdatedOn());
-			
+
 			requisitionActivity = requisitionActivityService.addRequisitionActivity(requisitionActivity);
 			logger.info("Requisition activity added successfully");
 		}
 		return requisitionActivity;
 	}
 
-	public List<Requisition> searchRequisition(Map<String, String> requestObj) throws Exception {
+	public List<Requisition> searchRequisition(Map<String, String> requestObj) throws ParseException {
 		logger.info("Request to search requisition on given filter criteria");
 		Requisition requisition = new Requisition();
 
@@ -531,12 +553,12 @@ public class RequisitionService {
 			requisition.setId(Long.parseLong(requestObj.get("reqNo").toLowerCase()));
 			isFilter = true;
 		}
-		
+
 		if (!org.apache.commons.lang3.StringUtils.isBlank(requestObj.get("reqestNo"))) {
 			requisition.setId(Long.parseLong(requestObj.get("reqestNo").toLowerCase()));
 			isFilter = true;
 		}
-		
+
 		if (!org.apache.commons.lang3.StringUtils.isBlank(requestObj.get("departmentId"))) {
 			Department department = departmentService.getDepartment(Long.parseLong(requestObj.get("departmentId")));
 			if (department != null) {
@@ -598,8 +620,8 @@ public class RequisitionService {
 			requisition.setUpdatedOn(instant);
 			isFilter = true;
 		}
-	    if (requestObj.get("updatedBy") != null) {
-	    	requisition.setUpdatedBy(requestObj.get("updatedBy"));
+		if (requestObj.get("updatedBy") != null) {
+			requisition.setUpdatedBy(requestObj.get("updatedBy"));
 			isFilter = true;
 		}
 
@@ -609,7 +631,7 @@ public class RequisitionService {
 			requisition.setDueDate(localDate);
 			isFilter = true;
 		}
-		
+
 		List<Requisition> list = null;
 		if (isFilter) {
 			list = this.requisitionRepository.findAll(Example.of(requisition), Sort.by(Direction.DESC, "id"));
@@ -619,63 +641,65 @@ public class RequisitionService {
 
 		Date fromDate = null;
 		boolean isDateFilter = false;
-		if(requestObj.get("fromDate") != null){
-			fromDate = DateFormatUtil.convertStringToUtilDate(Constants.DEFAULT_DATE_FORMAT,requestObj.get("fromDate"));
+		if (requestObj.get("fromDate") != null) {
+			fromDate = DateFormatUtil.convertStringToUtilDate(Constants.DEFAULT_DATE_FORMAT,
+					requestObj.get("fromDate"));
 			isDateFilter = true;
 		}
-		
+
 		Date toDate = null;
-		if(requestObj.get("toDate") != null){
-			toDate = DateFormatUtil.convertStringToUtilDate(Constants.DEFAULT_DATE_FORMAT,requestObj.get("toDate"));
+		if (requestObj.get("toDate") != null) {
+			toDate = DateFormatUtil.convertStringToUtilDate(Constants.DEFAULT_DATE_FORMAT, requestObj.get("toDate"));
 			isDateFilter = true;
 		}
-		
+
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd").withZone(ZoneId.from(ZoneOffset.UTC));
 		List<Requisition> filteredList = new ArrayList<>();
 		for (Requisition req : list) {
-			if(fromDate != null && toDate != null && fromDate.equals(toDate)) {
+			if (fromDate != null && toDate != null && fromDate.equals(toDate)) {
 				Date reqDate = DateFormatUtil.convertInstantToUtilDate(formatter, req.getCreatedOn());
-				if(reqDate.equals(fromDate)) {
+				if (reqDate.equals(fromDate)) {
 					filteredList.add(req);
 				}
-			}else if(fromDate != null && toDate != null && !fromDate.equals(toDate)) {
+			} else if (fromDate != null && toDate != null && !fromDate.equals(toDate)) {
 				Date reqDate = DateFormatUtil.convertInstantToUtilDate(formatter, req.getCreatedOn());
-		        if(reqDate.getTime() >= fromDate.getTime() && reqDate.getTime() <= toDate.getTime()) {
+				if (reqDate.getTime() >= fromDate.getTime() && reqDate.getTime() <= toDate.getTime()) {
 					filteredList.add(req);
 				}
-			}else if(fromDate != null && toDate == null ) {
+			} else if (fromDate != null && toDate == null) {
 				Date reqDate = DateFormatUtil.convertInstantToUtilDate(formatter, req.getCreatedOn());
-				if(reqDate.getTime() >= fromDate.getTime()) {
+				if (reqDate.getTime() >= fromDate.getTime()) {
 					filteredList.add(req);
 				}
-			}else if(fromDate == null && toDate != null ) {
+			} else if (fromDate == null && toDate != null) {
 				Date reqDate = DateFormatUtil.convertInstantToUtilDate(formatter, req.getCreatedOn());
-				if(reqDate.getTime() <= toDate.getTime()) {
+				if (reqDate.getTime() <= toDate.getTime()) {
 					filteredList.add(req);
 				}
 			}
 		}
-		
-		if(isDateFilter) {
+
+		if (isDateFilter) {
 			list = filteredList;
 		}
-		
+
 		for (Requisition req : list) {
 			RequisitionActivity ca = new RequisitionActivity();
 			ca.setRequisitionId(req.getId());
 			List<RequisitionActivity> caList = requisitionActivityRepository.findAll(Example.of(ca));
 			req.setActivityList(caList);
-			
+
 			Map<String, String> searchDoc = new HashMap<>();
 			searchDoc.put("sourceOfOrigin", this.getClass().getSimpleName());
 			searchDoc.put("sourceId", String.valueOf(req.getId()));
 			searchDoc.put("identifier", Constants.IDENTIFIER_REQUISITION_EXTRA_BUDGETORY_FILE);
 			List<Document> docList = documentService.searchDocument(searchDoc);
 			req.setDocumentList(docList);
-			
+
 			Map<String, String> searchLineItem = new HashMap<>();
 			searchLineItem.put("requisitionId", String.valueOf(req.getId()));
-			List<RequisitionLineItem> lineItemList = requisitionLineItemService.searchRequisitionLineItem(searchLineItem);
+			List<RequisitionLineItem> lineItemList = requisitionLineItemService
+					.searchRequisitionLineItem(searchLineItem);
 			req.setLineItemList(lineItemList);
 		}
 
@@ -851,9 +875,8 @@ public class RequisitionService {
 //		}
 //
 //	}
-	
 
-	public boolean approveRequisition(ObjectNode obj) throws JSONException {
+	public boolean approveRequisition(ObjectNode obj){
 		logger.info("Getting requisition by id: " + obj);
 
 		try {
@@ -882,7 +905,6 @@ public class RequisitionService {
 
 	}
 
-	
 	private void saveExtraBudgetoryFile(MultipartFile[] files, Requisition requisition, Instant now)
 			throws IOException, JSONException {
 //		   List<String> fileNames = new ArrayList<>();
@@ -890,8 +912,8 @@ public class RequisitionService {
 //		      Arrays.asList(files).stream().forEach(file -> {
 //		        fileNames.add(file.getOriginalFilename());
 //		      });
-	     for(MultipartFile file: files) {
-	    	 if (file != null) {
+		for (MultipartFile file : files) {
+			if (file != null) {
 				logger.info("Saving extra budgetory file");
 				byte[] bytes = file.getBytes();
 				String orgFileName = StringUtils.cleanPath(file.getOriginalFilename());
@@ -904,14 +926,14 @@ public class RequisitionService {
 					filename = orgFileName.substring(0, orgFileName.lastIndexOf("."));
 				}
 				filename = filename.toLowerCase().replaceAll(" ", "-") + "_" + System.currentTimeMillis() + "." + ext;
-				
+
 				File localStorage = new File(Constants.LOCAL_REQUISITION_FILE_STORAGE_DIRECTORY);
 				if (!localStorage.exists()) {
 					localStorage.mkdirs();
 				}
 				Path path = Paths.get(localStorage.getAbsolutePath() + File.separatorChar + filename);
 				Files.write(path, bytes);
-	
+
 				Document document = new Document();
 				document.setFileName(filename);
 				document.setFileExt(ext);
@@ -929,68 +951,71 @@ public class RequisitionService {
 				document = documentService.saveDocument(document);
 				requisition.setExtraBudgetoryFile(bytes);
 				logger.info("Extra budgetory file saved successfully");
-			}else {
+			} else {
 				logger.info("Requisition extra budgetory file not provided");
 			}
 		}
 	}
-	private void  saveRequisitionLineItemFile(MultipartFile[] requisitionLineItemFile, Instant now)throws IOException, JSONException {
-		
-		for(MultipartFile file: requisitionLineItemFile) {
-		if (file != null) {
-			logger.info("Saving requsition line items data file and its details");
-			byte[] bytes = file.getBytes();
-			String orgFileName = StringUtils.cleanPath(file.getOriginalFilename());
-			String ext = "";
-			if (orgFileName.lastIndexOf(".") != -1) {
-				ext = orgFileName.substring(orgFileName.lastIndexOf(".") + 1);
-			}
-			
-			String filename = orgFileName;
-			if (orgFileName.lastIndexOf(".") != -1) {
-				filename = orgFileName.substring(0, orgFileName.lastIndexOf("."));
-			}
-			filename = filename.toLowerCase().replaceAll(" ", "-") + "_" + System.currentTimeMillis() + "." + ext;
-			
-			File localStorage = new File(Constants.LOCAL_DATA_FILE_STORAGE_DIRECTORY);
-			if (!localStorage.exists()) {
-				localStorage.mkdirs();
-			}
-			Path path = Paths.get(localStorage.getAbsolutePath() + File.separatorChar + filename);
-			Files.write(path, bytes);
 
-			DataFile dataFile= new DataFile(); 
-			dataFile.setFileName(filename);
-			dataFile.setFileExt(ext);
-			dataFile.setFileType(ext.toUpperCase());
-			dataFile.setFileSize(file.getSize());
-			dataFile.setStorageLocation(Constants.FILE_STORAGE_LOCATION_LOCAL);
-			dataFile.setSourceOfOrigin(this.getClass().getSimpleName());
+	private void saveRequisitionLineItemFile(MultipartFile[] requisitionLineItemFile, Instant now)
+			throws IOException, JSONException {
+
+		for (MultipartFile file : requisitionLineItemFile) {
+			if (file != null) {
+				logger.info("Saving requsition line items data file and its details");
+				byte[] bytes = file.getBytes();
+				String orgFileName = StringUtils.cleanPath(file.getOriginalFilename());
+				String ext = "";
+				if (orgFileName.lastIndexOf(".") != -1) {
+					ext = orgFileName.substring(orgFileName.lastIndexOf(".") + 1);
+				}
+
+				String filename = orgFileName;
+				if (orgFileName.lastIndexOf(".") != -1) {
+					filename = orgFileName.substring(0, orgFileName.lastIndexOf("."));
+				}
+				filename = filename.toLowerCase().replaceAll(" ", "-") + "_" + System.currentTimeMillis() + "." + ext;
+
+				File localStorage = new File(Constants.LOCAL_DATA_FILE_STORAGE_DIRECTORY);
+				if (!localStorage.exists()) {
+					localStorage.mkdirs();
+				}
+				Path path = Paths.get(localStorage.getAbsolutePath() + File.separatorChar + filename);
+				Files.write(path, bytes);
+
+				DataFile dataFile = new DataFile();
+				dataFile.setFileName(filename);
+				dataFile.setFileExt(ext);
+				dataFile.setFileType(ext.toUpperCase());
+				dataFile.setFileSize(file.getSize());
+				dataFile.setStorageLocation(Constants.FILE_STORAGE_LOCATION_LOCAL);
+				dataFile.setSourceOfOrigin(this.getClass().getSimpleName());
 //			dataFile.setCreatedBy(liteItemList.getCreatedBy());
-			dataFile.setCreatedOn(now);
-			
-     		dataFile = dataFileRepository.save(dataFile);
-     		logger.info("Requsition line items data file and its details saved successfully");
-		}
+				dataFile.setCreatedOn(now);
+
+				dataFile = dataFileRepository.save(dataFile);
+				logger.info("Requsition line items data file and its details saved successfully");
+			}
 		}
 	}
-	
+
 	@Transactional
 	public void deleteRequisition(Long requisitionId) {
 		logger.info("Deleting requisition");
 		Requisition req = getRequisition(requisitionId);
 		Instant now = Instant.now();
-		if(req != null) {
+		if (req != null) {
 			req.setStatus(Constants.STATUS_DELETED);
 			req.setUpdatedOn(now);
 			saveRequisitionActivity(req);
 		}
-		
+
 		Map<String, String> reqLineItemMap = new HashMap<>();
 		reqLineItemMap.put("requisitionId", String.valueOf(requisitionId));
-		List<RequisitionLineItem> reqLineItemList = requisitionLineItemService.searchRequisitionLineItem(reqLineItemMap);
-		for(RequisitionLineItem reqLineItem : reqLineItemList) {
-			
+		List<RequisitionLineItem> reqLineItemList = requisitionLineItemService
+				.searchRequisitionLineItem(reqLineItemMap);
+		for (RequisitionLineItem reqLineItem : reqLineItemList) {
+
 			RequisitionLineItemActivity reqLiAct = new RequisitionLineItemActivity();
 			BeanUtils.copyProperties(reqLineItem, reqLiAct);
 			reqLiAct.setRequisitionLineItemId(reqLineItem.getId());
@@ -998,11 +1023,10 @@ public class RequisitionService {
 			reqLiAct.setUpdatedOn(now);
 			reqLiAct = requisitionLineItemActivityService.addRequisitionLineItemActivity(reqLiAct);
 			requisitionLineItemService.deleteRequisitionLineItem(reqLineItem.getId());
-			
+
 		}
 		requisitionRepository.deleteById(requisitionId);
 		logger.info(" Requisition deleted successfully");
 	}
-	
-	
+
 }

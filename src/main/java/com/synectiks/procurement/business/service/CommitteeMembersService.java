@@ -68,7 +68,7 @@ public class CommitteeMembersService {
 	}
 
 	@Transactional
-	public CommitteeMember addCommitteeMember(String obj, MultipartFile file) throws Exception {
+	public CommitteeMember addCommitteeMember(String obj, MultipartFile file) throws IOException, JSONException {
 		CommitteeMember committeeMember = new CommitteeMember();
 
 		ObjectMapper mapper = new ObjectMapper();
@@ -77,7 +77,7 @@ public class CommitteeMembersService {
 		if (json.get("committeeId") != null) {
 			committee = committeeService.getCommittee(json.get("committeeId").asLong());
 			if (committee == null) {
-				logger.warn("Committee not found. Cannot add the member.");
+				logger.warn("Committee not found. can not add the member.");
 				return null;
 			}
 		}
@@ -224,7 +224,7 @@ public class CommitteeMembersService {
 	}
 
 	@Transactional
-	public CommitteeMember updateCommitteeMembers(String obj, MultipartFile file) throws Exception {
+	public CommitteeMember updateCommitteeMembers(String obj, MultipartFile file) throws IOException, JSONException {
 		ObjectMapper mapper = new ObjectMapper();
 		ObjectNode json = (ObjectNode) mapper.readTree(obj);
 

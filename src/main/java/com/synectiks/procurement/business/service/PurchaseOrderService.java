@@ -1,6 +1,5 @@
 package com.synectiks.procurement.business.service;
 
-import java.net.URISyntaxException;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -14,7 +13,6 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.configurationprocessor.json.JSONException;
 import org.springframework.boot.configurationprocessor.json.JSONObject;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Sort;
@@ -58,7 +56,7 @@ public class PurchaseOrderService {
 		return null;
 	}
 
-	public PurchaseOrder addPurchaseOrder(ObjectNode obj) throws JSONException {
+	public PurchaseOrder addPurchaseOrder(ObjectNode obj){
 		PurchaseOrder purchaseOrder = new PurchaseOrder();
 
 		Optional<Requisition> oc = requisitionRepository.findById(Long.parseLong(obj.get("requisitionId").asText()));
@@ -106,7 +104,7 @@ public class PurchaseOrderService {
 		return purchaseOrder;
 	}
 
-	public PurchaseOrder updatePurchaseOrder(ObjectNode obj) throws JSONException, URISyntaxException {
+	public PurchaseOrder updatePurchaseOrder(ObjectNode obj){
 		Optional<PurchaseOrder> ur = purchaseOrderRepository.findById(Long.parseLong(obj.get("id").asText()));
 		if (!ur.isPresent()) {
 			logger.error("Purchase order not found");
@@ -201,7 +199,7 @@ public class PurchaseOrderService {
 		purchaseOrderRepository.deleteById(id);
 	}
 
-	public boolean approvePurchaseOrder(ObjectNode obj) throws JSONException {
+	public boolean approvePurchaseOrder(ObjectNode obj){
 		logger.info("Getting purchase order by id: " + obj);
 
 		try {

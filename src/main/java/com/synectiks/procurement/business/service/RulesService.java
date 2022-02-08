@@ -1,6 +1,5 @@
 package com.synectiks.procurement.business.service;
 
-import java.net.URISyntaxException;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
@@ -35,7 +34,7 @@ public class RulesService {
 	@Autowired
 	private RulesRepository rulesRepository;
 
-	public Rules addRules(ObjectNode obj) throws JSONException, UniqueConstraintException {
+	public Rules addRules(ObjectNode obj) throws UniqueConstraintException{
 		Rules rules = new Rules();
 
 		if (obj.get("name").asText() != null) {
@@ -97,7 +96,7 @@ public class RulesService {
 		return rules;
 	}
 
-	public Rules updateRules(ObjectNode obj) throws JSONException, URISyntaxException, UniqueConstraintException {
+	public Rules updateRules(ObjectNode obj) throws UniqueConstraintException, JSONException  {
 		
 		Optional<Rules> oRule = rulesRepository.findById(Long.parseLong(obj.get("ruleId").asText()));
 		if (!oRule.isPresent()) {
@@ -107,7 +106,7 @@ public class RulesService {
 		
 		Rules rules = oRule.get();
 		
-		try {
+		
 			if (obj.get("roleName") != null && (!rules.getRoles().getName().equalsIgnoreCase(obj.get("roleName").asText()))) {
 				Map<String, String> requestObj = new HashMap<>();
 				requestObj.put("name", obj.get("roleName").asText());
@@ -124,10 +123,7 @@ public class RulesService {
 				
 			}
 
-		} catch (Exception e) {
-			logger.error("Exception in validating duplicate rule. Exception: ", e);
-			throw e;
-		}
+
 
 		if (obj.get("name") != null) {
 			rules.setName(obj.get("name").asText().toUpperCase());

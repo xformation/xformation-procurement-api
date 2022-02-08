@@ -61,7 +61,7 @@
     </changeSet>
     
     
-      <changeSet id="20210722052855-1-data" author="jhipster" context="faker">
+     <!--  <changeSet id="20210722052855-1-data" author="jhipster" context="faker">
         <loadData
                   file="config/liquibase/fake-data/requisition_activity.csv"
                   separator=";"
@@ -80,9 +80,9 @@
             <column name="notes" type="string"/>
             <column name="due_date" type="date"/>
              <column name="requisition_id" type="numeric"/>
-            <!-- jhipster-needle-liquibase-add-loadcolumn - JHipster (and/or extensions) can add load columns here -->
+            jhipster-needle-liquibase-add-loadcolumn - JHipster (and/or extensions) can add load columns here
         </loadData>
-    </changeSet>
+    </changeSet> -->
 
 
 

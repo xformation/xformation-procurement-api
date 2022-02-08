@@ -7,7 +7,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Period;
 import java.time.ZoneId;
-import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
 import java.util.Date;
@@ -55,17 +54,17 @@ public final class DateFormatUtil {
         return newDt;
     }
 	
-	public static final Date convertStringToUtilDate(String dateFormat, String date) throws Exception {
+	public static final Date convertStringToUtilDate(String dateFormat, String date) throws ParseException  {
 		Date newDt = null;
 		SimpleDateFormat sdf = new SimpleDateFormat();
-		try{
+//		try{
 			sdf.applyPattern(dateFormat);
 			newDt = sdf.parse(date);
 			logger.info(String.format("Date conversion from string to util date :old date : %s, new date : %s",date,newDt));
-		}catch (Exception e){
-			logger.error("Exception in date conversion from string to util date: " , e);
-			throw e;
-		}
+//		}catch (Exception e){
+//			logger.error("Exception in date conversion from string to util date: " , e);
+//			throw e;
+//		}
         return newDt;
 	}
 	
@@ -133,7 +132,7 @@ public final class DateFormatUtil {
         return DateFormatUtil.convertStringToLocalDate(stDt[2]+"-"+stDt[0]+"-"+stDt[1], Constants.DEFAULT_DATE_FORMAT);
     }
 	
-	public static final Date convertInstantToUtilDate(DateTimeFormatter formatter, Instant instant) throws Exception {
+	public static final Date convertInstantToUtilDate(DateTimeFormatter formatter, Instant instant) throws ParseException {
 		return DateFormatUtil.convertStringToUtilDate(Constants.DEFAULT_DATE_FORMAT,formatter.format(instant));
 	}
 	

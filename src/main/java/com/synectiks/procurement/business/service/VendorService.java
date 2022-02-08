@@ -1,6 +1,5 @@
 package com.synectiks.procurement.business.service;
 
-import java.net.URISyntaxException;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
@@ -9,7 +8,6 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.configurationprocessor.json.JSONException;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
@@ -40,7 +38,7 @@ public class VendorService {
 		return null;
 	}
 
-	public Vendor addVendor(ObjectNode obj) throws JSONException {
+	public Vendor addVendor(ObjectNode obj) {
 		Vendor vendor = new Vendor();
 
 		if (obj.get("firstName") != null) {
@@ -83,7 +81,7 @@ public class VendorService {
 		return vendor;
 	}
 
-	public Vendor updateVendor(ObjectNode obj) throws JSONException, URISyntaxException {
+	public Vendor updateVendor(ObjectNode obj) {
 		Optional<Vendor> ur = vendorRepository.findById(Long.parseLong(obj.get("id").asText()));
 		if (!ur.isPresent()) {
 			logger.error("Vendor not found");

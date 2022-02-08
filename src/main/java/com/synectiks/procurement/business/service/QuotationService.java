@@ -94,7 +94,7 @@ public class QuotationService {
 			}
 			quotation.setPurchaseOrder(purchaseOrder);
 		} else {
-			logger.error("Vendor not provided. Quotation cannot be added");
+			logger.error("purchase order id not provided. Quotation cannot be added");
 			return null;
 		}
 
@@ -261,8 +261,8 @@ public class QuotationService {
 			quotation.setUpdatedOn(instant);
 			isFilter = true;
 		}
-	    if (requestObj.get("updatedBy") != null) {
-	    	quotation.setUpdatedBy(requestObj.get("updatedBy"));
+		if (requestObj.get("updatedBy") != null) {
+			quotation.setUpdatedBy(requestObj.get("updatedBy"));
 			isFilter = true;
 		}
 

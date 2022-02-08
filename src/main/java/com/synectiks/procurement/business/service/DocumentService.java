@@ -1,6 +1,5 @@
 package com.synectiks.procurement.business.service;
 
-import java.net.URISyntaxException;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
@@ -9,7 +8,6 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.configurationprocessor.json.JSONException;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
@@ -49,9 +47,8 @@ public class DocumentService {
 		return null;
 	}
 
-	public Document addDocument(ObjectNode obj) throws JSONException {
+	public Document addDocument(ObjectNode obj){
 		Document document = new Document();
-
 		Optional<Contact> oc = contactRepository.findById(Long.parseLong(obj.get("contactId").asText()));
 		if (oc.isPresent()) {
 			document.setContact(oc.get());
@@ -102,16 +99,14 @@ public class DocumentService {
 		return document;
 	}
 
-	public Document saveDocument(Document document) throws JSONException {
-		
+	public Document saveDocument(Document document){
 		document = documentRepository.save(document);
-
 		logger.info("Document saved successfully: " + document.toString());
 
 		return document;
 	}
 	
-	public Document updateDocument(ObjectNode obj) throws JSONException, URISyntaxException {
+	public Document updateDocument(ObjectNode obj){
 		Optional<Document> odc = documentRepository.findById(Long.parseLong(obj.get("id").asText()));
 		if (!odc.isPresent()) {
 			logger.error("Document id not found");

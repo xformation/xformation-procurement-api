@@ -1,6 +1,5 @@
 package com.synectiks.procurement.business.service;
 
-import java.net.URISyntaxException;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
@@ -13,7 +12,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.configurationprocessor.json.JSONException;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
@@ -113,7 +111,7 @@ public class RolesService {
 
 	}
 
-	public Roles updateRoles(ObjectNode obj) throws JSONException, URISyntaxException, UniqueConstraintException {
+	public Roles updateRoles(ObjectNode obj) throws UniqueConstraintException {
 		Optional<Roles> ur = rolesRepository.findById(Long.parseLong(obj.get("id").asText()));
 		if (!ur.isPresent()) {
 			logger.error("Role not found");
@@ -177,7 +175,7 @@ public class RolesService {
 		return roles;
 	}
 
-	public List<Roles> searchRoles(@RequestParam Map<String, String> requestObj) throws JSONException {
+	public List<Roles> searchRoles(@RequestParam Map<String, String> requestObj){
 		Roles roles = new Roles();
 		boolean isFilter = false;
 		if (requestObj.get("id") != null) {

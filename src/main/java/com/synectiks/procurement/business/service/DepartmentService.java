@@ -1,6 +1,5 @@
 package com.synectiks.procurement.business.service;
 
-import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -8,7 +7,6 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.configurationprocessor.json.JSONException;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
@@ -36,7 +34,7 @@ public class DepartmentService {
 		return null;
 	}
 
-	public Department addDepartment(ObjectNode obj) throws JSONException {
+	public Department addDepartment(ObjectNode obj){
 		Department department = new Department();
 		if (obj.get("name") != null) {
 			department.setName(obj.get("name").asText());
@@ -46,7 +44,7 @@ public class DepartmentService {
 		return department;
 	}
 
-	public Department updateDepartment(ObjectNode obj) throws JSONException, URISyntaxException {
+	public Department updateDepartment(ObjectNode obj) {
 		Optional<Department> ur = departmentRepository.findById(Long.parseLong(obj.get("id").asText()));
 		if (!ur.isPresent()) {
 			logger.warn("Department id not found");

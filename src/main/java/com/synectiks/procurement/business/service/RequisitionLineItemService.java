@@ -13,7 +13,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.configurationprocessor.json.JSONException;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
@@ -62,7 +61,7 @@ public class RequisitionLineItemService {
 	}
 
 	@Transactional
-	public RequisitionLineItem addRequisitionLineItem(ObjectNode obj) throws JSONException {
+	public RequisitionLineItem addRequisitionLineItem(ObjectNode obj)  {
 		RequisitionLineItem requisitionLineItem = new RequisitionLineItem();
 
 		Optional<Requisition> oReq = requisitionRepository.findById(Long.parseLong(obj.get("id").asText()));
@@ -143,7 +142,7 @@ public class RequisitionLineItemService {
 	}
 
 	@Transactional
-	public RequisitionLineItem updateRequisitionLineItem(ObjectNode obj) throws JSONException {
+	public RequisitionLineItem updateRequisitionLineItem(ObjectNode obj) {
 		logger.info("Update Requisition line item");
 
 		Optional<RequisitionLineItem> orqli = requisitionLineItemRepository

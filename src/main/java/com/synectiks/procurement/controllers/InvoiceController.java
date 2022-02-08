@@ -1,19 +1,18 @@
 package com.synectiks.procurement.controllers;
 
-import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.configurationprocessor.json.JSONException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -22,7 +21,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.synectiks.procurement.business.service.InvoiceService;
 import com.synectiks.procurement.domain.Invoice;
-import com.synectiks.procurement.domain.Status;
+
+import io.github.jhipster.web.util.HeaderUtil;
 
 @RestController
 @RequestMapping("/api")
@@ -32,130 +32,40 @@ public class InvoiceController {
 	@Autowired
 	private InvoiceService invoiceService;
 
-	@PostMapping("/addInvoice")
-	public ResponseEntity<Status> addInvoice(@RequestBody ObjectNode obj) throws JSONException {
+	@PostMapping("/invoice")
+	public ResponseEntity<Invoice> addInvoice(@RequestBody ObjectNode obj) {
 		logger.info("Request to add a new invoice");
-		Status st = new Status();
-		try {
-			Invoice invoice = invoiceService.addInvoice(obj);
-			if (invoice == null) {
-				logger.error("Add invoice failed");
-				st.setCode(HttpStatus.EXPECTATION_FAILED.value());
-				st.setType("ERROR");
-				st.setMessage("Add invoice failed");
-				return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(st);
-			}
-			st.setCode(HttpStatus.OK.value());
-			st.setType("SUCCESS");
-			st.setMessage("Invoice add successful");
-			st.setObject(invoice);
-			return ResponseEntity.status(HttpStatus.OK).body(st);
-		} catch (Exception e) {
-			logger.error("Invoice add failed. Exception: ", e);
-			st.setCode(HttpStatus.EXPECTATION_FAILED.value());
-			st.setType("ERROR");
-			st.setMessage("Invoice add failed");
-			return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(st);
-		}
+		Invoice invoice = invoiceService.addInvoice(obj);
+		return ResponseEntity.status(HttpStatus.OK).body(invoice);
 	}
 
-	@PostMapping("/updateInvoice")
-	public ResponseEntity<Status> updateinvoice(@RequestBody ObjectNode obj) throws JSONException, URISyntaxException {
+	@PutMapping("/invoice")
+	public ResponseEntity<Invoice> updateinvoice(@RequestBody ObjectNode obj) {
 		logger.info("Request to update an invoice");
-		Status st = new Status();
-		try {
-			Invoice invoice = invoiceService.updateinvoice(obj);
-			if (invoice == null) {
-				logger.error("Update invoice failed");
-				st.setCode(HttpStatus.EXPECTATION_FAILED.value());
-				st.setType("ERROR");
-				st.setMessage("Update invoice failed");
-				return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(st);
-			}
-			st.setCode(HttpStatus.OK.value());
-			st.setType("SUCCESS");
-			st.setMessage("Updating invoice successful");
-			st.setObject(invoice);
-			return ResponseEntity.status(HttpStatus.OK).body(st);
-		} catch (Exception e) {
-			logger.error("Updating invoice failed. Exception: ", e);
-			st.setCode(HttpStatus.EXPECTATION_FAILED.value());
-			st.setType("ERROR");
-			st.setMessage("Updating invoice failed");
-			return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(st);
-		}
+		Invoice invoice = invoiceService.updateinvoice(obj);
+		return ResponseEntity.status(HttpStatus.OK).body(invoice);
 	}
 
-	@GetMapping("/searchInvoice")
-	public ResponseEntity<Status> searchinvoice(@RequestParam Map<String, String> requestObj) {
-		Status st = new Status();
+	@GetMapping("/invoice")
+	public ResponseEntity<List<Invoice>> searchinvoice(@RequestParam Map<String, String> requestObj) {
 		logger.info("Request to get list of invoices on given filter criteria");
-		try {
-			List<Invoice> list = invoiceService.searchinvoice(requestObj);
-			if (list == null) {
-				logger.error("Search invoice failed");
-				st.setCode(HttpStatus.EXPECTATION_FAILED.value());
-				st.setType("ERROR");
-				st.setMessage("Search invoice failed");
-				return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(st);
-			}
-			st.setCode(HttpStatus.OK.value());
-			st.setType("SUCCESS");
-			st.setMessage("Search of invoice list successful");
-			st.setObject(list);
-			return ResponseEntity.status(HttpStatus.OK).body(st);
-		} catch (Exception e) {
-			logger.error("Search of invoice list failed. Exception: ", e);
-			st.setCode(HttpStatus.EXPECTATION_FAILED.value());
-			st.setType("ERROR");
-			st.setMessage("Search of invoice list failed");
-			return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(st);
-		}
+		List<Invoice> list = invoiceService.searchinvoice(requestObj);
+		return ResponseEntity.status(HttpStatus.OK).body(list);
 
 	}
 
-	@DeleteMapping("/deleteInvoice/{id}")
-	public ResponseEntity<Status> deleteInvoice(@PathVariable Long id) {
-		Status st = new Status();
-		try {
-			invoiceService.deleteInvoice(id);
-			st.setCode(HttpStatus.OK.value());
-			st.setType("SUCCESS");
-			st.setMessage("Delete invoice successful");
-			return ResponseEntity.status(HttpStatus.OK).body(st);
-		} catch (Throwable e) {
-			st.setCode(HttpStatus.EXPECTATION_FAILED.value());
-			st.setType("ERROR");
-			st.setMessage("Delete invoice failed");
-			return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(st);
-		}
+	@DeleteMapping("/invoice/{id}")
+	public ResponseEntity<Void> deleteInvoice(@PathVariable Long id) {
+		invoiceService.deleteInvoice(id);
+		return ResponseEntity.noContent()
+				.headers(HeaderUtil.createEntityDeletionAlert("invoice", false, "invoice", id.toString())).build();
 	}
 
-	@GetMapping("/getInvoice/{id}")
-	public ResponseEntity<Status> getInvoice(@PathVariable Long id) {
+	@GetMapping("/invoice/{id}")
+	public ResponseEntity<Invoice> getInvoice(@PathVariable Long id) {
 		logger.info("Getting invoice by id: " + id);
-		Status st = new Status();
-		try {
-			Invoice invoice = invoiceService.getInvoice(id);
-			if (invoice == null) {
-				logger.warn("Invoice not found.");
-				st.setCode(HttpStatus.EXPECTATION_FAILED.value());
-				st.setType("ERROR");
-				st.setMessage("Invoice not found");
-				return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(st);
-			}
-			st.setCode(HttpStatus.OK.value());
-			st.setType("SUCCESS");
-			st.setMessage("Invoice found");
-			st.setObject(invoice);
-			return ResponseEntity.status(HttpStatus.OK).body(st);
-		} catch (Exception e) {
-			logger.error("Invoice not found. Exception: ", e);
-			st.setCode(HttpStatus.EXPECTATION_FAILED.value());
-			st.setType("ERROR");
-			st.setMessage("Invoice not found");
-			return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(st);
-		}
+		Invoice invoice = invoiceService.getInvoice(id);
+		return ResponseEntity.status(HttpStatus.OK).body(invoice);
 	}
 
 //	@PostMapping("/approveInvoice")

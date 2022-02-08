@@ -1,6 +1,5 @@
 package com.synectiks.procurement.business.service;
 
-import java.net.URISyntaxException;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
@@ -9,7 +8,6 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.configurationprocessor.json.JSONException;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
@@ -40,7 +38,7 @@ public class BuyerService {
 		return null;
 	}
 
-	public Buyer addBuyer(ObjectNode obj) throws JSONException {
+	public Buyer addBuyer(ObjectNode obj) {
 		Buyer buyer = new Buyer();
 
 		if (obj.get("firstName") != null) {
@@ -83,7 +81,7 @@ public class BuyerService {
 		return buyer;
 	}
 
-	public Buyer updateBuyer(ObjectNode obj) throws JSONException, URISyntaxException {
+	public Buyer updateBuyer(ObjectNode obj){
 		Optional<Buyer> bu = buyerRepository.findById(Long.parseLong(obj.get("id").asText()));
 		if (!bu.isPresent()) {
 			logger.error("Buyer not found");
@@ -114,6 +112,9 @@ public class BuyerService {
 		}
 		if (obj.get("status") != null) {
 			buyer.setStatus(obj.get("status").asText());
+		}
+		else {
+			buyer.setStatus(Constants.STATUS_DEACTIVE);
 		}
 		if (obj.get("user") != null) {
 			buyer.setUpdatedBy(obj.get("user").asText());

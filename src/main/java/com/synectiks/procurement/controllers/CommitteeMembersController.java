@@ -1,12 +1,13 @@
 package com.synectiks.procurement.controllers;
 
-import java.net.URISyntaxException;
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Required;
 import org.springframework.boot.configurationprocessor.json.JSONException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -21,7 +22,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.synectiks.procurement.business.service.CommitteeMembersService;
 import com.synectiks.procurement.domain.CommitteeMember;
-import com.synectiks.procurement.domain.Status;
 
 @RestController
 @RequestMapping("/api")
@@ -31,115 +31,70 @@ public class CommitteeMembersController {
 	@Autowired
 	private CommitteeMembersService committeeMembersService;
 
-	@RequestMapping(value = "/addCommitteeMember", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<Status> addCommitteeMembers(@RequestParam("obj") String obj,
-			@RequestParam("file") MultipartFile file) throws JSONException {
-		logger.info("Request to add New committee member");
-		Status st = new Status();
+	@RequestMapping(value = "/committeeMembers", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<CommitteeMember> addCommitteeMembers(@RequestParam("obj") String obj,
+			@RequestParam(name="file",required = false) MultipartFile file ) throws IOException, JSONException {
+		logger.info("Request to add new committee member");
+		CommitteeMember committeeMember=null;
+
 		try {
-			CommitteeMember committeeMember = committeeMembersService.addCommitteeMember(obj, file);
-			if (committeeMember == null) {
-				logger.error("Committee member could not be added.");
-				st.setCode(HttpStatus.EXPECTATION_FAILED.value());
-				st.setType("ERROR");
-				st.setMessage("Add committee member failed");
-				return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(st);
-			}
-			st.setCode(HttpStatus.OK.value());
-			st.setType("SUCCESS");
-			st.setMessage("Committee member added successfully");
-			st.setObject(committeeMember);
-			return ResponseEntity.status(HttpStatus.OK).body(st);
-		} catch (Exception e) {
-			logger.error("Adding committee member failed: ", e);
-			st.setCode(HttpStatus.EXPECTATION_FAILED.value());
-			st.setType("ERROR");
-			st.setMessage("Adding committee  member failed");
-			return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(st);
+			committeeMember = committeeMembersService.addCommitteeMember(obj, file);
+			return ResponseEntity.status(HttpStatus.OK).body(committeeMember);
+		} catch (IOException e) {
+			logger.error("Add committee member failed. IOException: ", e);
+			throw e;
+		} catch (JSONException e) {
+			logger.error("Add committee member failed. JSONException: ", e);
+			throw e;
 		}
 
 	}
 
-	@RequestMapping(value = "/updateCommitteeMembers", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<Status> updateCommitteeMembers(@RequestParam("obj") String obj,
-			@RequestParam("file") MultipartFile file) throws JSONException, URISyntaxException {
+	@RequestMapping(value = "/committeeMembers", method = RequestMethod.PUT, produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<CommitteeMember> updateCommitteeMembers(@RequestParam("obj") String obj,
+			@RequestParam(name="file",required = false) MultipartFile file) throws IOException, JSONException {
 		logger.info("Request to upde committee members");
-		Status st = new Status();
+		CommitteeMember committeeMember=null;
 		try {
-			CommitteeMember committeeMember = committeeMembersService.updateCommitteeMembers(obj, file);
-			if (committeeMember == null) {
-				logger.error("Committee members could not be updated.");
-				st.setCode(HttpStatus.EXPECTATION_FAILED.value());
-				st.setType("ERROR");
-				st.setMessage("Update committee members failed");
-				return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(st);
-			}
-			st.setCode(HttpStatus.OK.value());
-			st.setType("SUCCESS");
-			st.setMessage("Committee members update successfully");
-			st.setObject(committeeMember);
-			return ResponseEntity.status(HttpStatus.OK).body(st);
-		} catch (Exception e) {
-			logger.error("Updating committee members failed. Exception: ", e);
-			st.setCode(HttpStatus.EXPECTATION_FAILED.value());
-			st.setType("ERROR");
-			st.setMessage("Updating committee members failed");
-			return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(st);
+			committeeMember = committeeMembersService.updateCommitteeMembers(obj, file);
+			return ResponseEntity.status(HttpStatus.OK).body(committeeMember);
+		} catch (IOException e) {
+			logger.error("Update committee member failed. IOException: ", e);
+			throw e;
+		} catch (JSONException e) {
+			logger.error("Update committee member failed. JSONException: ", e);
+			throw e;
 		}
 	}
 
-	@GetMapping("/searchCommitteeMembers")
-	public ResponseEntity<Status> searchCommitteeMembers(@RequestParam Map<String, String> requestObj) {
+	@GetMapping("/committeeMembers")
+	public ResponseEntity<List<CommitteeMember>> searchCommitteeMembers(@RequestParam Map<String, String> requestObj)
+			throws IOException {
 		logger.info("Request to get list of committee on given filter criteria");
-		Status st = new Status();
+
+		List<CommitteeMember> list;
 		try {
-			List<CommitteeMember> list = committeeMembersService.searchCommitteeMembers(requestObj);
-			if (list == null) {
-				logger.error("Search committee members failed");
-				st.setCode(HttpStatus.EXPECTATION_FAILED.value());
-				st.setType("ERROR");
-				st.setMessage("Search committee members failed");
-				return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(st);
-			}
-			st.setCode(HttpStatus.OK.value());
-			st.setType("SUCCESS");
-			st.setMessage("Search committee members successful");
-			st.setObject(list);
-			return ResponseEntity.status(HttpStatus.OK).body(st);
-		} catch (Exception e) {
-			logger.error("Searching committee members failed . Exception: ", e);
-			st.setCode(HttpStatus.EXPECTATION_FAILED.value());
-			st.setType("ERROR");
-			st.setMessage("Searching committee members failed");
-			return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(st);
+			list = committeeMembersService.searchCommitteeMembers(requestObj);
+			return ResponseEntity.status(HttpStatus.OK).body(list);
+		} catch (IOException e) {
+			logger.error("Search committee members failed. IOException: ", e);
+			throw e;
 		}
 	}
 
-	@GetMapping("/getCommitteeMembers/{id}")
-	public ResponseEntity<Status> getCommitteeMembers(@PathVariable Long id) {
+	@GetMapping("/committeeMembers/{id}")
+	public ResponseEntity<List<CommitteeMember>> getCommitteeMembers(@PathVariable Map<String, String> id)throws IOException {
 		logger.info("Getting committee members by id: " + id);
-		Status st = new Status();
+		List<CommitteeMember> committeeMembers;
 		try {
-			CommitteeMember committeeMembers = committeeMembersService.getCommitteeMember(id);
-			if (committeeMembers == null) {
-				logger.warn("Committee members not found.");
-				st.setCode(HttpStatus.EXPECTATION_FAILED.value());
-				st.setType("ERROR");
-				st.setMessage("Committee members not found");
-				return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(st);
-			}
-			st.setCode(HttpStatus.OK.value());
-			st.setType("SUCCESS");
-			st.setMessage(" Committee members found");
-			st.setObject(committeeMembers);
-			return ResponseEntity.status(HttpStatus.OK).body(st);
-		} catch (Exception e) {
-			logger.error("Committee members not found. Exception: ", e);
-			st.setCode(HttpStatus.EXPECTATION_FAILED.value());
-			st.setType("ERROR");
-			st.setMessage("Committee members not found");
-			return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(st);
+			committeeMembers = committeeMembersService.searchCommitteeMembers(id);
+			return ResponseEntity.status(HttpStatus.OK).body(committeeMembers);
+		} catch (IOException e) {
+			logger.error("Search committee members failed. IOException: ", e);
+			throw e;
 		}
+		
+		
 	}
 
 }

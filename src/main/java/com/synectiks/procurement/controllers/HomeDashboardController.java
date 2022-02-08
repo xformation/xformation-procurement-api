@@ -2,8 +2,6 @@ package com.synectiks.procurement.controllers;
 
 import java.util.List;
 
-import javax.mail.Message;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

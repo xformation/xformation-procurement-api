@@ -1,6 +1,5 @@
 package com.synectiks.procurement.business.service;
 
-import java.net.URISyntaxException;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
@@ -12,7 +11,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.configurationprocessor.json.JSONException;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
@@ -35,7 +33,7 @@ public class ContactService {
 	ContactActivityRepository contactActivityRepository;
 
 	@Transactional
-	public Contact addContact(ObjectNode obj) throws JSONException {
+	public Contact addContact(ObjectNode obj){
 		Contact contact = new Contact();
 
 		if (obj.get("firstName") != null) {
@@ -94,7 +92,7 @@ public class ContactService {
 	}
 
 	@Transactional
-	public Contact updateContact(ObjectNode obj) throws JSONException, URISyntaxException {
+	public Contact updateContact(ObjectNode obj){
 		Optional<Contact> ur = contactRepository.findById(Long.parseLong(obj.get("id").asText()));
 		if (!ur.isPresent()) {
 			logger.info("Contact id not found");
