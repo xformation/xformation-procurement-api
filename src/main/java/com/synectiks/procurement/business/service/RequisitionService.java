@@ -122,7 +122,7 @@ public class RequisitionService {
 	}
 
 	@Transactional
-	public Requisition addRequisition(MultipartFile[] requisitionFile, MultipartFile[] requisitionLineItemFile,
+	public Requisition addRequisition(MultipartFile[] extraBudgetoryFile, MultipartFile[] requisitionLineItemFile,
 			String obj) throws JsonMappingException, JsonProcessingException, JSONException, IOException {
 		logger.info("Adding requistion");
 		Requisition requisition = new Requisition();
@@ -243,11 +243,12 @@ public class RequisitionService {
 		requisition = requisitionRepository.save(requisition);
 		logger.info("Requisition added successfully");
 
-		saveExtraBudgetoryFile(requisitionFile, requisition, now);
+		saveFile(extraBudgetoryFile, requisition, now, Constants.IDENTIFIER_REQUISITION_EXTRA_BUDGETORY_FILE);
 		saveRequisitionActivity(requisition);
 
 		saveRequisitionLineItem(requisition, liteItemList);
-		saveRequisitionLineItemFile(requisitionLineItemFile, now);
+//		saveRequisitionLineItemFile(requisitionLineItemFile, now);
+		saveFile(requisitionLineItemFile, requisition, now, Constants.IDENTIFIER_REQUISITION_LINE_ITEM_FILE);
 		logger.info("Requisition added successfully");
 		return requisition;
 	}
@@ -345,11 +346,12 @@ public class RequisitionService {
 			}
 			requisition.setTotalPrice(totalAmt);
 			saveRequisitionLineItem(requisition, liteItemList);
-			saveRequisitionLineItemFile(requisitionLineItemFile, now);
+//			saveRequisitionLineItemFile(requisitionLineItemFile, now);
+			saveFile(requisitionLineItemFile, requisition, now, Constants.IDENTIFIER_REQUISITION_LINE_ITEM_FILE);
 		}
 
 		if (extraBudgetoryFile != null) {
-			saveExtraBudgetoryFile(extraBudgetoryFile, requisition, now);
+			saveFile(extraBudgetoryFile, requisition, now, Constants.IDENTIFIER_REQUISITION_EXTRA_BUDGETORY_FILE);
 		}
 
 		if (json.get("status").asText().equals(Constants.STATUS_DEACTIVE)) {
@@ -905,50 +907,23 @@ public class RequisitionService {
 
 	}
 
-	private void saveExtraBudgetoryFile(MultipartFile[] files, Requisition requisition, Instant now)
+	private void saveFile(MultipartFile[] files, Requisition requisition, Instant now, String identifier)
 			throws IOException, JSONException {
-//		   List<String> fileNames = new ArrayList<>();
 
-//		      Arrays.asList(files).stream().forEach(file -> {
-//		        fileNames.add(file.getOriginalFilename());
-//		      });
 		for (MultipartFile file : files) {
 			if (file != null) {
 				logger.info("Saving extra budgetory file");
 				byte[] bytes = file.getBytes();
-				String orgFileName = StringUtils.cleanPath(file.getOriginalFilename());
-				String ext = "";
-				if (orgFileName.lastIndexOf(".") != -1) {
-					ext = orgFileName.substring(orgFileName.lastIndexOf(".") + 1);
-				}
-				String filename = orgFileName;
-				if (orgFileName.lastIndexOf(".") != -1) {
-					filename = orgFileName.substring(0, orgFileName.lastIndexOf("."));
-				}
-				filename = filename.toLowerCase().replaceAll(" ", "-") + "_" + System.currentTimeMillis() + "." + ext;
-
+				Map<String,String> nameMap = getFileName(file);
+				
 				File localStorage = new File(Constants.LOCAL_REQUISITION_FILE_STORAGE_DIRECTORY);
 				if (!localStorage.exists()) {
 					localStorage.mkdirs();
 				}
-				Path path = Paths.get(localStorage.getAbsolutePath() + File.separatorChar + filename);
+				Path path = Paths.get(localStorage.getAbsolutePath() + File.separatorChar + nameMap.get("fileName"));
 				Files.write(path, bytes);
 
-				Document document = new Document();
-				document.setFileName(filename);
-				document.setFileExt(ext);
-				document.setFileType(ext.toUpperCase());
-				document.setFileSize(file.getSize());
-				document.setStorageLocation(Constants.FILE_STORAGE_LOCATION_LOCAL);
-				document.setLocalFilePath(localStorage.getAbsolutePath() + File.separatorChar + filename);
-				document.setSourceOfOrigin(this.getClass().getSimpleName());
-				document.setSourceId(requisition.getId());
-				document.setIdentifier(Constants.IDENTIFIER_REQUISITION_EXTRA_BUDGETORY_FILE);
-				document.setCreatedBy(requisition.getCreatedBy());
-				document.updatedBy(requisition.getCreatedBy());
-				document.setCreatedOn(now);
-				document.setUpdatedOn(now);
-				document = documentService.saveDocument(document);
+				saveDocument(requisition, now, file, nameMap, localStorage, identifier);
 				requisition.setExtraBudgetoryFile(bytes);
 				logger.info("Extra budgetory file saved successfully");
 			} else {
@@ -957,47 +932,66 @@ public class RequisitionService {
 		}
 	}
 
-	private void saveRequisitionLineItemFile(MultipartFile[] requisitionLineItemFile, Instant now)
-			throws IOException, JSONException {
-
-		for (MultipartFile file : requisitionLineItemFile) {
-			if (file != null) {
-				logger.info("Saving requsition line items data file and its details");
-				byte[] bytes = file.getBytes();
-				String orgFileName = StringUtils.cleanPath(file.getOriginalFilename());
-				String ext = "";
-				if (orgFileName.lastIndexOf(".") != -1) {
-					ext = orgFileName.substring(orgFileName.lastIndexOf(".") + 1);
-				}
-
-				String filename = orgFileName;
-				if (orgFileName.lastIndexOf(".") != -1) {
-					filename = orgFileName.substring(0, orgFileName.lastIndexOf("."));
-				}
-				filename = filename.toLowerCase().replaceAll(" ", "-") + "_" + System.currentTimeMillis() + "." + ext;
-
-				File localStorage = new File(Constants.LOCAL_DATA_FILE_STORAGE_DIRECTORY);
-				if (!localStorage.exists()) {
-					localStorage.mkdirs();
-				}
-				Path path = Paths.get(localStorage.getAbsolutePath() + File.separatorChar + filename);
-				Files.write(path, bytes);
-
-				DataFile dataFile = new DataFile();
-				dataFile.setFileName(filename);
-				dataFile.setFileExt(ext);
-				dataFile.setFileType(ext.toUpperCase());
-				dataFile.setFileSize(file.getSize());
-				dataFile.setStorageLocation(Constants.FILE_STORAGE_LOCATION_LOCAL);
-				dataFile.setSourceOfOrigin(this.getClass().getSimpleName());
-//			dataFile.setCreatedBy(liteItemList.getCreatedBy());
-				dataFile.setCreatedOn(now);
-
-				dataFile = dataFileRepository.save(dataFile);
-				logger.info("Requsition line items data file and its details saved successfully");
-			}
-		}
+	private void saveDocument(Requisition requisition, Instant now, MultipartFile file, Map<String, String> nameMap,
+			File localStorage, String identifier) {
+		Document document = new Document();
+		document.setFileName(nameMap.get("fileName"));
+		document.setFileExt(nameMap.get("ext"));
+		document.setFileType(nameMap.get("ext").toUpperCase());
+		document.setFileSize(file.getSize());
+		document.setStorageLocation(Constants.FILE_STORAGE_LOCATION_LOCAL);
+		document.setLocalFilePath(localStorage.getAbsolutePath() + File.separatorChar + nameMap.get("fileName"));
+		document.setSourceOfOrigin(this.getClass().getSimpleName());
+		document.setSourceId(requisition.getId());
+		document.setIdentifier(identifier);
+		document.setCreatedBy(requisition.getCreatedBy());
+		document.updatedBy(requisition.getCreatedBy());
+		document.setCreatedOn(now);
+		document.setUpdatedOn(now);
+		document = documentService.saveDocument(document);
 	}
+
+//	private void saveRequisitionLineItemFile(MultipartFile[] requisitionLineItemFile, Instant now)
+//			throws IOException, JSONException {
+//
+//		for (MultipartFile file : requisitionLineItemFile) {
+//			if (file != null) {
+//				logger.info("Saving requsition line items data file and its details");
+//				byte[] bytes = file.getBytes();
+//				String orgFileName = StringUtils.cleanPath(file.getOriginalFilename());
+//				String ext = "";
+//				if (orgFileName.lastIndexOf(".") != -1) {
+//					ext = orgFileName.substring(orgFileName.lastIndexOf(".") + 1);
+//				}
+//
+//				String filename = orgFileName;
+//				if (orgFileName.lastIndexOf(".") != -1) {
+//					filename = orgFileName.substring(0, orgFileName.lastIndexOf("."));
+//				}
+//				filename = filename.toLowerCase().replaceAll(" ", "-") + "_" + System.currentTimeMillis() + "." + ext;
+//
+//				File localStorage = new File(Constants.LOCAL_DATA_FILE_STORAGE_DIRECTORY);
+//				if (!localStorage.exists()) {
+//					localStorage.mkdirs();
+//				}
+//				Path path = Paths.get(localStorage.getAbsolutePath() + File.separatorChar + filename);
+//				Files.write(path, bytes);
+//
+//				DataFile dataFile = new DataFile();
+//				dataFile.setFileName(filename);
+//				dataFile.setFileExt(ext);
+//				dataFile.setFileType(ext.toUpperCase());
+//				dataFile.setFileSize(file.getSize());
+//				dataFile.setStorageLocation(Constants.FILE_STORAGE_LOCATION_LOCAL);
+//				dataFile.setSourceOfOrigin(this.getClass().getSimpleName());
+////			dataFile.setCreatedBy(liteItemList.getCreatedBy());
+//				dataFile.setCreatedOn(now);
+//
+//				dataFile = dataFileRepository.save(dataFile);
+//				logger.info("Requsition line items data file and its details saved successfully");
+//			}
+//		}
+//	}
 
 	@Transactional
 	public void deleteRequisition(Long requisitionId) {
@@ -1029,4 +1023,21 @@ public class RequisitionService {
 		logger.info(" Requisition deleted successfully");
 	}
 
+	
+	private Map<String, String> getFileName(MultipartFile file) {
+		Map<String,String> nameMap = new HashMap<>();
+		String orgFileName = StringUtils.cleanPath(file.getOriginalFilename());
+		String ext = "";
+		if (orgFileName.lastIndexOf(".") != -1) {
+			ext = orgFileName.substring(orgFileName.lastIndexOf(".") + 1);
+		}
+		String fileName = orgFileName;
+		if (orgFileName.lastIndexOf(".") != -1) {
+			fileName = orgFileName.substring(0, orgFileName.lastIndexOf("."));
+		}
+		fileName = fileName.toLowerCase().replaceAll(" ", "-") + "_" + System.currentTimeMillis() + "." + ext;
+		nameMap.put("fileName", fileName);
+		nameMap.put("ext", ext);
+		return nameMap; 
+	}
 }

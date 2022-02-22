@@ -56,6 +56,7 @@ public final class Constants {
     
     public static final String IDENTIFIER_PROFILE_IMAGE = "PROFILE_IMAGE";
     public static final String IDENTIFIER_REQUISITION_EXTRA_BUDGETORY_FILE = "REQUISITION_EXTRA_BUDGETORY_FILE";
+    public static final String IDENTIFIER_REQUISITION_LINE_ITEM_FILE = "REQUISITION_LINE_ITEM_FILE";
     
     private Constants() {
     }
