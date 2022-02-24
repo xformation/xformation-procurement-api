@@ -3,6 +3,7 @@ package com.synectiks.procurement.domain;
 import java.io.Serializable;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -97,13 +98,13 @@ public class Requisition implements Serializable {
     @JsonProperty
     private List<RequisitionActivity> activityList;
     
-    @Transient
-    @JsonProperty
-    private byte[] extraBudgetoryFile;
+//    @Transient
+//    @JsonProperty
+//    private byte[] extraBudgetoryFile;
     
     @Transient
     @JsonProperty
-    private List<Document> documentList;
+    private List<Document> documentList = new ArrayList<Document>();
     
     @Transient
     @JsonProperty
@@ -394,13 +395,7 @@ public class Requisition implements Serializable {
 		this.activityList = activityList;
 	}
 
-	public byte[] getExtraBudgetoryFile() {
-		return extraBudgetoryFile;
-	}
-
-	public void setExtraBudgetoryFile(byte[] extraBudgetoryFile) {
-		this.extraBudgetoryFile = extraBudgetoryFile;
-	}
+	
 
 	public List<Document> getDocumentList() {
 		return documentList;

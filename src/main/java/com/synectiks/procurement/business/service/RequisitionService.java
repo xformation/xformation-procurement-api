@@ -201,28 +201,7 @@ public class RequisitionService {
 			requisition.setStatus(json.get("status").asText());
 		}
 
-		DateTimeFormatter formatter = DateTimeFormatter.ofPattern(Constants.DEFAULT_DATE_FORMAT);
-		if (json.get("dueDate") != null) {
-			try {
-				LocalDate localDate = LocalDate.parse(json.get("dueDate").asText(), formatter);
-				requisition.setDueDate(localDate);
-			} catch (Exception e) {
-				logger.error("Cannot read due date. Exception: " + e.getMessage());
-				long millis = System.currentTimeMillis();
-				java.sql.Date date = new java.sql.Date(millis);
-
-				LocalDate datew = LocalDate.parse(date.toString());
-				LocalDate localDate = datew.plusDays(Constants.DEFAULT_DUE_DAYS);
-				requisition.setDueDate(localDate);
-			}
-		} else {
-			long millis = System.currentTimeMillis();
-			java.sql.Date date = new java.sql.Date(millis);
-
-			LocalDate datew = LocalDate.parse(date.toString());
-			LocalDate localDate = datew.plusDays(Constants.DEFAULT_DUE_DAYS);
-			requisition.setDueDate(localDate);
-		}
+		setFromatedDueDate(requisition, json);
 
 		if (json.get("user") != null) {
 			requisition.setCreatedBy(json.get("user").asText());
@@ -253,18 +232,37 @@ public class RequisitionService {
 
 		saveFile(extraBudgetoryFile, requisition, now, Constants.IDENTIFIER_REQUISITION_EXTRA_BUDGETORY_FILE);
 		saveRequisitionActivity(requisition);
-
 		saveRequisitionLineItem(requisition, liteItemList);
-//		saveRequisitionLineItemFile(requisitionLineItemFile, now);
+		
 		saveFile(requisitionLineItemFile, requisition, now, Constants.IDENTIFIER_REQUISITION_LINE_ITEM_FILE);
 		logger.info("Requisition added successfully");
-		Map<String, String> requestObj = new HashMap<>();
-		requestObj.put("id", String.valueOf(requisition.getId()));
-		List<Requisition> list = searchRequisition(requestObj);
-		if(list != null && list.size() > 0) {
-			return list.get(0);
+		
+		return requisition;
+	}
+
+	private void setFromatedDueDate(Requisition requisition, ObjectNode json) {
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern(Constants.DEFAULT_DATE_FORMAT);
+		if (json.get("dueDate") != null) {
+			try {
+				LocalDate localDate = LocalDate.parse(json.get("dueDate").asText(), formatter);
+				requisition.setDueDate(localDate);
+			} catch (Exception e) {
+				logger.error("Cannot read due date. Exception: " + e.getMessage());
+				long millis = System.currentTimeMillis();
+				java.sql.Date date = new java.sql.Date(millis);
+
+				LocalDate datew = LocalDate.parse(date.toString());
+				LocalDate localDate = datew.plusDays(Constants.DEFAULT_DUE_DAYS);
+				requisition.setDueDate(localDate);
+			}
+		} else {
+			long millis = System.currentTimeMillis();
+			java.sql.Date date = new java.sql.Date(millis);
+
+			LocalDate datew = LocalDate.parse(date.toString());
+			LocalDate localDate = datew.plusDays(Constants.DEFAULT_DUE_DAYS);
+			requisition.setDueDate(localDate);
 		}
-		return null;
 	}
 
 	@Transactional
@@ -730,8 +728,10 @@ public class RequisitionService {
 //		logger.info("Requisition deleted successfully");
 //	}
 
-	public List<Requisition> getAllRequisitions() {
-		List<Requisition> list = requisitionRepository.findAll(Sort.by(Direction.ASC, "id"));
+	public List<Requisition> getAllRequisitions() throws ParseException {
+		Map<String, String> requestObj = new HashMap<>();
+		List<Requisition> list = searchRequisition(requestObj);
+//		List<Requisition> list = requisitionRepository.findAll(Sort.by(Direction.ASC, "id"));
 		logger.info("All requisitions. Total records: " + list.size());
 		return list;
 	}
@@ -987,6 +987,7 @@ public class RequisitionService {
 		document.setCreatedOn(now);
 		document.setUpdatedOn(now);
 		document = documentService.saveDocument(document);
+		requisition.getDocumentList().add(document);
 	}
 
 	@Transactional
