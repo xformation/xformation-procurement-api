@@ -1,7 +1,9 @@
 package com.synectiks.procurement.business.service;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -37,13 +39,17 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.amazonaws.auth.AWSStaticCredentialsProvider;
+import com.amazonaws.regions.Regions;
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.AmazonS3ClientBuilder;
+import com.amazonaws.services.s3.model.PutObjectResult;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.synectiks.procurement.config.Constants;
 import com.synectiks.procurement.domain.Currency;
-import com.synectiks.procurement.domain.DataFile;
 import com.synectiks.procurement.domain.Department;
 import com.synectiks.procurement.domain.Document;
 import com.synectiks.procurement.domain.Requisition;
@@ -53,7 +59,6 @@ import com.synectiks.procurement.domain.RequisitionLineItemActivity;
 import com.synectiks.procurement.domain.Rules;
 import com.synectiks.procurement.domain.Vendor;
 import com.synectiks.procurement.domain.VendorRequisitionBucket;
-import com.synectiks.procurement.repository.DataFileRepository;
 import com.synectiks.procurement.repository.RequisitionActivityRepository;
 import com.synectiks.procurement.repository.RequisitionLineItemRepository;
 import com.synectiks.procurement.repository.RequisitionRepository;
@@ -88,8 +93,8 @@ public class RequisitionService {
 	@Autowired
 	private VendorRequisitionBucketRepository vendorRequisitionBucketRepository;
 
-	@Autowired
-	private DataFileRepository dataFileRepository;
+//	@Autowired
+//	private DataFileRepository dataFileRepository;
 
 	@Autowired
 	private VendorService vendorService;
@@ -108,7 +113,10 @@ public class RequisitionService {
 	
 	@Autowired
 	private RequisitionLineItemRepository requisitionLineItemRepository;
-
+	
+	@Autowired
+    private XformAwsS3Config xformAwsS3Config;
+	
 	public Requisition getRequisition(Long id) {
 		logger.info("Getting requisition by id: " + id);
 		Optional<Requisition> ovn = requisitionRepository.findById(id);
@@ -123,7 +131,7 @@ public class RequisitionService {
 
 	@Transactional
 	public Requisition addRequisition(MultipartFile[] extraBudgetoryFile, MultipartFile[] requisitionLineItemFile,
-			String obj) throws JsonMappingException, JsonProcessingException, JSONException, IOException {
+			String obj) throws JsonMappingException, JsonProcessingException, JSONException, IOException, ParseException {
 		logger.info("Adding requistion");
 		Requisition requisition = new Requisition();
 
@@ -250,7 +258,13 @@ public class RequisitionService {
 //		saveRequisitionLineItemFile(requisitionLineItemFile, now);
 		saveFile(requisitionLineItemFile, requisition, now, Constants.IDENTIFIER_REQUISITION_LINE_ITEM_FILE);
 		logger.info("Requisition added successfully");
-		return requisition;
+		Map<String, String> requestObj = new HashMap<>();
+		requestObj.put("id", String.valueOf(requisition.getId()));
+		List<Requisition> list = searchRequisition(requestObj);
+		if(list != null && list.size() > 0) {
+			return list.get(0);
+		}
+		return null;
 	}
 
 	@Transactional
@@ -694,7 +708,7 @@ public class RequisitionService {
 			Map<String, String> searchDoc = new HashMap<>();
 			searchDoc.put("sourceOfOrigin", this.getClass().getSimpleName());
 			searchDoc.put("sourceId", String.valueOf(req.getId()));
-			searchDoc.put("identifier", Constants.IDENTIFIER_REQUISITION_EXTRA_BUDGETORY_FILE);
+//			searchDoc.put("identifier", Constants.IDENTIFIER_REQUISITION_EXTRA_BUDGETORY_FILE);
 			List<Document> docList = documentService.searchDocument(searchDoc);
 			req.setDocumentList(docList);
 
@@ -907,40 +921,64 @@ public class RequisitionService {
 
 	}
 
+	@Transactional
 	private void saveFile(MultipartFile[] files, Requisition requisition, Instant now, String identifier)
 			throws IOException, JSONException {
-
+		AmazonS3 s3client = AmazonS3ClientBuilder
+		  .standard()
+		  .withCredentials(new AWSStaticCredentialsProvider(xformAwsS3Config.getAwsCredentials()))
+		  .withRegion(Regions.fromName(xformAwsS3Config.getRegion()))
+		  .build();
 		for (MultipartFile file : files) {
-			if (file != null) {
-				logger.info("Saving extra budgetory file");
-				byte[] bytes = file.getBytes();
-				Map<String,String> nameMap = getFileName(file);
-				
-				File localStorage = new File(Constants.LOCAL_REQUISITION_FILE_STORAGE_DIRECTORY);
-				if (!localStorage.exists()) {
-					localStorage.mkdirs();
+			
+			byte[] bytes = file.getBytes();
+			Map<String,String> nameMap = getFileName(file);
+			
+			if(!org.apache.commons.lang3.StringUtils.isBlank(Constants.IS_LOCAL_FILE_STORE)
+					&& "Y".equalsIgnoreCase(Constants.IS_LOCAL_FILE_STORE)) {
+				File localFile = new File(Constants.LOCAL_FILE_PATH);
+				logger.info("Saving requistion file to local: "+getFileName(file));
+				if (!localFile.exists()) {
+					localFile.mkdirs();
 				}
-				Path path = Paths.get(localStorage.getAbsolutePath() + File.separatorChar + nameMap.get("fileName"));
+				String absolutePath = localFile.getAbsolutePath() + File.separatorChar + nameMap.get("fileName");
+				Path path = Paths.get(absolutePath);
 				Files.write(path, bytes);
-
-				saveDocument(requisition, now, file, nameMap, localStorage, identifier);
-				requisition.setExtraBudgetoryFile(bytes);
-				logger.info("Extra budgetory file saved successfully");
-			} else {
-				logger.info("Requisition extra budgetory file not provided");
+				saveDocument(requisition, absolutePath, null, null, now, file.getSize(), nameMap, identifier);
 			}
+			
+			if(!org.apache.commons.lang3.StringUtils.isBlank(Constants.IS_AWS_FIEL_STORE)
+					&& "Y".equalsIgnoreCase(Constants.IS_AWS_FIEL_STORE)) {
+				logger.info("Saving requistion file to AWS: "+getFileName(file));
+				String awsFileUrl = uploadFileToAwsS3(s3client, Constants.REQUISITION_BUCKET, Constants.REQUISITION_DIRECTORY,  nameMap, file);
+				saveDocument(requisition, null, Constants.REQUISITION_BUCKET, awsFileUrl, now, file.getSize(), nameMap, identifier);
+			}
+				
+//				requisition.setExtraBudgetoryFile(bytes);
+//				logger.info("Extra budgetory file saved successfully");
 		}
+		s3client.shutdown();
 	}
 
-	private void saveDocument(Requisition requisition, Instant now, MultipartFile file, Map<String, String> nameMap,
-			File localStorage, String identifier) {
+	@Transactional
+	private void saveDocument(Requisition requisition, String localFilePath, String s3Bucket, String s3Url, Instant now, long fileSize, Map<String, String> nameMap,
+			String identifier) {
 		Document document = new Document();
 		document.setFileName(nameMap.get("fileName"));
 		document.setFileExt(nameMap.get("ext"));
 		document.setFileType(nameMap.get("ext").toUpperCase());
-		document.setFileSize(file.getSize());
-		document.setStorageLocation(Constants.FILE_STORAGE_LOCATION_LOCAL);
-		document.setLocalFilePath(localStorage.getAbsolutePath() + File.separatorChar + nameMap.get("fileName"));
+		document.setFileSize(fileSize);
+		
+		if(!org.apache.commons.lang3.StringUtils.isBlank(localFilePath)) {
+			document.setLocalFilePath(localFilePath);
+		}
+		if(!org.apache.commons.lang3.StringUtils.isBlank(s3Bucket)) {
+			document.sets3Bucket(s3Bucket);
+		}
+		if(!org.apache.commons.lang3.StringUtils.isBlank(s3Url)) {
+			document.sets3Url(s3Url);
+		}
+//		document.setStorageLocation(Constants.FILE_STORAGE_LOCATION_LOCAL);
 		document.setSourceOfOrigin(this.getClass().getSimpleName());
 		document.setSourceId(requisition.getId());
 		document.setIdentifier(identifier);
@@ -950,48 +988,6 @@ public class RequisitionService {
 		document.setUpdatedOn(now);
 		document = documentService.saveDocument(document);
 	}
-
-//	private void saveRequisitionLineItemFile(MultipartFile[] requisitionLineItemFile, Instant now)
-//			throws IOException, JSONException {
-//
-//		for (MultipartFile file : requisitionLineItemFile) {
-//			if (file != null) {
-//				logger.info("Saving requsition line items data file and its details");
-//				byte[] bytes = file.getBytes();
-//				String orgFileName = StringUtils.cleanPath(file.getOriginalFilename());
-//				String ext = "";
-//				if (orgFileName.lastIndexOf(".") != -1) {
-//					ext = orgFileName.substring(orgFileName.lastIndexOf(".") + 1);
-//				}
-//
-//				String filename = orgFileName;
-//				if (orgFileName.lastIndexOf(".") != -1) {
-//					filename = orgFileName.substring(0, orgFileName.lastIndexOf("."));
-//				}
-//				filename = filename.toLowerCase().replaceAll(" ", "-") + "_" + System.currentTimeMillis() + "." + ext;
-//
-//				File localStorage = new File(Constants.LOCAL_DATA_FILE_STORAGE_DIRECTORY);
-//				if (!localStorage.exists()) {
-//					localStorage.mkdirs();
-//				}
-//				Path path = Paths.get(localStorage.getAbsolutePath() + File.separatorChar + filename);
-//				Files.write(path, bytes);
-//
-//				DataFile dataFile = new DataFile();
-//				dataFile.setFileName(filename);
-//				dataFile.setFileExt(ext);
-//				dataFile.setFileType(ext.toUpperCase());
-//				dataFile.setFileSize(file.getSize());
-//				dataFile.setStorageLocation(Constants.FILE_STORAGE_LOCATION_LOCAL);
-//				dataFile.setSourceOfOrigin(this.getClass().getSimpleName());
-////			dataFile.setCreatedBy(liteItemList.getCreatedBy());
-//				dataFile.setCreatedOn(now);
-//
-//				dataFile = dataFileRepository.save(dataFile);
-//				logger.info("Requsition line items data file and its details saved successfully");
-//			}
-//		}
-//	}
 
 	@Transactional
 	public void deleteRequisition(Long requisitionId) {
@@ -1039,5 +1035,23 @@ public class RequisitionService {
 		nameMap.put("fileName", fileName);
 		nameMap.put("ext", ext);
 		return nameMap; 
+	}
+	
+	private String uploadFileToAwsS3(AmazonS3 s3client, String bucket, String directory, Map<String,String> nameMap, MultipartFile file) throws IOException{
+		byte[] buffer = new byte[file.getInputStream().available()];
+		file.getInputStream().read(buffer);
+		File tempFile = File.createTempFile(nameMap.get("fileName"), "");
+		try (OutputStream outStream = new FileOutputStream(tempFile)) {
+		    outStream.write(buffer);
+		}
+		String key = directory+"/"+nameMap.get("fileName");
+		PutObjectResult res = s3client.putObject(
+				bucket, 
+				key,
+				tempFile);
+		tempFile.deleteOnExit();
+		
+		return s3client.getUrl(bucket, key).toExternalForm();
+		
 	}
 }

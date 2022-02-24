@@ -10,13 +10,23 @@ import javax.annotation.PostConstruct;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.annotation.Bean;
 import org.springframework.core.env.Environment;
 
+import com.amazonaws.auth.AWSCredentials;
+import com.amazonaws.auth.AWSStaticCredentialsProvider;
+import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.regions.Regions;
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.AmazonS3ClientBuilder;
+import com.synectiks.procurement.business.service.XformAwsS3Config;
 import com.synectiks.procurement.config.ApplicationProperties;
+import com.synectiks.procurement.config.Constants;
 
 import io.github.jhipster.config.DefaultProfileUtil;
 import io.github.jhipster.config.JHipsterConstants;
@@ -62,6 +72,7 @@ public class ProcurementApp {
         SpringApplication app = new SpringApplication(ProcurementApp.class);
         DefaultProfileUtil.addDefaultProfile(app);
         Environment env = app.run(args).getEnvironment();
+        updateConstants(env);
         logApplicationStartup(env);
     }
 
@@ -95,5 +106,29 @@ public class ProcurementApp {
             serverPort,
             contextPath,
             env.getActiveProfiles());
+    }
+    
+    @Bean
+    @Autowired
+    public XformAwsS3Config getAwsS3Configurations() {
+    	return XformAwsS3Config.builder()
+        		.apiAccessKey(env.getProperty("aws.access-key"))
+        		.apiSecretKey(env.getProperty("aws.secret-key"))
+        		.region(env.getProperty("aws.region"))
+        		.build();
+    }
+//    
+//    @Bean
+//    @Autowired
+//    public AWSCredentials getAwsCredentials() {
+//    	return new BasicAWSCredentials(env.getProperty("aws.access-key"),env.getProperty("aws.secret-key")); 
+//    }
+    
+    public static void updateConstants(Environment env) {
+    	Constants.REQUISITION_BUCKET = env.getProperty("requisition.aws.bucket");
+    	Constants.REQUISITION_DIRECTORY = env.getProperty("requisition.aws.directory");
+    	Constants.IS_LOCAL_FILE_STORE = env.getProperty("file-storage.local-storage");
+    	Constants.LOCAL_FILE_PATH = env.getProperty("file-storage.local-file-path");
+    	Constants.IS_AWS_FIEL_STORE = env.getProperty("file-storage.aws-storage");
     }
 }

@@ -72,8 +72,21 @@ spring:
 server:
   port: 7050
 
+aws:
+  access-key: ${ACCESS_KEY}
+  secret-key: ${SECRET_KEY}
+  region: ${REGION}
+ 
+requisition:
+  aws:
+    bucket: ${REQUISITION_BUCKET}
+    directory: ${REQUISITION_DIRECTORY}
 
-
+file-storage:
+  local-storage: ${IS_LOCAL_FILE_STORE} #Y/N
+  local-file-path: ${LOCAL_FILE_PATH}
+  aws-storage: ${IS_AWS_FIEL_STORE} # Y/N
+        
 # ===================================================================
 # JHipster specific properties
 #

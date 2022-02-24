@@ -58,6 +58,13 @@ public final class Constants {
     public static final String IDENTIFIER_REQUISITION_EXTRA_BUDGETORY_FILE = "REQUISITION_EXTRA_BUDGETORY_FILE";
     public static final String IDENTIFIER_REQUISITION_LINE_ITEM_FILE = "REQUISITION_LINE_ITEM_FILE";
     
+    public static String REQUISITION_BUCKET = null;
+    public static String REQUISITION_DIRECTORY = null;
+    
+    public static String IS_LOCAL_FILE_STORE = null;
+    public static String LOCAL_FILE_PATH = null;
+    public static String IS_AWS_FIEL_STORE = null;
+    
     private Constants() {
     }
 }
