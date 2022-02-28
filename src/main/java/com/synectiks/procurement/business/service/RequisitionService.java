@@ -348,7 +348,7 @@ public class RequisitionService {
 
 		if (requisitionLineItemFile != null) {
 
-			List<RequisitionLineItem> liteItemList = getLineItemFromFile(requisitionLineItemFile);
+			List<RequisitionLineItem> liteItemList = getLineItemFromFileForUpdate(requisitionLineItemFile);
 			List<RequisitionLineItem> liteItemList2 = getLineItemFromJson(obj);
 			liteItemList.addAll(liteItemList2);
 			int totalAmt = 0;
@@ -484,7 +484,7 @@ public class RequisitionService {
 			XSSFWorkbook workbook = new XSSFWorkbook(file.getInputStream());
 			XSSFSheet worksheet = workbook.getSheetAt(0);
 
-			// skiping first row, that is row index 0. Starting loop with 1
+			// skipping first row, that is row index 0. Starting loop with 1
 			for (int i = 1; i < worksheet.getPhysicalNumberOfRows(); i++) {
 				XSSFRow row = worksheet.getRow(i);
 				RequisitionLineItem item = new RequisitionLineItem();
@@ -527,6 +527,69 @@ public class RequisitionService {
 //					item.setPrice(Integer.parseInt(row.getCell(3).getStringCellValue()));
 //				}
 //			}
+
+				lineItemList.add(item);
+
+			}
+		}
+		return lineItemList;
+
+	}
+	
+	public List<RequisitionLineItem> getLineItemFromFileForUpdate(MultipartFile[] requisitionLineItemFile) throws IOException {
+		List<RequisitionLineItem> lineItemList = new ArrayList<>();
+		if (requisitionLineItemFile == null) {
+			return lineItemList;
+		}
+		for (MultipartFile file : requisitionLineItemFile) {
+			XSSFWorkbook workbook = new XSSFWorkbook(file.getInputStream());
+			XSSFSheet worksheet = workbook.getSheetAt(0);
+
+			// skipping first row, that is row index 0. Starting loop with 1
+			for (int i = 1; i < worksheet.getPhysicalNumberOfRows(); i++) {
+				XSSFRow row = worksheet.getRow(i);
+				RequisitionLineItem item = new RequisitionLineItem();
+
+				if (row.getCell(0).getCellType() != null) {
+					item.setItemDescription(row.getCell(0).getStringCellValue());
+				}
+
+				try {
+					if (row.getCell(1) != null) {
+						item.setOrderQuantity((int) row.getCell(1).getNumericCellValue());
+					}
+				} catch (Exception e) {
+					if (row.getCell(1) != null) {
+						item.setOrderQuantity(Integer.parseInt(row.getCell(1).getStringCellValue()));
+					}
+				}
+
+				try {
+					if (row.getCell(2) != null) {
+						item.setRatePerItem((int) row.getCell(2).getNumericCellValue());
+					}
+				} catch (Exception e) {
+					if (row.getCell(2) != null) {
+						item.setRatePerItem(Integer.parseInt(row.getCell(2).getStringCellValue()));
+					}
+				}
+				
+				try {
+					if (row.getCell(3) != null) {
+						item.setId( (long) row.getCell(3).getNumericCellValue());
+					}
+				} catch (Exception e) {
+					if (row.getCell(3) != null) {
+						item.setId(Long.parseLong( row.getCell(3).getStringCellValue()));
+					}
+				}
+
+
+				if (item.getOrderQuantity() != null && item.getRatePerItem() != null) {
+					int amt = item.getOrderQuantity() * item.getRatePerItem();
+					item.setPrice(amt);
+				}
+
 
 				lineItemList.add(item);
 
@@ -649,8 +712,7 @@ public class RequisitionService {
 		List<Requisition> list = null;
 		if (isFilter) {
 			list = this.requisitionRepository.findAll(Example.of(requisition), Sort.by(Direction.DESC, "id"));
-		} else {
-			list = this.requisitionRepository.findAll(Sort.by(Direction.DESC, "id"));
+		} else {list = this.requisitionRepository.findAll(Sort.by(Direction.DESC, "id"));
 		}
 
 		Date fromDate = null;
